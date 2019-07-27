@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>wecook</name>
+    <version>0.0.1</version>
+    <description>Code for robot to execute or replan the commands received from learning part</description>
+    <license>BSD</license>
+    <maintainer email="hjzh578@gmail.com">Hejia Zhang</maintainer>
+    <depend>boost</depend>
+    <depend>dartsim</depend>
+    <depend>eigen</depend>
+    <depend>aikido</depend>
+    <depend>libada</depend>
+    <depend>tf_conversions</depend>
+    <depend>ada_description</depend>
+    <depend>pr_assets</depend>
+    <depend>pr_tsr</depend>
+    <depend>cv_bridge</depend>
+    <depend>image_transport</depend>
+    <depend>message_generation</depend>
+
+    <!-- This is required by REP-136. -->
+    <exec_depend>message_runtime</exec_depend>
+    <exec_depend>catkin</exec_depend>
+    <buildtool_depend>catkin</buildtool_depend>
+    <buildtool_depend>cmake</buildtool_depend>
+    <buildtool_depend>clang-format-3.8</buildtool_depend>
+    <export>
+        <build_type>cmake</build_type>
+    </export>
+</package>
