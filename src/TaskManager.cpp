@@ -2,6 +2,8 @@
 
 using namespace wecook;
 
+std::vector<Task> TaskManager::m_taskQueue{};
+
 TaskManager::TaskManager(ros::NodeHandle nh) : m_nh(nh) {
 
 }
@@ -16,6 +18,6 @@ void TaskManager::addNewTask(const TaskMsg::ConstPtr &msg) {
     Action action(actionMsg.location, actionMsg.ingredients, actionMsg.verb, actionMsg.tool);
     task.addSubgoal(action);
   }
-  m_taskQueue.emplace_back(task);
+  TaskManager::m_taskQueue.emplace_back(task);
 }
 
