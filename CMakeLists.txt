@@ -19,10 +19,10 @@ add_message_files(
         ActionMsg.msg
 )
 
-generate_messages()
+generate_messages(DEPENDENCIES std_msgs)
 
 catkin_package(
-        CATKIN_DEPENDS message_runtime)
+        CATKIN_DEPENDS message_runtime std_msgs)
 
 find_package(DART 6.6.2 REQUIRED)
 include_directories(${DART_INCLUDE_DIRS})
@@ -68,14 +68,16 @@ target_link_libraries(wecook
 
 install(TARGETS wecook RUNTIME DESTINATION bin)
 
-include(ClangFormat)
-clang_format_setup(VERSION 3.8)
+#catkin_install_python(PROGRAMS scripts/ex_task1.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
-if (CLANG_FORMAT_EXECUTABLE)
-        file(GLOB_RECURSE ALL_SOURCE_FILES
-                LIST_DIRECTORIES false
-                src/*.cpp
-                src/*.h)
-        clang_format_add_sources(${ALL_SOURCE_FILES})
-        clang_format_add_targets()
-endif()
+#include(ClangFormat)
+#clang_format_setup(VERSION 3.8)
+#
+#if (CLANG_FORMAT_EXECUTABLE)
+#        file(GLOB_RECURSE ALL_SOURCE_FILES
+#                LIST_DIRECTORIES false
+#                src/*.cpp
+#                src/*.h)
+#        clang_format_add_sources(${ALL_SOURCE_FILES})
+#        clang_format_add_targets()
+#endif()

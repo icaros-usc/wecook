@@ -16,16 +16,16 @@
 namespace wecook {
 class TaskManager {
  public:
-  TaskManager(ros::NodeHandle);
+  TaskManager(const ros::NodeHandle &n);
 
   void start();
  private:
-  static std::vector<Task> m_taskQueue;
+  std::vector<Task> m_taskQueue;
   bool m_isFree;
   ros::Subscriber m_Listener;
   ros::NodeHandle m_nh;
 
-  static void addNewTask(const TaskMsg::ConstPtr &msg);
+  void addNewTask(const TaskMsg::ConstPtr &msg);
 };
 }
 
