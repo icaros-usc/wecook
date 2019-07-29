@@ -15,6 +15,22 @@ class Action {
 
   }
 
+  std::string get_verb() {
+    return m_verb;
+  }
+
+  std::string get_location() {
+    return m_location;
+  }
+
+  std::string get_tool() {
+    return m_tool;
+  }
+
+  std::vector<std::string> get_ingredients() {
+    return m_ingredients;
+  }
+
  private:
   std::string m_location;
   std::string m_tool;

@@ -2,7 +2,7 @@
 
 using namespace wecook;
 
-TaskManager::TaskManager(const ros::NodeHandle &nh) : m_nh(nh) {
+TaskManager::TaskManager(const ros::NodeHandle &nh) : m_nh(nh), m_isEnd(false) {
 
 }
 
@@ -17,6 +17,23 @@ void TaskManager::addNewTask(const TaskMsg::ConstPtr &msg) {
     Action action(actionMsg.location, actionMsg.ingredients, actionMsg.verb, actionMsg.tool);
     task.addSubgoal(action);
   }
-  m_taskQueue.emplace_back(task);
+  m_taskQueue.push(task);
+}
+
+void TaskManager::run() {
+  ros::Rate loop_rate(10);
+  while (!m_isEnd) {
+    ros::spinOnce();
+    loop_rate.sleep();
+    if (!m_taskQueue.empty()) {
+      Task task = m_taskQueue.front();
+      this->execute(task);
+      m_taskQueue.pop();
+    }
+  }
+}
+
+int TaskManager::execute(Task &task) {
+  task.print();
 }
 

@@ -11,7 +11,9 @@ int main(int argc, char **argv) {
   TaskManager taskManager = TaskManager(n);
   taskManager.start();
 
-  ros::spin();
+//  ros::spin();
+  boost::thread t{boost::bind(&TaskManager::run, &taskManager)};
+  t.join();
 
   return 0;
 }

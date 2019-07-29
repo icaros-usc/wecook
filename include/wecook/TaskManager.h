@@ -7,6 +7,8 @@
 
 #include <ros/subscriber.h>
 #include <ros/node_handle.h>
+#include <boost/thread.hpp>
+#include <queue>
 
 #include "wecook/Task.h"
 #include "wecook/Action.h"
@@ -19,13 +21,17 @@ class TaskManager {
   TaskManager(const ros::NodeHandle &n);
 
   void start();
+
+  void run();
  private:
-  std::vector<Task> m_taskQueue;
-  bool m_isFree;
+  std::queue<Task> m_taskQueue;
+  bool m_isEnd;
   ros::Subscriber m_Listener;
   ros::NodeHandle m_nh;
 
   void addNewTask(const TaskMsg::ConstPtr &msg);
+
+  int execute(Task &task);
 };
 }
 

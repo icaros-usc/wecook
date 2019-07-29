@@ -16,6 +16,15 @@ class Task {
     m_subgoals.emplace_back(action);
   }
 
+  void print() {
+    for (auto &action : m_subgoals) {
+      std::cout << action.get_verb()
+                << action.get_tool()
+                << action.get_location()
+                << action.get_ingredients()[0] << std::endl;
+    }
+  }
+
  private:
   std::vector<Action> m_subgoals;
 };
