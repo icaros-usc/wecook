@@ -19,10 +19,10 @@
 namespace wecook {
 class TaskManager {
  public:
-  TaskManager(const ros::NodeHandle &n);
+  TaskManager(const ros::NodeHandle &n, const std::map<std::string, std::shared_ptr<Robot>> &robots);
 
   void start();
-
+  void stop(int signum);
   void run();
  private:
   std::queue<Task> m_taskQueue;
