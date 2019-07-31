@@ -5,13 +5,18 @@
 #ifndef WECOOK_ACTION_H
 #define WECOOK_ACTION_H
 
+#include <string>
+#include <vector>
+
 namespace wecook {
+
 class Action {
  public:
-  Action(const std::string &location,
+  Action(const std::string &pid,
+         const std::string &location,
          const std::vector<std::string> &ingredients,
          const std::string &verb,
-         const std::string &tool) : m_ingredients(ingredients), m_location(location), m_tool(tool), m_verb(verb) {
+         const std::string &tool) : m_pid(pid), m_ingredients(ingredients), m_location(location), m_tool(tool), m_verb(verb) {
 
   }
 
@@ -31,7 +36,12 @@ class Action {
     return m_ingredients;
   }
 
+  std::string get_pid() {
+    return m_pid;
+  }
+
  private:
+  std::string m_pid;
   std::string m_location;
   std::string m_tool;
   std::vector<std::string> m_ingredients;

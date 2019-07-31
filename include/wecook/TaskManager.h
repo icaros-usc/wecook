@@ -14,6 +14,7 @@
 #include "wecook/Action.h"
 #include "wecook/TaskMsg.h"
 #include "wecook/ActionMsg.h"
+#include "wecook/Robots.h"
 
 namespace wecook {
 class TaskManager {
@@ -28,6 +29,7 @@ class TaskManager {
   bool m_isEnd;
   ros::Subscriber m_Listener;
   ros::NodeHandle m_nh;
+  Robots m_robots;
 
   void addNewTask(const TaskMsg::ConstPtr &msg);
 

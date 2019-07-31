@@ -5,6 +5,8 @@
 #ifndef WECOOK_TASK_H
 #define WECOOK_TASK_H
 
+#include <iostream>
+
 #include "Action.h"
 
 namespace wecook {
@@ -23,6 +25,10 @@ class Task {
                 << action.get_location()
                 << action.get_ingredients()[0] << std::endl;
     }
+  }
+
+  std::vector<Action> getSubgoals() {
+    return m_subgoals;
   }
 
  private:

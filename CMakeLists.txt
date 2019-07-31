@@ -58,7 +58,16 @@ include_directories(${Boost_INCLUDE_DIRS})
 
 include_directories(include)
 
-add_executable(wecook src/main.cpp src/TaskManager.cpp include/wecook/TaskManager.h include/wecook/Task.h include/wecook/Action.h)
+add_executable(wecook
+        src/main.cpp
+        src/TaskManager.cpp
+        include/wecook/TaskManager.h
+        include/wecook/Task.h
+        include/wecook/Action.h
+        include/wecook/Robot.h
+        src/Robot.cpp
+        include/wecook/Robots.h
+        src/Robots.cpp)
 add_dependencies(wecook wecook_generate_messages_cpp)
 target_link_libraries(wecook
         ${DART_LIBRARIES}

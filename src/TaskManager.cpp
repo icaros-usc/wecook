@@ -14,7 +14,7 @@ void TaskManager::addNewTask(const TaskMsg::ConstPtr &msg) {
   ROS_INFO("Receive Msg");
   Task task = Task();
   for (auto actionMsg : msg->actions) {
-    Action action(actionMsg.location, actionMsg.ingredients, actionMsg.verb, actionMsg.tool);
+    Action action(actionMsg.pid, actionMsg.location, actionMsg.ingredients, actionMsg.verb, actionMsg.tool);
     task.addSubgoal(action);
   }
   m_taskQueue.push(task);
@@ -25,15 +25,17 @@ void TaskManager::run() {
   while (!m_isEnd) {
     ros::spinOnce();
     loop_rate.sleep();
-    if (!m_taskQueue.empty()) {
+    if (!m_taskQueue.empty() && m_robots.isFree()) {
       Task task = m_taskQueue.front();
-      this->execute(task);
+      m_robots.execute(task);
       m_taskQueue.pop();
     }
   }
 }
 
 int TaskManager::execute(Task &task) {
-  task.print();
+
+  // Execute actions
+  m_robots.execute(task);
 }
 
