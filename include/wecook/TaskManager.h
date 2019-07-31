@@ -32,8 +32,6 @@ class TaskManager {
   Robots m_robots;
 
   void addNewTask(const TaskMsg::ConstPtr &msg);
-
-  int execute(Task &task);
 };
 }
 

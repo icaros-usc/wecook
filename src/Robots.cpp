@@ -23,6 +23,7 @@ void Robots::run() {
     if (!m_task.empty()) {
       m_isFree = false;
       Task task = m_task[0];
+      // TODO setup the scene
       std::vector<Action> subgoals = task.getSubgoals();
       for (auto &action : subgoals) {
         std::string pid = action.get_pid();

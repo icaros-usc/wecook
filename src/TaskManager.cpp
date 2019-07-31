@@ -39,10 +39,3 @@ void TaskManager::run() {
     }
   }
 }
-
-int TaskManager::execute(Task &task) {
-
-  // Execute actions
-  m_robots.execute(task);
-}
-
