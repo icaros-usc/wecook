@@ -69,7 +69,7 @@ add_executable(wecook
         include/wecook/Robot.h
         src/Robot.cpp
         include/wecook/Robots.h
-        src/Robots.cpp include/wecook/Object.h include/wecook/utils.h)
+        src/Robots.cpp include/wecook/Object.h include/wecook/utils.h include/wecook/ActionPlanner.h)
 add_dependencies(wecook wecook_generate_messages_cpp)
 target_link_libraries(wecook
         ${DART_LIBRARIES}

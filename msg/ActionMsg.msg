@@ -1,5 +1,5 @@
-string pid
+string[] pid
 string verb
-string location
+string[] location
 string tool
 string[] ingredients

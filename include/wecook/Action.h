@@ -12,8 +12,8 @@ namespace wecook {
 
 class Action {
  public:
-  Action(const std::string &pid,
-         const std::string &location,
+  Action(const std::vector<std::string> &pid,
+         const std::vector<std::string> &location,
          const std::vector<std::string> &ingredients,
          const std::string &verb,
          const std::string &tool) : m_pid(pid), m_ingredients(ingredients), m_location(location), m_tool(tool), m_verb(verb) {
@@ -24,7 +24,7 @@ class Action {
     return m_verb;
   }
 
-  std::string get_location() {
+  std::vector<std::string> get_location() {
     return m_location;
   }
 
@@ -36,13 +36,13 @@ class Action {
     return m_ingredients;
   }
 
-  std::string get_pid() {
+  std::vector<std::string> get_pid() {
     return m_pid;
   }
 
  private:
-  std::string m_pid;
-  std::string m_location;
+  std::vector<std::string> m_pid;
+  std::vector<std::string> m_location;
   std::string m_tool;
   std::vector<std::string> m_ingredients;
   std::string m_verb;

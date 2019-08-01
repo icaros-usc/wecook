@@ -31,10 +31,14 @@ void Robots::run() {
       }
       std::vector<Action> subgoals = task.getSubgoals();
       for (auto &action : subgoals) {
-        std::string pid = action.get_pid();
-        while (!m_robots[pid]->isFree()) {
+        std::vector<std::string> pids = action.get_pid();
+        for (const auto &pid : pids) {
+          while (!m_robots[pid]->isFree()) {
+          }
         }
-        m_robots[pid]->execute(action);
+        m_actionPlanner.plan(action, m_robots);
+        // Add skill call back
+        // m_robots[pid]->execute(action);
       }
       m_task.pop_back();
     }

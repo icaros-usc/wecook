@@ -23,14 +23,14 @@ class Task {
     m_objects.emplace_back(object);
   }
 
-  void print() {
-    for (auto &action : m_subgoals) {
-      std::cout << action.get_verb()
-                << action.get_tool()
-                << action.get_location()
-                << action.get_ingredients()[0] << std::endl;
-    }
-  }
+//  void print() {
+//    for (auto &action : m_subgoals) {
+//      std::cout << action.get_verb()
+//                << action.get_tool()
+//                << action.get_location()
+//                << action.get_ingredients()[0] << std::endl;
+//    }
+//  }
 
   std::vector<Action> getSubgoals() {
     return m_subgoals;

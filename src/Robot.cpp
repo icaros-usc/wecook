@@ -24,11 +24,11 @@ void Robot::run() {
       Action action = m_action[0];
 
       // action execution
-      std::cout << action.get_pid() << " "
-                << action.get_verb() << " "
-                << action.get_tool() << " "
-                << action.get_location() << " "
-                << action.get_ingredients()[0] << std::endl;
+//      std::cout << action.get_pid() << " "
+//                << action.get_verb() << " "
+//                << action.get_tool() << " "
+//                << action.get_location() << " "
+//                << action.get_ingredients()[0] << std::endl;
       m_action.pop_back();
     }
     m_isFree = true;

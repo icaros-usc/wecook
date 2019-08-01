@@ -15,6 +15,7 @@
 #include "Task.h"
 #include "Robot.h"
 #include "utils.h"
+#include "ActionPlanner.h"
 
 namespace wecook {
 class Robots {
@@ -59,6 +60,7 @@ class Robots {
   bool m_isFree = true;
   bool m_isEnd = false;
   std::vector<Task> m_task;
+  ActionPlanner m_actionPlanner;
 };
 }
 #endif //WECOOK_ROBOTS_H
