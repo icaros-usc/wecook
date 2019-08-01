@@ -17,6 +17,8 @@ add_message_files(
         FILES
         TaskMsg.msg
         ActionMsg.msg
+        SceneMsg.msg
+        ObjectMsg.msg
 )
 
 generate_messages(DEPENDENCIES std_msgs)
@@ -67,7 +69,7 @@ add_executable(wecook
         include/wecook/Robot.h
         src/Robot.cpp
         include/wecook/Robots.h
-        src/Robots.cpp)
+        src/Robots.cpp include/wecook/Object.h include/wecook/utils.h)
 add_dependencies(wecook wecook_generate_messages_cpp)
 target_link_libraries(wecook
         ${DART_LIBRARIES}

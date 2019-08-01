@@ -3,6 +3,7 @@
 //
 
 #include "wecook/Robots.h"
+#include "wecook/utils.h"
 
 using namespace wecook;
 
@@ -24,6 +25,10 @@ void Robots::run() {
       m_isFree = false;
       Task task = m_task[0];
       // TODO setup the scene
+      std::vector<Object> objects = task.getObjects();
+      for (auto &object : objects) {
+        addBodyFromURDF(m_env.get(), object.getUrl(), object.getPose());
+      }
       std::vector<Action> subgoals = task.getSubgoals();
       for (auto &action : subgoals) {
         std::string pid = action.get_pid();

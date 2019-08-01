@@ -8,6 +8,7 @@
 #include <iostream>
 
 #include "Action.h"
+#include "Object.h"
 
 namespace wecook {
 class Task {
@@ -16,6 +17,10 @@ class Task {
 
   void addSubgoal(const Action &action) {
     m_subgoals.emplace_back(action);
+  }
+
+  void addObject(const Object &object) {
+    m_objects.emplace_back(object);
   }
 
   void print() {
@@ -31,8 +36,13 @@ class Task {
     return m_subgoals;
   }
 
+  std::vector<Object> getObjects() {
+    return m_objects;
+  }
+
  private:
   std::vector<Action> m_subgoals;
+  std::vector<Object> m_objects;
 };
 }
 

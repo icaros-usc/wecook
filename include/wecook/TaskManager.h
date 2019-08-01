@@ -15,6 +15,8 @@
 #include "wecook/TaskMsg.h"
 #include "wecook/ActionMsg.h"
 #include "wecook/Robots.h"
+#include "wecook/Object.h"
+#include "wecook/ObjectMsg.h"
 
 namespace wecook {
 class TaskManager {
