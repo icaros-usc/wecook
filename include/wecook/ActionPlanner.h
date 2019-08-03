@@ -14,28 +14,12 @@ class ActionPlanner {
  public:
   ActionPlanner() = default;
 
-  void plan(Action &action, std::map<std::string, std::shared_ptr<Robot>> &robots) {
-    if (action.get_verb() == "cut") {
-      planCut(action, robots);
-    } else if (action.get_verb() == "transfer") {
-      planTransfer(action, robots);
-    }
-  }
+  void plan(Action &action, std::map<std::string, std::shared_ptr<Robot>> &robots);
 
  private:
-  void planCut(Action &action, std::map<std::string, std::shared_ptr<Robot>> &robots) {
-    auto robot = robots[action.get_pid()[0]];
+  void planCut(Action &action, std::map<std::string, std::shared_ptr<Robot>> &robots);
 
-    auto world = robot->getWorld();
-
-    auto knifeName = action.get_tool();
-
-    auto knifeSkeleton = world->getSkeleton(knifeName);
-  }
-
-  void planTransfer(Action &action, std::map<std::string, std::shared_ptr<Robot>> &robots) {
-
-  }
+  void planTransfer(Action &action, std::map<std::string, std::shared_ptr<Robot>> &robots);
 };
 }
 
