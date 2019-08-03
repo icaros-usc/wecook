@@ -26,6 +26,11 @@ class ActionPlanner {
   void planCut(Action &action, std::map<std::string, std::shared_ptr<Robot>> &robots) {
     auto robot = robots[action.get_pid()[0]];
 
+    auto world = robot->getWorld();
+
+    auto knifeName = action.get_tool();
+
+    auto knifeSkeleton = world->getSkeleton(knifeName);
   }
 
   void planTransfer(Action &action, std::map<std::string, std::shared_ptr<Robot>> &robots) {

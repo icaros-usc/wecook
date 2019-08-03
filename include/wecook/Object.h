@@ -25,6 +25,10 @@ class Object {
     return m_pose;
   }
 
+  std::string getName() {
+    return m_name;
+  }
+
  private:
   std::string m_name;
   std::string m_url;

@@ -27,7 +27,7 @@ void Robots::run() {
       // TODO setup the scene
       std::vector<Object> objects = task.getObjects();
       for (auto &object : objects) {
-        addBodyFromURDF(m_env.get(), object.getUrl(), object.getPose());
+        addBodyFromURDF(m_env.get(), object.getUrl(), object.getPose(), object.getName());
       }
       std::vector<Action> subgoals = task.getSubgoals();
       for (auto &action : subgoals) {

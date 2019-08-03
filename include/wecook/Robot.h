@@ -31,6 +31,10 @@ class Robot {
     return m_isEnd;
   }
 
+  inline aikido::planner::WorldPtr getWorld() {
+    return m_ada->getWorld();
+  }
+
   void createAda(const aikido::planner::WorldPtr &env) {
     m_ada = std::make_shared<ada::Ada>(env, true, m_name, m_transform);
 //    auto robotSkeleton = m_ada->getMetaSkeleton();

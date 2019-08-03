@@ -34,14 +34,16 @@ inline Eigen::Isometry3d vectorToIsometry(std::vector<double> &poseVector) {
 }
 
 inline std::shared_ptr<::dart::dynamics::Skeleton> addBodyFromURDF(aikido::planner::World *world,
-                                                                   const std::string uri,
-                                                                   std::vector<double> objectPose) {
+                                                                   const std::string &uri,
+                                                                   std::vector<double> objectPose,
+                                                                   const std::string &name) {
   auto transform = vectorToIsometry(objectPose);
 
   dart::utils::DartLoader urdfLoader;
   const auto resourceRetriever
       = std::make_shared<aikido::io::CatkinResourceRetriever>();
   const auto skeleton = urdfLoader.parseSkeleton(uri, resourceRetriever);
+  skeleton->setName(name);
 
   if (!skeleton)
     throw std::runtime_error("unable to load '" + uri + "'");
