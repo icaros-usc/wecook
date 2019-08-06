@@ -27,18 +27,34 @@ def talker():
     #                       ObjectMsg('pot0',
     #                                 'package://wecook_assets/data/objects/pot.urdf',
     #                                 [0.3, 0.0, 0.73, 0., 0., 0., 1.])])
-    scene_msg = SceneMsg([ObjectMsg('bowl0',
-                                    'package://wecook_assets/data/objects/bowl.urdf',
-                                    [0.5, -0.30, 0.73, 0., 0., 0., 1.]),
-                          ObjectMsg('bowl1',
-                                    'package://wecook_assets/data/objects/bowl.urdf',
-                                    [0.5, 0.30, 0.73, 0., 0., 0., 1.]),
+    scene_msg = SceneMsg([ObjectMsg('pot0',
+                                    'package://wecook_assets/data/objects/pot.urdf',
+                                    [0.3, -0.45, 0.73, 0., 0., 0., 1.]),
                           ObjectMsg('knife0',
                                     'package://wecook_assets/data/objects/knife.urdf',
-                                    [0.15, 0.06, 1.00, 0., 1., 0., 0.])])
-    task_msg = TaskMsg(scene_msg, [ActionMsg(['p1'], 'transfer', ['bowl0', 'bowl1'], 'hand', ['milk']),
+                                    [0.0, 0.06, 0.80, 0, 0.7071063, 0, 0.7071073]),
+                          ObjectMsg('chopping_board0',
+                                    'package://wecook_assets/data/objects/chopping_board.urdf',
+                                    [0.3, 0.35, 0.73, 0.7071063, 0, 0, 0.7071073]),
+                          ObjectMsg('food_item0',
+                                    'package://wecook_assets/data/objects/food_item.urdf',
+                                    [0.3, 0.35, 0.80, 0., 0., 0., 1.]),
+                          ObjectMsg('food_item1',
+                                    'package://wecook_assets/data/objects/food_item.urdf',
+                                    [0.3, -0.45, 0.8, 0., 0., 0., 1.]),
+                          ObjectMsg('spoon0',
+                                    'package://wecook_assets/data/objects/spoon.urdf',
+                                    [0.0, -0.60, 0.80, 0., 0.7071063, 0, 0.7071063]),
+                          ObjectMsg('plate0',
+                                    'package://wecook_assets/data/objects/plate.urdf',
+                                    [0.3, 0.65, 0.73, 0., 0., 0., 1.]),
+                          ObjectMsg('bowl0',
+                                    'package://wecook_assets/data/objects/bowl.urdf',
+                                    [0.3, -0.05, 0.73, 0., 0., 0., 1.])])
+
+    task_msg = TaskMsg(scene_msg, [ActionMsg(['p1'], 'stir', ['pot0'], 'spoon0', ['food_item1']),
     # task_msg = TaskMsg(scene_msg, [ActionMsg(['p1'], 'cut', ['cupboard'], 'knife0', ['milk'])])
-                                   ActionMsg(['p2'], 'cut', ['cupboard'], 'knife0', ['tomato'])])
+                                   ActionMsg(['p2'], 'cut', ['chopping_board0'], 'knife0', ['food_item0'])])
 
     # sleeping 10 seconds to publish
     rospy.sleep(1)

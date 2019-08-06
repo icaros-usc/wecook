@@ -16,7 +16,13 @@ void ActionPlanner::plan(Action &action, std::map<std::string, std::shared_ptr<R
     planCut(action, robots);
   } else if (action.get_verb() == "transfer") {
     planTransfer(action, robots);
+  } else if (action.get_verb() == "stir") {
+    planStir(action, robots);
   }
+}
+
+void ActionPlanner::planStir(Action &action, std::map<std::string, std::shared_ptr<Robot>> &robots) {
+
 }
 
 void ActionPlanner::planCut(Action &action, std::map<std::string, std::shared_ptr<Robot>> &robots) {
@@ -33,35 +39,10 @@ void ActionPlanner::planCut(Action &action, std::map<std::string, std::shared_pt
   auto knifePose = getObjectPose(knifeSkeleton);
 
   aikido::constraint::dart::TSR knifeTSR = getDefaultKnifeTSR();
-  knifeTSR.mT0_w = knifePose;
-  knifeTSR.mTw_e = Eigen::Isometry3d::Identity();
+  knifeTSR.mT0_w = knifePose * knifeTSR.mT0_w;
+//  knifeTSR.mTw_e = Eigen::Isometry3d::Identity();
   auto goalTSR = std::make_shared<aikido::constraint::dart::TSR>(knifeTSR);
-//  auto ranker = std::make_shared<aikido::distance::NominalConfigurationRanker>(armSpace,
-//                                                                               armSkeleton,
-//                                                                               std::vector<double>());
-//  ROS_INFO("Start planning trajectory to grab knife.");
-//  aikido::trajectory::TrajectoryPtr traj = robot->planToTSR(armSpace,
-//                                                            armSkeleton,
-//                                                            robotHand->getEndEffectorBodyNode(),
-//                                                            goalTSR,
-//                                                            nullptr,
-//                                                            2.0,
-//                                                            1);
-////  std::cout << traj->getStartTime() << std::endl;
-//  std::cout << traj.get() << std::endl;
-//  ROS_INFO("This?");
-//  if (traj != nullptr) {
-//    ROS_INFO("%lf", traj->getDuration());
-//    ROS_INFO("Found a valid trajectory, start executing it!");
-//    auto trajPtr = traj.get();
-//    ROS_INFO("This?");
-//    aikido::trajectory::TrajectoryPtr timedTrajectory = robot->retimePath(armSkeleton, traj.get());
-//    ROS_INFO("Computed timed trajectory");
-//    auto future = robot->executeTrajectory(timedTrajectory);
-//    future.wait();
-//  } else {
-//    ROS_INFO("Failed to find a solution!");
-//  }
+
   auto ik = dart::dynamics::InverseKinematics::create(robotHand->getEndEffectorBodyNode());
   ik->setDofs(armSkeleton->getDofs());
 
@@ -106,6 +87,9 @@ void ActionPlanner::planCut(Action &action, std::map<std::string, std::shared_pt
   } else {
     ROS_INFO("Didn't find a valid goal state!");
   }
+
+  // grab knife
+
 }
 
 void ActionPlanner::planTransfer(Action &action, std::map<std::string, std::shared_ptr<Robot>> &robots) {
