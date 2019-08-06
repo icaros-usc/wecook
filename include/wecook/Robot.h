@@ -25,6 +25,8 @@ class Robot {
 
   void closeHand();
 
+  void openHand();
+
   inline bool isFree() {
     return m_isFree;
   }

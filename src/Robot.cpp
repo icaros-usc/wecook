@@ -56,9 +56,29 @@ void Robot::closeHand() {
   auto handSpace = std::make_shared<aikido::statespace::dart::MetaSkeletonStateSpace>(handSkeleton.get());
 
   auto goalState = handSpace->createState();
-
+  auto initialPose = handSkeleton->getPositions();
+  std::cout << "Initial pose: " << initialPose << std::endl;
   Eigen::Vector2d preshape;
   preshape << 0.75, 0.75;
+  handSpace->convertPositionsToState(preshape, goalState);
+
+  auto trajectory = m_ada->planToConfiguration(handSpace,
+                                               handSkeleton,
+                                               goalState,
+                                               nullptr,
+                                               1.0);
+  auto future = m_ada->executeTrajectory(trajectory);
+  future.wait();
+}
+
+void Robot::openHand() {
+  auto handSkeleton = m_ada->getHand()->getMetaSkeleton();
+  auto handSpace = std::make_shared<aikido::statespace::dart::MetaSkeletonStateSpace>(handSkeleton.get());
+
+  auto goalState = handSpace->createState();
+
+  Eigen::Vector2d preshape;
+  preshape << 0., 0.;
   handSpace->convertPositionsToState(preshape, goalState);
 
   auto trajectory = m_ada->planToConfiguration(handSpace,

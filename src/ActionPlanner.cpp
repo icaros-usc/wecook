@@ -8,6 +8,7 @@
 
 #include "wecook/tsr/knife.h"
 #include "wecook/tsr/food.h"
+#include "wecook/tsr/pose.h"
 #include "wecook/utils.h"
 #include "wecook/ActionPlanner.h"
 
@@ -155,23 +156,89 @@ void ActionPlanner::planCut(Action &action, std::map<std::string, std::shared_pt
     ROS_INFO("Didn't find a valid goal state!");
   }
 
-
-  // raise knife
   using Jacobian = dart::math::LinearJacobian;
   Jacobian jac;
   Eigen::VectorXd delta_x(3);
   Eigen::VectorXd delta_q(6);
-  for(int i = 0; i < 50; i++){
-    jac = armSkeleton->getLinearJacobian(robotHand->getEndEffectorBodyNode());
-    delta_x << 0.0,0,0.001;
-    delta_q = aikido::common::pseudoinverse(jac)*delta_x;
-    Eigen::VectorXd currPos = armSkeleton->getPositions();
-    ros::Duration(0.1).sleep();
-    std::cout <<"delta_q is: " << delta_q << std::endl;
-    std::cout <<"currPos is: " << currPos << std::endl;
-    Eigen::VectorXd new_pos = currPos + delta_q;
-    armSkeleton->setPositions(new_pos);
+
+  for (int j = 0; j < 3; j++) {
+    // move knife downwards
+    for(int i = 0; i < 30; i++) {
+      jac = armSkeleton->getLinearJacobian(robotHand->getEndEffectorBodyNode());
+      delta_x << 0.0,0,-0.001;
+      delta_q = aikido::common::pseudoinverse(jac)*delta_x;
+      Eigen::VectorXd currPos = armSkeleton->getPositions();
+      ros::Duration(0.1).sleep();
+//    std::cout <<"delta_q is: " << delta_q << std::endl;
+//    std::cout <<"currPos is: " << currPos << std::endl;
+      Eigen::VectorXd new_pos = currPos + delta_q;
+      armSkeleton->setPositions(new_pos);
+    }
+    // raise knife
+    for(int i = 0; i < 30; i++) {
+      jac = armSkeleton->getLinearJacobian(robotHand->getEndEffectorBodyNode());
+      delta_x << 0.0,0,0.001;
+      delta_q = aikido::common::pseudoinverse(jac)*delta_x;
+      Eigen::VectorXd currPos = armSkeleton->getPositions();
+      ros::Duration(0.1).sleep();
+//    std::cout <<"delta_q is: " << delta_q << std::endl;
+//    std::cout <<"currPos is: " << currPos << std::endl;
+      Eigen::VectorXd new_pos = currPos + delta_q;
+      armSkeleton->setPositions(new_pos);
+    }
   }
+
+  // put knife back
+  aikido::constraint::dart::TSR poseTSR = getDefaultPoseTSR();
+  poseTSR.mT0_w = knifePose * poseTSR.mT0_w;
+  auto goalTSR3 = std::make_shared<aikido::constraint::dart::TSR>(poseTSR);
+  auto ik3 = dart::dynamics::InverseKinematics::create(robotHand->getEndEffectorBodyNode());
+  ik3->setDofs(armSkeleton->getDofs());
+  auto rng3 = std::unique_ptr<aikido::common::RNG>(new aikido::common::RNGWrapper<std::default_random_engine>(0));
+  aikido::constraint::dart::InverseKinematicsSampleable ikSampleable3(armSpace,
+                                                                      armSkeleton,
+                                                                      goalTSR3,
+                                                                      aikido::constraint::dart::createSampleableBounds(armSpace, std::move(rng3)),
+                                                                      ik3,
+                                                                     10);
+  auto generator3 = ikSampleable3.createSampleGenerator();
+  std::vector<aikido::statespace::dart::MetaSkeletonStateSpace::ScopedState> configurations3;
+  auto goalState3 = armSpace->createState();
+  static const std::size_t maxSnapSamples3{2};
+  std::size_t snapSamples3 = 0;
+  while (snapSamples3 < maxSnapSamples3 && generator3->canSample()) {
+    std::lock_guard<std::mutex> lock(armSkeleton->getBodyNode(0)->getSkeleton()->getMutex());
+    bool sampled = generator3->sample(goalState3);
+    ++snapSamples3;
+
+    if (!sampled) {
+      continue;
+    }
+    configurations3.emplace_back(goalState3.clone());
+  }
+
+  if (!configurations3.empty()) {
+    ROS_INFO("Found a valid goal state!");
+    ROS_INFO("Start planning a path to the goal configuration!");
+    auto trajectory = robot->m_ada->planToConfiguration(armSpace,
+                                                        armSkeleton,
+                                                        configurations3[0],
+                                                        nullptr,
+                                                        10);
+    if (trajectory) {
+      ROS_INFO("Found the trajectory!");
+      aikido::trajectory::TrajectoryPtr timedTrajectory
+          = robot->m_ada->smoothPath(armSkeleton, trajectory.get(), std::make_shared<aikido::constraint::Satisfied>(armSpace));
+      auto future = robot->executeTrajectory(timedTrajectory);
+      future.wait();
+    }
+  } else {
+    ROS_INFO("Didn't find a valid goal state!");
+  }
+
+  // drop knife
+  robot->openHand();
+  robotHand->ungrab();
 }
 
 void ActionPlanner::planTransfer(Action &action, std::map<std::string, std::shared_ptr<Robot>> &robots) {
