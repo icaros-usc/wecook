@@ -10,6 +10,11 @@
 #include <Eigen/Dense>
 
 #include "Action.h"
+#include "MotionPlanner.h"
+#include "ConfMotionPlanner.h"
+#include "ConnMotionPlanner.h"
+#include "TSRMotionPlanner.h"
+#include "DeltaMotionPlanner.h"
 
 namespace wecook {
 class Robot {
@@ -26,6 +31,10 @@ class Robot {
   void closeHand();
 
   void openHand();
+
+  inline void addSubMotions(const std::vector<std::shared_ptr<MotionPlanner>> &subMotions) {
+    m_subMotions = subMotions;
+  }
 
   inline bool isFree() {
     return m_isFree;
@@ -90,6 +99,13 @@ class Robot {
   bool m_isEnd = false;
   std::vector<Action> m_action;
   Eigen::Isometry3d m_transform;
+  std::vector<std::shared_ptr<MotionPlanner>> m_subMotions;
+
+ private:
+//  void plan(const ConfMotionPlanner &motion);
+//  void plan(const TSRMotionPlanner &motion);
+//  void plan(const ConnMotionPlanner &motion);
+//  void plan(const DeltaMotionPlanner &motion);
 };
 }
 #endif //WECOOK_ROBOT_H
