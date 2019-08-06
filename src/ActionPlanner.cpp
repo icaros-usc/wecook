@@ -4,8 +4,10 @@
 #include <aikido/distance/NominalConfigurationRanker.hpp>
 #include <aikido/constraint/dart/InverseKinematicsSampleable.hpp>
 #include <aikido/constraint/dart/JointStateSpaceHelpers.hpp>
+#include <aikido/common/PseudoInverse.hpp>
 
 #include "wecook/tsr/knife.h"
+#include "wecook/tsr/food.h"
 #include "wecook/utils.h"
 #include "wecook/ActionPlanner.h"
 
@@ -89,7 +91,87 @@ void ActionPlanner::planCut(Action &action, std::map<std::string, std::shared_pt
   }
 
   // grab knife
+  robot->closeHand();
+  robotHand->grab(knifeSkeleton);
 
+  // move to above food item
+  // assume all ingredients have been
+  // put together
+  auto foodName = action.get_ingredients()[0];
+  auto foodSkeleton = world->getSkeleton(foodName);
+  auto foodPose = getObjectPose(foodSkeleton);
+  auto foodTSR = getDefaultFoodTSR();
+  foodTSR.mT0_w = foodPose * foodTSR.mT0_w;
+  auto goalTSR2 = std::make_shared<aikido::constraint::dart::TSR>(foodTSR);
+
+
+
+  auto ik2 = dart::dynamics::InverseKinematics::create(robotHand->getEndEffectorBodyNode()->getChildBodyNode(0));
+
+  ik2->setDofs(armSkeleton->getDofs());
+
+  std::cout << rng.get() << std::endl;
+  auto rng2 = std::unique_ptr<aikido::common::RNG>(new aikido::common::RNGWrapper<std::default_random_engine>(0));
+  aikido::constraint::dart::InverseKinematicsSampleable ikSampleable2(armSpace,
+                                                                      armSkeleton,
+                                                                      goalTSR2,
+                                                                      aikido::constraint::dart::createSampleableBounds(armSpace, std::move(rng2)),
+                                                                      ik2,
+                                                                      10);
+  ROS_INFO("This?");
+  auto generator2 = ikSampleable2.createSampleGenerator();
+  std::vector<aikido::statespace::dart::MetaSkeletonStateSpace::ScopedState> configurations2;
+
+  auto goalState2 = armSpace->createState();
+  static const std::size_t maxSnapSamples2{2};
+  std::size_t snapSamples2 = 0;
+  while (snapSamples2 < maxSnapSamples2 && generator2->canSample()) {
+    std::lock_guard<std::mutex> lock(armSkeleton->getBodyNode(0)->getSkeleton()->getMutex());
+    bool sampled = generator2->sample(goalState2);
+    ++snapSamples2;
+
+    if (!sampled) {
+      continue;
+    }
+    configurations2.emplace_back(goalState2.clone());
+  }
+
+  if (!configurations2.empty()) {
+    ROS_INFO("Found a valid goal state!");
+    ROS_INFO("Start planning a path to the goal configuration!");
+    auto trajectory = robot->m_ada->planToConfiguration(armSpace,
+                                                        armSkeleton,
+                                                        configurations2[0],
+                                                        nullptr,
+                                                        10);
+    if (trajectory) {
+      ROS_INFO("Found the trajectory!");
+      aikido::trajectory::TrajectoryPtr timedTrajectory
+          = robot->m_ada->smoothPath(armSkeleton, trajectory.get(), std::make_shared<aikido::constraint::Satisfied>(armSpace));
+      auto future = robot->executeTrajectory(timedTrajectory);
+      future.wait();
+    }
+  } else {
+    ROS_INFO("Didn't find a valid goal state!");
+  }
+
+
+  // raise knife
+  using Jacobian = dart::math::LinearJacobian;
+  Jacobian jac;
+  Eigen::VectorXd delta_x(3);
+  Eigen::VectorXd delta_q(6);
+  for(int i = 0; i < 50; i++){
+    jac = armSkeleton->getLinearJacobian(robotHand->getEndEffectorBodyNode());
+    delta_x << 0.0,0,0.001;
+    delta_q = aikido::common::pseudoinverse(jac)*delta_x;
+    Eigen::VectorXd currPos = armSkeleton->getPositions();
+    ros::Duration(0.1).sleep();
+    std::cout <<"delta_q is: " << delta_q << std::endl;
+    std::cout <<"currPos is: " << currPos << std::endl;
+    Eigen::VectorXd new_pos = currPos + delta_q;
+    armSkeleton->setPositions(new_pos);
+  }
 }
 
 void ActionPlanner::planTransfer(Action &action, std::map<std::string, std::shared_ptr<Robot>> &robots) {

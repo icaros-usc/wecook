@@ -30,10 +30,8 @@ int main(int argc, char **argv) {
   taskManager = new TaskManager(n, robots);
   taskManager->start();
 
-//  ros::spin();
   boost::thread t{boost::bind(&TaskManager::run, taskManager)};
 
-//  t.join();
   ros::spin();
 
   delete taskManager;
