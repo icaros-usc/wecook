@@ -54,6 +54,13 @@ inline std::shared_ptr<::dart::dynamics::Skeleton> addBodyFromURDF(aikido::plann
   world->addSkeleton(skeleton);
   return skeleton;
 }
+
+inline Eigen::Isometry3d getObjectPose(const dart::dynamics::SkeletonPtr &skeleton) {
+  auto body = skeleton->getBodyNode(0);
+  auto transform = body->getWorldTransform();
+  return transform;
+}
+
 }
 
 #endif //WECOOK_UTILS_H

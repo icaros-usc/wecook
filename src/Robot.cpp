@@ -35,3 +35,19 @@ void Robot::run() {
   }
 }
 
+aikido::trajectory::TrajectoryPtr Robot::planToTSR(const aikido::statespace::dart::MetaSkeletonStateSpacePtr &space,
+                                                   const dart::dynamics::MetaSkeletonPtr &metaSkeleton,
+                                                   const dart::dynamics::BodyNodePtr &bn,
+                                                   const aikido::constraint::dart::TSRPtr &tsr,
+                                                   const aikido::constraint::dart::CollisionFreePtr &collisionFree,
+                                                   double timelimit,
+                                                   size_t maxNumTrails) {
+  m_ada->planToTSR(space,
+                   metaSkeleton,
+                   bn,
+                   tsr,
+                   collisionFree,
+                   timelimit,
+                   maxNumTrails);
+}
+
