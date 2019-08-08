@@ -18,15 +18,19 @@ namespace wecook {
     tsr.mTw_e = Eigen::Isometry3d::Identity();
 
     // Transform between end effector and w
-    double verticalOffset = 0.15;
-    double horizontalOffset = 0.25;
+//    double verticalOffset = 0.15;
+//    double horizontalOffset = 0.25;
 
-    tsr.mTw_e.translation() = Eigen::Vector3d{0, horizontalOffset, verticalOffset};
+//    tsr.mTw_e.translation() = Eigen::Vector3d{0, horizontalOffset, verticalOffset};
 
     // Rotation around object
     tsr.mBw = Eigen::Matrix<double, 6, 2>::Zero();
     tsr.mBw(5, 0) = -M_PI;
     tsr.mBw(5, 1) = M_PI;
+    tsr.mBw(4, 0) = -M_PI / 8;
+    tsr.mBw(4, 1) = M_PI / 8;
+    tsr.mBw(3, 0) = -M_PI / 8;
+    tsr.mBw(3, 1) = M_PI / 8;
 
     return tsr;
   }

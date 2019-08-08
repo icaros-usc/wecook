@@ -19,10 +19,10 @@ def talker():
                                     [0.3, 0.35, 0.73, 0.7071063, 0, 0, 0.7071073]),
                           ObjectMsg('food_item0',
                                     'package://wecook_assets/data/objects/food_item.urdf',
-                                    [0.3, 0.35, 0.73, 0., 0., 0., 1.]),
+                                    [0.3, 0.35, 0.75, 0., 0., 0., 1.]),
                           ObjectMsg('food_item1',
                                     'package://wecook_assets/data/objects/food_item.urdf',
-                                    [0.3, -0.45, 0.73, 0., 0., 0., 1.]),
+                                    [0.3, -0.45, 0.75, 0., 0., 0., 1.]),
                           ObjectMsg('spoon0',
                                     'package://wecook_assets/data/objects/spoon.urdf',
                                     [0.0, -0.60, 0.80, 0., 0.7071063, 0, 0.7071063]),
@@ -31,10 +31,15 @@ def talker():
                                     [0.3, 0.65, 0.7, 0., 0., 0., 1.]),
                           ObjectMsg('bowl0',
                                     'package://wecook_assets/data/objects/bowl.urdf',
-                                    [0.3, -0.05, 0.7, 0., 0., 0., 1.])])
+                                    [0.3, 0., 0.7, 0., 0., 0., 1.])])
 
     task_msg = TaskMsg(scene_msg, [ActionMsg(['p1'], 'stir', ['pot0'], 'spoon0', ['food_item1']),
-                                   ActionMsg(['p2'], 'cut', ['chopping_board0'], 'knife0', ['food_item0'])])
+                                   ActionMsg(['p2'], 'cut', ['chopping_board0'], 'knife0', ['food_item0']),
+                                   ActionMsg(['p2'], 'transfer', ['chopping_board0', 'bowl0'], 'hand', ['food_item0']),
+                                   ActionMsg(['p2', 'p1'], 'handover', ['air'], 'hand', ['bowl0']),
+                                   ActionMsg(['p1'], 'transfer', ['bowl0', 'pot0'], 'bowl0', ['food_item0']),
+                                   ActionMsg(['p1'], 'stir', ['pot0'], 'spoon0', ['food_item0', 'food_item1']),
+                                   ActionMsg(['p2', 'p1'], 'holding_transfer', ['pot0', 'plate0'], 'spoon0', ['food_item0', 'food_item1'])])
 
     # sleeping 10 seconds to publish
     rospy.sleep(1)

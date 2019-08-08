@@ -22,6 +22,10 @@ class ActionPlanner {
   void planCut(Action &action, std::map<std::string, std::shared_ptr<Robot>> &robots);
 
   void planTransfer(Action &action, std::map<std::string, std::shared_ptr<Robot>> &robots);
+
+  void planHolding(Action &action, std::map<std::string, std::shared_ptr<Robot>> &robots);
+
+  void planHandover(Action &action, std::map<std::string, std::shared_ptr<Robot>> &robots);
 };
 }
 

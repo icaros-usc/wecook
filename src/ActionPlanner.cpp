@@ -11,12 +11,14 @@
 #include "wecook/tsr/pose.h"
 #include "wecook/tsr/spoon.h"
 #include "wecook/tsr/pot.h"
+#include "wecook/tsr/bowl.h"
 #include "wecook/utils.h"
 #include "wecook/ActionPlanner.h"
 #include "wecook/TSRMotionPlanner.h"
 #include "wecook/ConfMotionPlanner.h"
 #include "wecook/DeltaMotionPlanner.h"
 #include "wecook/ConnMotionPlanner.h"
+#include "wecook/strutils.h"
 
 using namespace wecook;
 
@@ -27,7 +29,19 @@ void ActionPlanner::plan(Action &action, std::map<std::string, std::shared_ptr<R
     planTransfer(action, robots);
   } else if (action.get_verb() == "stir") {
     planStir(action, robots);
+  } else if (action.get_verb() == "handover") {
+    planHandover(action, robots);
+  } else if (action.get_verb().find('_') != std::string::npos) {
+    planHolding(action, robots);
   }
+}
+
+void ActionPlanner::planHandover(Action &action, std::map<std::string, std::shared_ptr<Robot>> &robots) {
+
+}
+
+void ActionPlanner::planHolding(Action &action, std::map<std::string, std::shared_ptr<Robot>> &robots) {
+
 }
 
 void ActionPlanner::planStir(Action &action, std::map<std::string, std::shared_ptr<Robot>> &robots) {
@@ -58,7 +72,7 @@ void ActionPlanner::planStir(Action &action, std::map<std::string, std::shared_p
   conf << 0.75, 0.75;
   auto motion2 = std::make_shared<ConfMotionPlanner>(conf, handSpace, handSkeleton);
   subMotions.emplace_back(motion2);
-  auto motion3 = std::make_shared<ConnMotionPlanner>(spoonSkeleton, true, armSpace, armSkeleton);
+  auto motion3 = std::make_shared<ConnMotionPlanner>(spoonSkeleton, robotHand->getMetaSkeleton(), true, armSpace, armSkeleton);
   subMotions.emplace_back(motion3);
 
   // Move spoon to be inside pot
@@ -109,7 +123,6 @@ void ActionPlanner::planStir(Action &action, std::map<std::string, std::shared_p
   aikido::constraint::dart::TSR poseTSR = getDefaultPoseTSR();
   poseTSR.mT0_w = spoonPose * poseTSR.mT0_w;
   auto goalTSR3 = std::make_shared<aikido::constraint::dart::TSR>(poseTSR);
-//  auto motion6 = std::make_shared<TSRMotionPlanner>(goalTSR3, knifeSkeleton->getBodyNode(0), armSpace, armSkeleton);
   auto motion7 = std::make_shared<TSRMotionPlanner>(goalTSR3, spoonSkeleton->getBodyNode(0), nullptr, armSpace, armSkeleton);
   subMotions.emplace_back(motion7);
 
@@ -118,7 +131,7 @@ void ActionPlanner::planStir(Action &action, std::map<std::string, std::shared_p
   conf << 0., 0.;
   auto motion8 = std::make_shared<ConfMotionPlanner>(conf, handSpace, handSkeleton);
   subMotions.emplace_back(motion8);
-  auto motion9 = std::make_shared<ConnMotionPlanner>(spoonSkeleton, false, armSpace, armSkeleton);
+  auto motion9 = std::make_shared<ConnMotionPlanner>(spoonSkeleton, robotHand->getMetaSkeleton(), false, armSpace, armSkeleton);
   subMotions.emplace_back(motion9);
 
   robot->addSubMotions(subMotions);
@@ -152,7 +165,7 @@ void ActionPlanner::planCut(Action &action, std::map<std::string, std::shared_pt
   conf << 0.75, 0.75;
   auto motion2 = std::make_shared<ConfMotionPlanner>(conf, handSpace, handSkeleton);
   subMotions.emplace_back(motion2);
-  auto motion7 = std::make_shared<ConnMotionPlanner>(knifeSkeleton, true, armSpace, armSkeleton);
+  auto motion7 = std::make_shared<ConnMotionPlanner>(knifeSkeleton, robotHand->getMetaSkeleton(), true, armSpace, armSkeleton);
   subMotions.emplace_back(motion7);
 
   // Move knife to be above food
@@ -186,19 +199,98 @@ void ActionPlanner::planCut(Action &action, std::map<std::string, std::shared_pt
   auto goalTSR3 = std::make_shared<aikido::constraint::dart::TSR>(poseTSR);
   auto motion6 = std::make_shared<TSRMotionPlanner>(goalTSR3, knifeSkeleton->getBodyNode(0),
                                                     nullptr, armSpace, armSkeleton);
-//  auto motion6 = std::make_shared<TSRMotionPlanner>(goalTSR3, robotHand->getEndEffectorBodyNode()->getChildBodyNode(0), nullptr, armSpace, armSkeleton);
   subMotions.emplace_back(motion6);
 
   // ungrab knife
   conf << 0., 0.;
   auto motion8 = std::make_shared<ConfMotionPlanner>(conf, handSpace, handSkeleton);
   subMotions.emplace_back(motion8);
-  auto motion9 = std::make_shared<ConnMotionPlanner>(knifeSkeleton, false, armSpace, armSkeleton);
+  auto motion9 = std::make_shared<ConnMotionPlanner>(knifeSkeleton, robotHand->getMetaSkeleton(), false, armSpace, armSkeleton);
   subMotions.emplace_back(motion9);
 
   robot->addSubMotions(subMotions);
 }
 
 void ActionPlanner::planTransfer(Action &action, std::map<std::string, std::shared_ptr<Robot>> &robots) {
+  std::vector<std::shared_ptr<MotionPlanner>> subMotions;
 
+  auto robot = robots[action.get_pid()[0]];
+  auto robotHand = robot->getHand();
+  auto robotArm = robot->getArm();
+  auto armSkeleton = robotArm->getMetaSkeleton();
+  auto armSpace = std::make_shared<aikido::statespace::dart::MetaSkeletonStateSpace>(armSkeleton.get());
+  auto handSkeleton = robotHand->getMetaSkeleton();
+  auto handSpace = std::make_shared<aikido::statespace::dart::MetaSkeletonStateSpace>(handSkeleton.get());
+  auto world = robot->getWorld();
+
+  if (action.get_tool() == "hand") {
+    auto foodName = action.get_ingredients()[0];
+    auto foodSkeleton = world->getSkeleton(foodName);
+    auto foodPose = getObjectPose(foodSkeleton);
+    aikido::constraint::dart::TSR foodTSR = getDefaultFoodTSR();
+    foodTSR.mT0_w.translation() = Eigen::Vector3d(0., 0., 0.08);
+    foodTSR.mT0_w = foodPose * foodTSR.mT0_w;
+    auto goalTSR = std::make_shared<aikido::constraint::dart::TSR>(foodTSR);
+    auto motion1 = std::make_shared<TSRMotionPlanner>(goalTSR, robotHand->getEndEffectorBodyNode(), nullptr, armSpace, armSkeleton);
+    subMotions.emplace_back(motion1);
+
+    // grab food
+    auto conf = Eigen::Vector2d();
+    conf << 0.75, 0.75;
+    auto motion2 = std::make_shared<ConfMotionPlanner>(conf, handSpace, handSkeleton);
+    subMotions.emplace_back(motion2);
+    auto motion3 = std::make_shared<ConnMotionPlanner>(foodSkeleton, robotHand->getMetaSkeleton(), true, armSpace, armSkeleton);
+    subMotions.emplace_back(motion3);
+
+    // move food a little bit up
+    // Cutting
+    for (int j = 0; j < 1; j++) {
+      dart::math::LinearJacobian jac;
+      auto bn = robotHand->getEndEffectorBodyNode();
+      jac = armSkeleton->getLinearJacobian(bn);
+      Eigen::VectorXd delta_x(3);
+
+      delta_x << 0., 0., 0.001;
+      auto motion7 = std::make_shared<DeltaMotionPlanner>(bn, delta_x, jac, 30, armSpace, armSkeleton);
+      subMotions.emplace_back(motion7);
+    }
+
+    // move food to new position
+    auto locationName = action.get_location()[1];
+    auto locationSkeleton = world->getSkeleton(locationName);
+    auto locationPose = getObjectPose(locationSkeleton);
+    auto locationTSR = getDefaultBowlTSR();
+    locationTSR.mT0_w.translation() = Eigen::Vector3d(0., 0., 0.15);
+    locationTSR.mT0_w = locationPose * locationTSR.mT0_w;
+    Eigen::Matrix3d rot;
+    rot <<
+        1, 0, 0,
+        0, -1, 0,
+        0, 0, -1;
+    Eigen::Matrix3d rot2;
+    rot2 <<
+      -1, 0, 0,
+      0, -1, 0,
+      0, 0, 1;
+    locationTSR.mTw_e.linear() = rot2 * rot;
+    auto goalTSR2 = std::make_shared<aikido::constraint::dart::TSR>(locationTSR);
+    auto motion4 = std::make_shared<TSRMotionPlanner>(goalTSR2, robotHand->getEndEffectorBodyNode(), nullptr, armSpace, armSkeleton, true);
+    subMotions.emplace_back(motion4);
+
+    // ungrab food
+    conf << 0., 0.;
+    auto motion5 = std::make_shared<ConfMotionPlanner>(conf, handSpace, handSkeleton);
+    subMotions.emplace_back(motion5);
+    auto motion6 = std::make_shared<ConnMotionPlanner>(foodSkeleton, robotHand->getMetaSkeleton(), false, armSpace, armSkeleton);
+    subMotions.emplace_back(motion6);
+
+    // merge food and new location
+    auto motion8 = std::make_shared<ConnMotionPlanner>(foodSkeleton, robotHand->getMetaSkeleton(), true, armSpace, armSkeleton);
+    subMotions.emplace_back(motion8);
+  } else if (action.get_tool() == action.get_location()[0]) {
+
+  } else {
+
+  }
+  robot->addSubMotions(subMotions);
 }
