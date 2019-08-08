@@ -16,12 +16,12 @@ inline aikido::constraint::dart::TSR getDefaultPoseTSR() {
   // Transform w.r.t root
   tsr.mT0_w = Eigen::Isometry3d::Identity();
   tsr.mTw_e = Eigen::Isometry3d::Identity();
-  Eigen::Matrix3d rot;
-  rot <<
-      0, 0, -1,
-      0, 1, 0,
-      1, 0, 0;
-  tsr.mTw_e.linear() = rot;
+//  Eigen::Matrix3d rot;
+//  rot <<
+//      0, 0, -1,
+//      0, 1, 0,
+//      1, 0, 0;
+//  tsr.mTw_e.linear() = rot;
 
 //  // Transform between end effector and w
 //  double verticalOffset = 0.15;

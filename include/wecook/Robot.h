@@ -28,10 +28,6 @@ class Robot {
 
   void stop();
 
-  void closeHand();
-
-  void openHand();
-
   inline void addSubMotions(const std::vector<std::shared_ptr<MotionPlanner>> &subMotions) {
     m_subMotions = subMotions;
   }
@@ -74,18 +70,7 @@ class Robot {
 
   void createAda(const aikido::planner::WorldPtr &env) {
     m_ada = std::make_shared<ada::Ada>(env, true, m_name, m_transform);
-//    auto robotSkeleton = m_ada->getMetaSkeleton();
-//    dynamic_cast<dart::dynamics::FreeJoint *>(robotSkeleton->getJoint(0))->setTransform(m_transform);
   }
-
-  aikido::trajectory::TrajectoryPtr planToTSR(
-      const aikido::statespace::dart::MetaSkeletonStateSpacePtr &space,
-      const dart::dynamics::MetaSkeletonPtr &metaSkeleton,
-      const dart::dynamics::BodyNodePtr &bn,
-      const aikido::constraint::dart::TSRPtr &tsr,
-      const aikido::constraint::dart::CollisionFreePtr &collisionFree,
-      double timelimit,
-      size_t maxNumTrails);
 
   std::shared_ptr<ada::Ada> m_ada = nullptr;
 
@@ -100,12 +85,6 @@ class Robot {
   std::vector<Action> m_action;
   Eigen::Isometry3d m_transform;
   std::vector<std::shared_ptr<MotionPlanner>> m_subMotions;
-
- private:
-//  void plan(const ConfMotionPlanner &motion);
-//  void plan(const TSRMotionPlanner &motion);
-//  void plan(const ConnMotionPlanner &motion);
-//  void plan(const DeltaMotionPlanner &motion);
 };
 }
 #endif //WECOOK_ROBOT_H
