@@ -37,7 +37,41 @@ void ActionPlanner::plan(Action &action, std::map<std::string, std::shared_ptr<R
 }
 
 void ActionPlanner::planHandover(Action &action, std::map<std::string, std::shared_ptr<Robot>> &robots) {
+  std::vector<std::shared_ptr<MotionPlanner>> subMotions;
+  // this action will invlove two agents, robot master and robot slave
+  // robot master is the agent initiating the interaction
+  auto robotM = robots[action.get_pid()[0]];
+  auto robotMHand = robotM->getHand();
+  auto robotMArm = robotM->getArm();
+  auto armMSkeleton = robotMArm->getMetaSkeleton();
+  auto armMSpace = std::make_shared<aikido::statespace::dart::MetaSkeletonStateSpace>(armMSkeleton.get());
+  auto handMSkeleton = robotMHand->getMetaSkeleton();
+  auto handMSpace = std::make_shared<aikido::statespace::dart::MetaSkeletonStateSpace>(handMSkeleton.get());
 
+  // first plan robot master to grasp the object
+  auto worldM = robotM->getWorld();
+  auto objectName = action.get_ingredients()[0];
+  auto objectSkeleton = worldM->getSkeleton(objectName);
+  auto objectPose = getObjectPose(objectSkeleton);
+  aikido::constraint::dart::TSR objectTSR = getDefaultBowlTSR();
+  Eigen::Matrix3d rot;
+  rot <<
+    -1, 0, 0,
+    0, 1, 0,
+    0, 0, -1;
+  Eigen::Matrix3d rot2;
+  rot2 <<
+    0, -1, 0,
+    1, 0, 0,
+    0, 0, 1;
+  objectTSR.mTw_e.linear() = rot2 * rot;
+  objectTSR.mTw_e.translation() = Eigen::Vector3d(0.0, 0.05, 0.10);
+  objectTSR.mT0_w = objectPose * objectTSR.mT0_w;
+  auto goalTSR = std::make_shared<aikido::constraint::dart::TSR>(objectTSR);
+  auto motion1 = std::make_shared<TSRMotionPlanner>(goalTSR, robotMHand->getEndEffectorBodyNode(), nullptr, armMSpace, armMSkeleton, false);
+  subMotions.emplace_back(motion1);
+
+  robotM->addSubMotions(subMotions);
 }
 
 void ActionPlanner::planHolding(Action &action, std::map<std::string, std::shared_ptr<Robot>> &robots) {
@@ -285,8 +319,8 @@ void ActionPlanner::planTransfer(Action &action, std::map<std::string, std::shar
     subMotions.emplace_back(motion6);
 
     // merge food and new location
-    auto motion8 = std::make_shared<ConnMotionPlanner>(foodSkeleton, robotHand->getMetaSkeleton(), true, armSpace, armSkeleton);
-    subMotions.emplace_back(motion8);
+//    auto motion8 = std::make_shared<ConnMotionPlanner>(foodSkeleton, robotHand->getMetaSkeleton(), true, armSpace, armSkeleton);
+//    subMotions.emplace_back(motion8);
   } else if (action.get_tool() == action.get_location()[0]) {
 
   } else {
