@@ -18,16 +18,9 @@ int main(int argc, char **argv) {
   std::map<std::string, std::shared_ptr<Robot>> robots{};
   Eigen::Isometry3d robotPose1 = Eigen::Isometry3d::Identity();
   robotPose1.translation() = Eigen::Vector3d(-0.3, -0.70, 0.4);
-//  Eigen::Matrix3d rot;
-//  rot <<
-//      -1, 0, 0,
-//      0, -1, 0,
-//      0, 0, 1;
-//  robotPose1.linear() = rot;
   std::string robotName1 = "j2n6s200_1";
   std::shared_ptr<Robot> pRobot1 = std::make_shared<Robot>(robotPose1, robotName1);
   Eigen::Isometry3d robotPose2 = Eigen::Isometry3d::Identity();
-//  robotPose2.linear() = rot;
   robotPose2.translation() = Eigen::Vector3d(-0.3, 0.35, 0.4);
   std::string robotName2 = "j2n6s200_2";
   std::shared_ptr<Robot> pRobot2 = std::make_shared<Robot>(robotPose2, robotName2);

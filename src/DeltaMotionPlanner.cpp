@@ -9,7 +9,7 @@
 using namespace wecook;
 
 void DeltaMotionPlanner::plan(const std::shared_ptr<ada::Ada> &ada) {
-  ROS_INFO("Planning delta motion!");
+//  ROS_INFO("Planning delta motion!");
 
   Eigen::VectorXd delta_q(6);
 

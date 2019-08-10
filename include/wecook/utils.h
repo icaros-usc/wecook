@@ -28,7 +28,8 @@ inline Eigen::Isometry3d vectorToIsometry(std::vector<double> &poseVector) {
 
   Eigen::Isometry3d pose(Eigen::Isometry3d::Identity());
   pose.translation() = p.head(3);
-  Eigen::Quaterniond q(p[3], p[4], p[5], p[6]);
+  // w, x, y, z
+  Eigen::Quaterniond q(p[6], p[3], p[4], p[5]);
   pose.linear() = Eigen::Matrix3d(q);
   return pose;
 }

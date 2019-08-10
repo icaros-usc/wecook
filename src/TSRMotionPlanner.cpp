@@ -47,7 +47,7 @@ void TSRMotionPlanner::plan(const std::shared_ptr<ada::Ada> &ada) {
       }
       std::vector<aikido::statespace::dart::MetaSkeletonStateSpace::ScopedState> configurations;
       auto goalState = m_stateSpace->createState();
-      static const std::size_t maxSnapSamples{10};
+      static const std::size_t maxSnapSamples{20};
       std::size_t snapSamples = 0;
       while (snapSamples < maxSnapSamples && generator->canSample()) {
         std::lock_guard<std::mutex> lock(m_skeleton->getBodyNode(0)->getSkeleton()->getMutex());
@@ -106,15 +106,15 @@ void TSRMotionPlanner::plan(const std::shared_ptr<ada::Ada> &ada) {
       }
       m_stateSpace->setState(m_skeleton.get(), startState.getState());
       if (!configurations.empty()) {
-        ROS_INFO("Found a valid goal state!");
-        ROS_INFO("Start planning a path to the goal configuration!");
+//        ROS_INFO("Found a valid goal state!");
+//        ROS_INFO("Start planning a path to the goal configuration!");
         auto trajectory = ada->planToConfiguration(m_stateSpace,
                                                    m_skeleton,
                                                    configurations[0],
                                                    m_collisionFree,
                                                    10);
         if (trajectory) {
-          ROS_INFO("Found the trajectory!");
+//          ROS_INFO("Found the trajectory!");
           aikido::trajectory::TrajectoryPtr timedTrajectory
               =
               ada->smoothPath(m_skeleton, trajectory.get(), std::make_shared<aikido::constraint::Satisfied>(m_stateSpace));

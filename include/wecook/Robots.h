@@ -32,10 +32,10 @@ class Robots {
     tablePose.emplace_back(0.5);
     tablePose.emplace_back(0.0);
     tablePose.emplace_back(0.0);
-    tablePose.emplace_back(0.707107);
+    tablePose.emplace_back(0.);
     tablePose.emplace_back(0);
-    tablePose.emplace_back(0);
-    tablePose.emplace_back(0.707107);
+    tablePose.emplace_back(0.7071063);
+    tablePose.emplace_back(0.7071073);
     addBodyFromURDF(m_env.get(), tableURDFUri, tablePose, "table");
 
     m_viewer = std::make_shared<aikido::rviz::WorldInteractiveMarkerViewer>(m_env, "wecook", "map");
