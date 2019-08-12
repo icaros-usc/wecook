@@ -58,7 +58,7 @@ void TSRMotionPlanner::plan(const std::shared_ptr<ada::Ada> &ada) {
         }
         configurations.emplace_back(goalState.clone());
       }
-      m_stateSpace->setState(m_skeleton.get(), startState.getState());
+//      m_stateSpace->setState(m_skeleton.get(), startState.getState());
       std::cout << "After sampling!" << m_skeleton->getPositions() << std::endl;
       if (!configurations.empty()) {
         ROS_INFO("Found a valid goal state!");

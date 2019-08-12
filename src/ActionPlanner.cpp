@@ -15,6 +15,7 @@
 #include "wecook/utils.h"
 #include "wecook/ActionPlanner.h"
 #include "wecook/TSRMotionPlanner.h"
+#include "wecook/TSRMotionwithConstraintPlanner.h"
 #include "wecook/ConfMotionPlanner.h"
 #include "wecook/DeltaMotionPlanner.h"
 #include "wecook/ConnMotionPlanner.h"
@@ -37,7 +38,7 @@ void ActionPlanner::plan(Action &action, std::map<std::string, std::shared_ptr<R
 }
 
 void ActionPlanner::planHandover(Action &action, std::map<std::string, std::shared_ptr<Robot>> &robots) {
-  std::vector<std::shared_ptr<MotionPlanner>> subMotions;
+  std::vector<std::shared_ptr<MotionPlanner>> subMotionsM;
   // this action will invlove two agents, robot master and robot slave
   // robot master is the agent initiating the interaction
   auto robotM = robots[action.get_pid()[0]];
@@ -53,18 +54,17 @@ void ActionPlanner::planHandover(Action &action, std::map<std::string, std::shar
   auto objectName = action.get_ingredients()[0];
   auto objectSkeleton = worldM->getSkeleton(objectName);
   auto objectPose = getObjectPose(objectSkeleton);
-  std::cout << objectPose.linear() << std::endl;
   aikido::constraint::dart::TSR objectTSR = getDefaultBowlTSR();
   Eigen::Matrix3d rot;
   rot <<
-    -1, 0, 0,
-    0, 1, 0,
-    0, 0, -1;
+      -1, 0, 0,
+      0, 1, 0,
+      0, 0, -1;
   Eigen::Matrix3d rot2;
   rot2 <<
-       0.7071072,  0.7071063,  0.0000000,
-      -0.7071063,  0.7071072,  0.0000000,
-      0.0000000,  0.0000000,  1.0000000;
+       0.7071072, 0.7071063, 0.0000000,
+      -0.7071063, 0.7071072, 0.0000000,
+      0.0000000, 0.0000000, 1.0000000;
   objectTSR.mTw_e.linear() = rot2 * rot;
   objectTSR.mTw_e.translation() = Eigen::Vector3d(-0.05, -0.05, 0.08);
   objectTSR.mBw = Eigen::Matrix<double, 6, 2>::Zero();
@@ -79,19 +79,79 @@ void ActionPlanner::planHandover(Action &action, std::map<std::string, std::shar
   objectTSR.mBw(3, 0) = -M_PI / 8;
   objectTSR.mBw(3, 1) = M_PI / 8;
   objectTSR.mT0_w = objectPose * objectTSR.mT0_w;
-  auto goalTSR = std::make_shared<aikido::constraint::dart::TSR>(objectTSR);
-  auto motion1 = std::make_shared<TSRMotionPlanner>(goalTSR, robotMHand->getEndEffectorBodyNode(), nullptr, armMSpace, armMSkeleton, false);
-  subMotions.emplace_back(motion1);
+  auto goalTSRM1 = std::make_shared<aikido::constraint::dart::TSR>(objectTSR);
+  auto motionM1 = std::make_shared<TSRMotionPlanner>(goalTSRM1,
+                                                     robotMHand->getEndEffectorBodyNode(),
+                                                     nullptr,
+                                                     armMSpace,
+                                                     armMSkeleton,
+                                                     false);
+  subMotionsM.emplace_back(motionM1);
 
   // grab the bowl
   auto conf = Eigen::Vector2d();
   conf << 0.75, 0.75;
-  auto motion2 = std::make_shared<ConfMotionPlanner>(conf, handMSpace, handMSkeleton);
-  subMotions.emplace_back(motion2);
-  auto motion3 = std::make_shared<ConnMotionPlanner>(objectSkeleton, robotMHand->getMetaSkeleton(), true, armMSpace, armMSkeleton);
-  subMotions.emplace_back(motion3);
+  auto motionM2 = std::make_shared<ConfMotionPlanner>(conf, handMSpace, handMSkeleton);
+  subMotionsM.emplace_back(motionM2);
+  auto motionM3 =
+      std::make_shared<ConnMotionPlanner>(objectSkeleton, robotMHand->getMetaSkeleton(), true, armMSpace, armMSkeleton);
+  subMotionsM.emplace_back(motionM3);
 
-  robotM->addSubMotions(subMotions);
+  // move the bowl to the centor of two agents
+  // first get robot slave
+  auto robotS = robots[action.get_pid()[1]];
+  auto robotSHand = robotS->getHand();
+  auto robotSArm = robotS->getArm();
+  auto armSSkeleton = robotSArm->getMetaSkeleton();
+  auto armSSpace = std::make_shared<aikido::statespace::dart::MetaSkeletonStateSpace>(armSSkeleton.get());
+  auto handSSkeleton = robotSHand->getMetaSkeleton();
+  auto handSSpace = std::make_shared<aikido::statespace::dart::MetaSkeletonStateSpace>(handSSkeleton.get());
+  // now get positions of two agents
+  auto robotMSkeleton = robotM->m_ada->getMetaSkeleton();
+  auto transformM = getObjectPose(robotMSkeleton);
+  auto robotSSkeleton = robotS->m_ada->getMetaSkeleton();
+  auto transformS = getObjectPose(robotSSkeleton);
+  auto handoverPose = Eigen::Isometry3d::Identity();
+  handoverPose.translation() = Eigen::Vector3d((transformM.translation()[0] + transformS.translation()[0]) / 2,
+                                               (transformM.translation()[1] + transformS.translation()[1]) / 2,
+                                               (transformM.translation()[2] + transformS.translation()[2]) / 2);
+  handoverPose.translation()[2] = 0.9;
+  handoverPose.translation()[0] = 0.10;
+  // move bowl to handover point
+  auto handoverTSR = getDefaultPoseTSR();
+  handoverTSR.mT0_w = handoverPose * handoverTSR.mT0_w;
+  handoverTSR.mBw(5, 0) = -M_PI / 8;
+  handoverTSR.mBw(5, 1) = M_PI / 8;
+  handoverTSR.mBw(4, 0) = -M_PI / 8;
+  handoverTSR.mBw(4, 1) = M_PI / 8;
+  handoverTSR.mBw(3, 0) = -M_PI / 8;
+  handoverTSR.mBw(3, 1) = M_PI / 8;
+  auto goalTSRM2 = std::make_shared<aikido::constraint::dart::TSR>(handoverTSR);
+  // the motion should be buit with constraint
+  auto constraintTSR = getDefaultPoseTSR();
+  constraintTSR.mBw(0, 0) = -10000;
+  constraintTSR.mBw(0, 1) = 10000;
+  constraintTSR.mBw(1, 0) = -10000;
+  constraintTSR.mBw(1, 1) = 10000;
+  constraintTSR.mBw(2, 0) = -10000;
+  constraintTSR.mBw(2, 1) = 10000;
+  constraintTSR.mBw(5, 0) = -M_PI;
+  constraintTSR.mBw(5, 1) = M_PI;
+  constraintTSR.mBw(4, 0) = 0;
+  constraintTSR.mBw(4, 1) = 0;
+  constraintTSR.mBw(3, 0) = 0;
+  constraintTSR.mBw(3, 1) = 0;
+  auto constraintTSRPtr = std::make_shared<aikido::constraint::dart::TSR>(constraintTSR);
+  auto motionM4 = std::make_shared<TSRMotionwithConstraintPlanner>(goalTSRM2,
+                                                                   constraintTSRPtr,
+                                                                   objectSkeleton->getBodyNode(0),
+                                                                   nullptr,
+                                                                   armMSpace,
+                                                                   armMSkeleton,
+                                                                   false);
+  subMotionsM.emplace_back(motionM4);
+
+  robotM->addSubMotions(subMotionsM);
 }
 
 //void ActionPlanner::planHolding(Action &action, std::map<std::string, std::shared_ptr<Robot>> &robots) {

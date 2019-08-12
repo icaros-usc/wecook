@@ -62,6 +62,12 @@ inline Eigen::Isometry3d getObjectPose(const dart::dynamics::SkeletonPtr &skelet
   return transform;
 }
 
+inline Eigen::Isometry3d getObjectPose(const dart::dynamics::MetaSkeletonPtr &skeleton) {
+  auto body = skeleton->getBodyNode(0);
+  auto transform = body->getWorldTransform();
+  return transform;
+}
+
 }
 
 #endif //WECOOK_UTILS_H
