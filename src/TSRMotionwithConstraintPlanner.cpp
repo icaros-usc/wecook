@@ -49,31 +49,14 @@ void TSRMotionwithConstraintPlanner::plan(const std::shared_ptr<ada::Ada> &ada) 
   auto constraintProjectable = std::make_shared<aikido::constraint::NewtonsMethodProjectable>(frameDiff,
                                                                                               projectionToleranceVec,
                                                                                               crrtParameters.projectionMaxIteration);
-//  auto robot = m_skeleton->getBodyNode(0)->getSkeleton();
-//  std::lock_guard<std::mutex> lock(robot->getMutex());
+  auto robot = m_skeleton->getBodyNode(0)->getSkeleton();
+  std::unique_lock<std::mutex> lock(robot->getMutex());
   // Current state
   auto startState = m_stateSpace->getScopedStateFromMetaSkeleton(m_skeleton.get());
 
   auto collisionConstraint
       = ada->getFullCollisionConstraint(m_stateSpace, m_skeleton, m_collisionFree);
 
-  // Call planner
-//  auto traj = aikido::planner::ompl::planCRRTConnect(startState,
-//                                                     goalTestable,
-//                                                     goalSampleable,
-//                                                     constraintProjectable,
-//                                                     m_stateSpace,
-//                                                     std::make_shared<aikido::statespace::GeodesicInterpolator>(m_stateSpace),
-//                                                     aikido::distance::createDistanceMetric(m_stateSpace),
-//                                                     constraintSampleable,
-//                                                     collisionConstraint,
-//                                                     aikido::constraint::dart::createTestableBounds(m_stateSpace),
-//                                                     aikido::constraint::dart::createProjectableBounds(m_stateSpace),
-//                                                     60,
-//                                                     crrtParameters.maxExtensionDistance,
-//                                                     crrtParameters.maxDistanceBtwProjections,
-//                                                     crrtParameters.minStepSize,
-//                                                     crrtParameters.minTreeConnectionDistance);
   // we will do our own planner
   auto interpolator = std::make_shared<aikido::statespace::GeodesicInterpolator>(m_stateSpace);
   auto distanceMetric = aikido::distance::createDistanceMetric(m_stateSpace);
@@ -91,7 +74,7 @@ void TSRMotionwithConstraintPlanner::plan(const std::shared_ptr<ada::Ada> &ada) 
   auto pdef = aikido::planner::ompl::ompl_make_shared<::ompl::base::ProblemDefinition>(si);
   auto sspace =
       aikido::planner::ompl::ompl_static_pointer_cast<aikido::planner::ompl::GeometricStateSpace>(si->getStateSpace());
-  auto start = sspace->allocState(startState);
+  auto start = sspace->allocState(startState.clone());
   pdef->addStartState(start);
   sspace->freeState(start);
   auto goalRegion = aikido::planner::ompl::getGoalRegion(si, goalTestable, goalSampleable);
@@ -107,6 +90,7 @@ void TSRMotionwithConstraintPlanner::plan(const std::shared_ptr<ada::Ada> &ada) 
 
   if (traj) {
     ROS_INFO("Found valid trajectory!");
+    lock.unlock();
     auto future = ada->executeTrajectory(traj);
     future.wait();
   }

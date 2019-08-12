@@ -115,35 +115,33 @@ void ActionPlanner::planHandover(Action &action, std::map<std::string, std::shar
   handoverPose.translation() = Eigen::Vector3d((transformM.translation()[0] + transformS.translation()[0]) / 2,
                                                (transformM.translation()[1] + transformS.translation()[1]) / 2,
                                                (transformM.translation()[2] + transformS.translation()[2]) / 2);
-  handoverPose.translation()[2] = 0.9;
-  handoverPose.translation()[0] = 0.10;
+  handoverPose.translation()[2] = 0.8;
+  handoverPose.translation()[0] = 0.3;
   // move bowl to handover point
   auto handoverTSR = getDefaultPoseTSR();
-  handoverTSR.mT0_w = handoverPose * handoverTSR.mT0_w;
-  handoverTSR.mBw(5, 0) = -M_PI / 8;
-  handoverTSR.mBw(5, 1) = M_PI / 8;
-  handoverTSR.mBw(4, 0) = -M_PI / 8;
-  handoverTSR.mBw(4, 1) = M_PI / 8;
-  handoverTSR.mBw(3, 0) = -M_PI / 8;
-  handoverTSR.mBw(3, 1) = M_PI / 8;
-  auto goalTSRM2 = std::make_shared<aikido::constraint::dart::TSR>(handoverTSR);
-  // the motion should be buit with constraint
-  auto constraintTSR = getDefaultPoseTSR();
-  constraintTSR.mBw(0, 0) = -10000;
-  constraintTSR.mBw(0, 1) = 10000;
-  constraintTSR.mBw(1, 0) = -10000;
-  constraintTSR.mBw(1, 1) = 10000;
-  constraintTSR.mBw(2, 0) = -10000;
-  constraintTSR.mBw(2, 1) = 10000;
-  constraintTSR.mBw(5, 0) = -M_PI;
-  constraintTSR.mBw(5, 1) = M_PI;
-  constraintTSR.mBw(4, 0) = 0;
-  constraintTSR.mBw(4, 1) = 0;
-  constraintTSR.mBw(3, 0) = 0;
-  constraintTSR.mBw(3, 1) = 0;
-  auto constraintTSRPtr = std::make_shared<aikido::constraint::dart::TSR>(constraintTSR);
+  Eigen::Vector3d direction = Eigen::Vector3d(handoverPose.translation()[0] - objectPose.translation()[0],
+                                              handoverPose.translation()[1] - objectPose.translation()[1],
+                                              handoverPose.translation()[2] - objectPose.translation()[2]);
+  double distance = direction.norm();
+  std::cout << "Distance: " << direction.norm() << std::endl;
+  double epsilon = 0.01;
+  auto constraintTSR = std::make_shared<aikido::constraint::dart::TSR>();
+  constraintTSR->mT0_w = dart::math::computeTransform(direction / direction.norm(),
+                                                      objectPose.translation(),
+                                                      dart::math::AxisType::AXIS_Z);
+  constraintTSR->mTw_e = constraintTSR->mT0_w.inverse() * objectPose;
+  constraintTSR->mBw << -epsilon, epsilon, -epsilon, epsilon,
+      std::min(0., distance), std::max(0., distance), -M_PI / 16, M_PI / 16, -M_PI / 16, M_PI / 16, -M_PI / 16, M_PI / 16;
+  auto goalTSRM2 = std::make_shared<aikido::constraint::dart::TSR>();
+  auto offset = Eigen::Isometry3d::Identity();
+  offset(2, 3) = distance;
+  goalTSRM2->mT0_w = constraintTSR->mT0_w * offset;
+  goalTSRM2->mTw_e = constraintTSR->mTw_e;
+  goalTSRM2->mBw << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon,
+      -M_PI / 16, M_PI / 16, -M_PI / 16, M_PI / 16, -M_PI / 16, M_PI / 16;
+
   auto motionM4 = std::make_shared<TSRMotionwithConstraintPlanner>(goalTSRM2,
-                                                                   constraintTSRPtr,
+                                                                   constraintTSR,
                                                                    objectSkeleton->getBodyNode(0),
                                                                    nullptr,
                                                                    armMSpace,
