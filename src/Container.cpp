@@ -3,6 +3,7 @@
 //
 
 #include "wecook/Container.h"
+#include "ros/console.h"
 
 using namespace wecook;
 

@@ -16,6 +16,7 @@
 #include "Robot.h"
 #include "utils.h"
 #include "ActionPlanner.h"
+#include "ContainingMap.h"
 
 namespace wecook {
 class World {
@@ -33,6 +34,7 @@ class World {
   }
 
   int addTask(Task &task);
+
   inline bool isFree() {
     return m_isFree;
   }
@@ -54,6 +56,7 @@ class World {
   bool m_isEnd = false;
   std::vector<Task> m_tasks;
   ActionPlanner m_actionPlanner;
+  std::shared_ptr<ContainingMap> m_containingMap = nullptr;
 };
 }
 #endif //WECOOK_WORLD_H

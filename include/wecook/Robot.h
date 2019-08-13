@@ -12,7 +12,7 @@
 #include "Action.h"
 #include "MotionPlanner.h"
 #include "ConfMotionPlanner.h"
-#include "ConnMotionPlanner.h"
+#include "GrabMotionPlanner.h"
 #include "TSRMotionPlanner.h"
 #include "DeltaMotionPlanner.h"
 

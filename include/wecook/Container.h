@@ -10,14 +10,12 @@
 #include "ConnMetadata.h"
 
 namespace wecook {
-class Container : public Object {
+class Container {
  public:
-  Container(const std::string &name,
-            const std::string &url,
-            const std::vector<double> &pose,
+  Container(const std::string &containerName,
+            const std::string &containedName,
             dart::dynamics::BodyNodePtr containerBodyNode) :
-      Object(name, url, pose),
-      m_containerBodyNode(containerBodyNode) {
+      m_name(containerName), m_containedName(containedName), m_containerBodyNode(containerBodyNode) {
 
   }
 
@@ -25,7 +23,29 @@ class Container : public Object {
 
   void unconnect();
 
+  inline bool ifSame(const std::string &name, const std::string &objectName) {
+    if (name == m_name && objectName == m_containedName) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  inline bool contains(const std::string &objectName) const {
+    if (m_containedName == objectName) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  inline Eigen::Isometry3d getContainedPose() const {
+    return m_connMetadata->m_bodyNode->getWorldTransform();
+  }
+
  private:
+  std::string m_name;
+  std::string m_containedName;
   std::shared_ptr<ConnMetadata> m_connMetadata = nullptr;
   dart::dynamics::BodyNodePtr m_containerBodyNode = nullptr;
 

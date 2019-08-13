@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import rospy
-from wecook.msg import ActionMsg, TaskMsg, SceneMsg, ObjectMsg
+from wecook.msg import ActionMsg, TaskMsg, SceneMsg, ObjectMsg, ContainingMsg
 
 
 def talker():
@@ -34,7 +34,9 @@ def talker():
                                     [0.3, 0.65, 0.7, 0., 0., 0., 1.]),
                           ObjectMsg('bowl0',
                                     'package://wecook_assets/data/objects/bowl.urdf',
-                                    [0.3, 0., 0.7, 0., 0., 0., 1.])])
+                                    [0.3, 0., 0.7, 0., 0., 0., 1.])],
+                         [ContainingMsg(['pot0', 'food_item1']),
+                          ContainingMsg(['chopping_board0', 'food_item0'])])
 
     task_msg = TaskMsg(scene_msg, [ActionMsg(['p1'], 'stir', ['pot0'], 'spoon0', ['food_item1']),
                                    ActionMsg(['p2'], 'cut', ['chopping_board0'], 'knife0', ['food_item0']),

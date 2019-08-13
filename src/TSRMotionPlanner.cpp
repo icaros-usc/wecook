@@ -106,15 +106,12 @@ void TSRMotionPlanner::plan(const std::shared_ptr<ada::Ada> &ada) {
       }
       m_stateSpace->setState(m_skeleton.get(), startState.getState());
       if (!configurations.empty()) {
-//        ROS_INFO("Found a valid goal state!");
-//        ROS_INFO("Start planning a path to the goal configuration!");
         auto trajectory = ada->planToConfiguration(m_stateSpace,
                                                    m_skeleton,
                                                    configurations[0],
                                                    m_collisionFree,
                                                    10);
         if (trajectory) {
-//          ROS_INFO("Found the trajectory!");
           aikido::trajectory::TrajectoryPtr timedTrajectory
               =
               ada->smoothPath(m_skeleton, trajectory.get(), std::make_shared<aikido::constraint::Satisfied>(m_stateSpace));

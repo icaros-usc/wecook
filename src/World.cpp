@@ -32,7 +32,7 @@ void World::run() {
           while (!m_robots[pid]->isFree()) {
           }
         }
-        m_actionPlanner.plan(action, m_robots);
+        m_actionPlanner.plan(action, m_robots, m_containingMap);
       }
       // wait for robots to be free
       for (const auto &robot : m_robots) {
@@ -51,6 +51,7 @@ void World::setup(const Task &task) {
   for (auto &object : objects) {
     addBodyFromURDF(m_env.get(), object.getUrl(), object.getPose(), object.getName());
   }
+  m_containingMap = std::make_shared<ContainingMap>(task, m_env);
 }
 
 void World::clean(const Task &task) {
@@ -59,4 +60,6 @@ void World::clean(const Task &task) {
     auto skeleton = m_env->getSkeleton(object.getName());
     m_env->removeSkeleton(skeleton);
   }
+  m_containingMap->unconnectAll();
+  m_containingMap.reset();
 }

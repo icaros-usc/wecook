@@ -14,6 +14,7 @@
 #include <dart/utils/urdf/DartLoader.hpp>
 #include <aikido/io/CatkinResourceRetriever.hpp>
 #include <ros/ros.h>
+#include "ContainingMap.h"
 
 namespace wecook {
 
@@ -56,16 +57,26 @@ inline std::shared_ptr<::dart::dynamics::Skeleton> addBodyFromURDF(aikido::plann
   return skeleton;
 }
 
-inline Eigen::Isometry3d getObjectPose(const dart::dynamics::SkeletonPtr &skeleton) {
-  auto body = skeleton->getBodyNode(0);
-  auto transform = body->getWorldTransform();
-  return transform;
+inline Eigen::Isometry3d getObjectPose(const dart::dynamics::SkeletonPtr &skeleton, const std::shared_ptr<ContainingMap> &containingMap) {
+  if (skeleton->getNumBodyNodes() > 0) {
+    auto body = skeleton->getBodyNode(0);
+    auto pose = body->getWorldTransform();
+    return pose;
+  } else {
+    // need to find
+    return containingMap->getContainedPose(skeleton->getName());
+  }
 }
 
-inline Eigen::Isometry3d getObjectPose(const dart::dynamics::MetaSkeletonPtr &skeleton) {
-  auto body = skeleton->getBodyNode(0);
-  auto transform = body->getWorldTransform();
-  return transform;
+inline Eigen::Isometry3d getObjectPose(const dart::dynamics::MetaSkeletonPtr &skeleton, const std::shared_ptr<ContainingMap> &containingMap) {
+  if (skeleton->getNumBodyNodes() > 0) {
+    auto body = skeleton->getBodyNode(0);
+    auto pose = body->getWorldTransform();
+    return pose;
+  } else {
+    // need to find
+    return containingMap->getContainedPose(skeleton->getName());
+  }
 }
 
 }

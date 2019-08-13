@@ -31,7 +31,7 @@ class TaskManager {
   bool m_isEnd;
   ros::Subscriber m_Listener;
   ros::NodeHandle m_nh;
-  World m_robots;
+  World m_world;
 
   void addNewTask(const TaskMsg::ConstPtr &msg);
 };

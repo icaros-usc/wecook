@@ -23,16 +23,11 @@ class Task {
     m_objects.emplace_back(object);
   }
 
-//  void print() {
-//    for (auto &action : m_subgoals) {
-//      std::cout << action.get_verb()
-//                << action.get_tool()
-//                << action.get_location()
-//                << action.get_ingredients()[0] << std::endl;
-//    }
-//  }
+  void addContainingPair(const std::string &containerName, const std::string &objectName) {
+    m_containingPairs.emplace_back(std::pair<std::string, std::string>(containerName, objectName));
+  }
 
-  std::vector<Action> getSubgoals() {
+  std::vector<Action> getSubgoals() const {
     return m_subgoals;
   }
 
@@ -40,9 +35,14 @@ class Task {
     return m_objects;
   }
 
+  std::vector<std::pair<std::string, std::string>> getContainingPairs() const {
+    return m_containingPairs;
+  }
+
  private:
   std::vector<Action> m_subgoals;
   std::vector<Object> m_objects;
+  std::vector<std::pair<std::string, std::string>> m_containingPairs;
 };
 }
 
