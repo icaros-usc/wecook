@@ -78,7 +78,7 @@ add_executable(wecook
         include/wecook/tsr/knife.h
         include/wecook/tsr/plate.h
         include/wecook/tsr/pot.h
-        include/wecook/tsr/spoon.h src/ActionPlanner.cpp include/wecook/tsr/food.h include/wecook/tsr/pose.h include/wecook/MotionPlanner.h include/wecook/TSRMotionPlanner.h include/wecook/ConfMotionPlanner.h include/wecook/DeltaMotionPlanner.h include/wecook/ConnMotionPlanner.h src/TSRMotionPlanner.cpp src/ConfMotionPlanner.cpp src/ConnMotionPlanner.cpp src/DeltaMotionPlanner.cpp include/wecook/strutils.h include/wecook/TSRMotionwithConstraintPlanner.h src/TSRMotionwithConstraintPlanner.cpp)
+        include/wecook/tsr/spoon.h src/ActionPlanner.cpp include/wecook/tsr/food.h include/wecook/tsr/pose.h include/wecook/MotionPlanner.h include/wecook/TSRMotionPlanner.h include/wecook/ConfMotionPlanner.h include/wecook/DeltaMotionPlanner.h include/wecook/ConnMotionPlanner.h src/TSRMotionPlanner.cpp src/ConfMotionPlanner.cpp src/ConnMotionPlanner.cpp src/DeltaMotionPlanner.cpp include/wecook/strutils.h include/wecook/TSRMotionwithConstraintPlanner.h src/TSRMotionwithConstraintPlanner.cpp include/wecook/Container.h include/wecook/ConnMetadata.h src/Container.cpp)
 add_dependencies(wecook wecook_generate_messages_cpp)
 target_link_libraries(wecook
         ${DART_LIBRARIES}
