@@ -14,7 +14,7 @@
 #include "wecook/Action.h"
 #include "wecook/TaskMsg.h"
 #include "wecook/ActionMsg.h"
-#include "wecook/Robots.h"
+#include "wecook/World.h"
 #include "wecook/Object.h"
 #include "wecook/ObjectMsg.h"
 
@@ -31,7 +31,7 @@ class TaskManager {
   bool m_isEnd;
   ros::Subscriber m_Listener;
   ros::NodeHandle m_nh;
-  Robots m_robots;
+  World m_robots;
 
   void addNewTask(const TaskMsg::ConstPtr &msg);
 };

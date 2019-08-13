@@ -68,8 +68,8 @@ add_executable(wecook
         include/wecook/Action.h
         include/wecook/Robot.h
         src/Robot.cpp
-        include/wecook/Robots.h
-        src/Robots.cpp
+        include/wecook/World.h
+        src/World.cpp
         include/wecook/Object.h
         include/wecook/utils.h
         include/wecook/ActionPlanner.h

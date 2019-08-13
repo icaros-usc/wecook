@@ -36,7 +36,7 @@ class Task {
     return m_subgoals;
   }
 
-  std::vector<Object> getObjects() {
+  std::vector<Object> getObjects() const {
     return m_objects;
   }
 

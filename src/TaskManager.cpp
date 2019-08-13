@@ -32,13 +32,10 @@ void TaskManager::addNewTask(const TaskMsg::ConstPtr &msg) {
 }
 
 void TaskManager::run() {
-//  ros::Rate loop_rate(10);
   while (!m_isEnd) {
-//    ros::spinOnce();
-//    loop_rate.sleep();
     if (!m_taskQueue.empty() && m_robots.isFree()) {
       Task task = m_taskQueue.front();
-      m_robots.execute(task);
+      m_robots.addTask(task);
       m_taskQueue.pop();
     }
   }

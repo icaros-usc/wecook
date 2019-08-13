@@ -427,7 +427,7 @@ void ActionPlanner::planTransfer(Action &action, std::map<std::string, std::shar
                                                       nullptr,
                                                       armSpace,
                                                       armSkeleton,
-                                                      true);
+                                                      false);
     subMotions.emplace_back(motion4);
 
     // ungrab food
