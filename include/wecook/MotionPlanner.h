@@ -10,12 +10,16 @@
 #include <aikido/constraint/dart/TSR.hpp>
 #include <dart/dynamics/BodyNode.hpp>
 
+#include "PreCondition.h"
+
 namespace wecook {
 
 class MotionPlanner {
  public:
   MotionPlanner(const aikido::statespace::dart::MetaSkeletonStateSpacePtr &stateSpace,
-                const dart::dynamics::MetaSkeletonPtr &skeleton) : m_stateSpace(stateSpace), m_skeleton(skeleton) {
+                const dart::dynamics::MetaSkeletonPtr &skeleton,
+                const std::shared_ptr<PreCondition> &condition)
+      : m_stateSpace(stateSpace), m_skeleton(skeleton), m_condition(condition) {
 
   }
 
@@ -23,8 +27,7 @@ class MotionPlanner {
 
   aikido::statespace::dart::MetaSkeletonStateSpacePtr m_stateSpace = nullptr;
   dart::dynamics::MetaSkeletonPtr m_skeleton = nullptr;
-
-
+  std::shared_ptr<PreCondition> m_condition = nullptr;
 
 };
 }

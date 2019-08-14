@@ -91,6 +91,11 @@ void TSRMotionwithConstraintPlanner::plan(const std::shared_ptr<ada::Ada> &ada) 
   if (traj) {
     ROS_INFO("Found valid trajectory!");
     lock.unlock();
+//    auto stateSpace = std::make_shared<aikido::statespace::dart::MetaSkeletonStateSpace>(m_skeleton.get());
+//    aikido::trajectory::TrajectoryPtr timedTrajectory
+//        =
+//        ada->smoothPath(m_skeleton, traj.get(), std::make_shared<aikido::constraint::Satisfied>(stateSpace));
+//    auto future = ada->executeTrajectory(timedTrajectory);
     auto future = ada->executeTrajectory(traj);
     future.wait();
   }

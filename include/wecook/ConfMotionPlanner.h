@@ -13,7 +13,11 @@ class ConfMotionPlanner : public MotionPlanner {
  public:
   ConfMotionPlanner(const Eigen::VectorXd &goalConf,
                     const aikido::statespace::dart::MetaSkeletonStateSpacePtr &stateSpace,
-                    const dart::dynamics::MetaSkeletonPtr &skeleton) : MotionPlanner(stateSpace, skeleton), m_goalConf(goalConf) {
+                    const dart::dynamics::MetaSkeletonPtr &skeleton,
+                    const std::shared_ptr<PreCondition> &condition = nullptr) : MotionPlanner(stateSpace,
+                                                                                              skeleton,
+                                                                                              condition),
+                                                                                m_goalConf(goalConf) {
   }
 
   void plan(const std::shared_ptr<ada::Ada> &ada);

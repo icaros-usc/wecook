@@ -13,9 +13,12 @@ class GrabMotionPlanner : public MotionPlanner {
   GrabMotionPlanner(const dart::dynamics::SkeletonPtr &bodyToGrab,
                     bool grab,
                     const aikido::statespace::dart::MetaSkeletonStateSpacePtr &stateSpace,
-                    const dart::dynamics::MetaSkeletonPtr &skeleton) : MotionPlanner(stateSpace, skeleton),
-                                                                       m_bodyToGrab(bodyToGrab),
-                                                                       m_grab(grab) {
+                    const dart::dynamics::MetaSkeletonPtr &skeleton,
+                    const std::shared_ptr<PreCondition> &condition = nullptr) : MotionPlanner(stateSpace,
+                                                                                              skeleton,
+                                                                                              condition),
+                                                                                m_bodyToGrab(bodyToGrab),
+                                                                                m_grab(grab) {
   }
 
   void plan(const std::shared_ptr<ada::Ada> &ada);

@@ -9,6 +9,15 @@
 using namespace wecook;
 
 void TSRMotionPlanner::plan(const std::shared_ptr<ada::Ada> &ada) {
+  if (m_condition) {
+    ROS_INFO("Waiting for condition to be verified!");
+    while (!m_condition->isSatisfied()) {
+      // sleep a little bit
+      ros::Duration(1.).sleep();
+    }
+    ROS_INFO("Condition is verified!");
+  }
+
   if (m_debug) {
     ROS_INFO("Debugging: Debuging!");
     std::cout << m_bn << std::endl;

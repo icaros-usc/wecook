@@ -19,13 +19,16 @@ class ConnMotionPlanner : public MotionPlanner {
                     std::shared_ptr<ContainingMap> &containingMap,
                     bool conn,
                     const aikido::statespace::dart::MetaSkeletonStateSpacePtr &stateSpace,
-                    const dart::dynamics::MetaSkeletonPtr &skeleton) : MotionPlanner(stateSpace, skeleton),
-                                                                       m_bodyToConn(bodyToConn),
-                                                                       m_bodyThatConns(bodyThatConns),
-                                                                       m_conn(conn),
-                                                                       m_containingMap(containingMap),
-                                                                       m_containerName(containerName),
-                                                                       m_objectName(objectName) {
+                    const dart::dynamics::MetaSkeletonPtr &skeleton,
+                    const std::shared_ptr<PreCondition> &condition = nullptr) : MotionPlanner(stateSpace,
+                                                                                              skeleton,
+                                                                                              condition),
+                                                                                m_bodyToConn(bodyToConn),
+                                                                                m_bodyThatConns(bodyThatConns),
+                                                                                m_conn(conn),
+                                                                                m_containingMap(containingMap),
+                                                                                m_containerName(containerName),
+                                                                                m_objectName(objectName) {
 
   }
 
