@@ -87,6 +87,8 @@ void TSRMotionwithConstraintPlanner::plan(const std::shared_ptr<ada::Ada> &ada) 
   planner->setMinStateDifference(crrtParameters.minStepSize);
 
   auto traj = planOMPL(planner, pdef, std::move(m_stateSpace), std::move(interpolator), 100);
+  auto stateSpace = std::make_shared<aikido::statespace::dart::MetaSkeletonStateSpace>(m_skeleton.get());
+  stateSpace->setState(m_skeleton.get(), startState.getState());
 
   if (traj) {
     ROS_INFO("Found valid trajectory!");

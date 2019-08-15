@@ -39,7 +39,7 @@ void World::run() {
         while (!robot.second->isFree()) {
         }
       }
-      clean(task);
+//      clean(task);
       m_tasks.pop_back();
     }
     m_isFree = true;

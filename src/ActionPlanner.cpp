@@ -15,12 +15,13 @@
 #include "wecook/TSRMotionPlanner.h"
 #include "wecook/TSRMotionwithConstraintPlanner.h"
 #include "wecook/ConfMotionPlanner.h"
-#include "wecook/DeltaMotionPlanner.h"
+#include "wecook/LinearDeltaMotionPlanner.h"
 #include "wecook/GrabMotionPlanner.h"
 #include "wecook/ConnMotionPlanner.h"
 #include "wecook/strutils.h"
 #include "wecook/TSRPreCondition.h"
 #include "wecook/ConfPreCondition.h"
+#include "wecook/AngularDeltaMotionPlanner.h"
 
 using namespace wecook;
 
@@ -178,7 +179,13 @@ void ActionPlanner::planHandover(Action &action,
   goalTSRS1->mBw(3, 0) = -M_PI / 8;
   goalTSRS1->mBw(3, 1) = M_PI / 8;
   auto condition1 = std::make_shared<TSRPreCondition>(goalTSRM2, objectSkeleton->getBodyNode(0));
-  auto motionS1 = std::make_shared<TSRMotionPlanner>(goalTSRS1, robotSHand->getEndEffectorBodyNode(), nullptr, armSSpace, armSSkeleton, condition1, false);
+  auto motionS1 = std::make_shared<TSRMotionPlanner>(goalTSRS1,
+                                                     robotSHand->getEndEffectorBodyNode(),
+                                                     nullptr,
+                                                     armSSpace,
+                                                     armSSkeleton,
+                                                     condition1,
+                                                     false);
   subMotionsS.emplace_back(motionS1);
 
   // Close robotS hand
@@ -201,9 +208,9 @@ void ActionPlanner::planHandover(Action &action,
 
   // moving robotM a little bit
   Eigen::Vector3d delta_x(0., 0., 0.001);
-  auto motionM7 = std::make_shared<DeltaMotionPlanner>(robotMHand->getEndEffectorBodyNode(), delta_x, 50, armMSpace, armMSkeleton);
+  auto motionM7 =
+      std::make_shared<LinearDeltaMotionPlanner>(robotMHand->getEndEffectorBodyNode(), delta_x, 50, armMSpace, armMSkeleton);
   subMotionsM.emplace_back(motionM7);
-
 
   robotM->addSubMotions(subMotionsM);
   robotS->addSubMotions(subMotionsS);
@@ -296,11 +303,13 @@ void ActionPlanner::planStir(Action &action,
   // Start stiring
   for (int j = 0; j < 3; j++) {
     Eigen::Vector3d delta_x(-0.001, 0., -0.);
-    auto motion5 = std::make_shared<DeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(), delta_x, 30, armSpace, armSkeleton);
+    auto motion5 =
+        std::make_shared<LinearDeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(), delta_x, 30, armSpace, armSkeleton);
     subMotions.emplace_back(motion5);
 
     delta_x << +0.001, 0., 0.00;
-    auto motion6 = std::make_shared<DeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(), delta_x, 30, armSpace, armSkeleton);
+    auto motion6 =
+        std::make_shared<LinearDeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(), delta_x, 30, armSpace, armSkeleton);
     subMotions.emplace_back(motion6);
   }
 
@@ -309,7 +318,13 @@ void ActionPlanner::planStir(Action &action,
   poseTSR.mT0_w = spoonPose * poseTSR.mT0_w;
   auto goalTSR3 = std::make_shared<aikido::constraint::dart::TSR>(poseTSR);
   auto motion7 =
-      std::make_shared<TSRMotionPlanner>(goalTSR3, spoonSkeleton->getBodyNode(0), nullptr, armSpace, armSkeleton, nullptr, false);
+      std::make_shared<TSRMotionPlanner>(goalTSR3,
+                                         spoonSkeleton->getBodyNode(0),
+                                         nullptr,
+                                         armSpace,
+                                         armSkeleton,
+                                         nullptr,
+                                         false);
   subMotions.emplace_back(motion7);
 
   // release
@@ -348,7 +363,13 @@ void ActionPlanner::planCut(Action &action,
   knifeTSR.mT0_w = knifePose * knifeTSR.mT0_w;
   auto goalTSR = std::make_shared<aikido::constraint::dart::TSR>(knifeTSR);
   auto motion1 =
-      std::make_shared<TSRMotionPlanner>(goalTSR, robotHand->getEndEffectorBodyNode(), nullptr, armSpace, armSkeleton, nullptr, false);
+      std::make_shared<TSRMotionPlanner>(goalTSR,
+                                         robotHand->getEndEffectorBodyNode(),
+                                         nullptr,
+                                         armSpace,
+                                         armSkeleton,
+                                         nullptr,
+                                         false);
   subMotions.emplace_back(motion1);
 
   // grab knife
@@ -386,11 +407,13 @@ void ActionPlanner::planCut(Action &action,
   // Cutting
   for (int j = 0; j < 3; j++) {
     Eigen::Vector3d delta_x(0., 0., -0.001);
-    auto motion4 = std::make_shared<DeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(), delta_x, 30, armSpace, armSkeleton);
+    auto motion4 =
+        std::make_shared<LinearDeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(), delta_x, 30, armSpace, armSkeleton);
     subMotions.emplace_back(motion4);
 
     delta_x << 0., 0., 0.001;
-    auto motion5 = std::make_shared<DeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(), delta_x, 30, armSpace, armSkeleton);
+    auto motion5 =
+        std::make_shared<LinearDeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(), delta_x, 30, armSpace, armSkeleton);
     subMotions.emplace_back(motion5);
   }
 
@@ -477,7 +500,8 @@ void ActionPlanner::planTransfer(Action &action,
     // move food a little bit up
     for (int j = 0; j < 1; j++) {
       Eigen::Vector3d delta_x(0., 0., 0.001);
-      auto motion7 = std::make_shared<DeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(), delta_x, 30, armSpace, armSkeleton);
+      auto motion7 =
+          std::make_shared<LinearDeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(), delta_x, 30, armSpace, armSkeleton);
       subMotions.emplace_back(motion7);
     }
 
@@ -520,7 +544,85 @@ void ActionPlanner::planTransfer(Action &action,
                                                        armSkeleton);
     subMotions.emplace_back(motion9);
   } else if (action.get_tool() == action.get_location()[0]) {
+    ROS_INFO_STREAM("Transferring " << action.get_ingredients()[0] << " from " << action.get_location()[0] << "  to "
+                                    << action.get_location()[1]);
+    // transfer food by doing pouring
+    auto oldLocationName = action.get_location()[0];
+    auto oldLocationSkeleton = world->getSkeleton(oldLocationName);
+    auto oldLocationPose = Eigen::Isometry3d::Identity(); // need to find it out later
+    dart::dynamics::BodyNode *oldLocationBodyNodePtr = nullptr; // need to find it out later
 
+    // first check if oldlocation has been grabbed
+    if (robotHand->isGrabbing(oldLocationName)) {
+      ROS_INFO("The old location object has been grabbed!");
+      oldLocationBodyNodePtr = robotHand->getGrabbedBodyNode();
+      oldLocationPose = oldLocationBodyNodePtr->getWorldTransform();
+      std::cout << oldLocationPose.translation() << std::endl;
+    } else {
+      // first try to grab old location object
+      oldLocationPose = getObjectPose(oldLocationSkeleton, containingMap);
+      oldLocationBodyNodePtr = oldLocationSkeleton->getBodyNode(0);
+    }
+
+    auto epsilon = 0.02;
+    // now move the old location object to the new location,
+    // to easily pour food from old container to new container.
+    auto newLocationName = action.get_location()[1];
+    auto newLocationSkeleton = world->getSkeleton(newLocationName);
+    auto newLocationPose = getObjectPose(newLocationSkeleton, containingMap);
+    auto newLocationTSR = std::make_shared<aikido::constraint::dart::TSR>();
+    newLocationTSR->mT0_w = newLocationPose * newLocationTSR->mT0_w;
+    std::cout << newLocationPose.translation() << std::endl;
+    newLocationTSR->mTw_e.translation() = Eigen::Vector3d(-0.08, 0.08, 0.25);
+    newLocationTSR->mBw
+        << -epsilon / 2, epsilon / 2, -epsilon / 2, epsilon
+        / 2, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
+    auto constraintTSR = std::make_shared<aikido::constraint::dart::TSR>();
+    auto newGoalPose = newLocationTSR->mT0_w * newLocationTSR->mTw_e;
+    Eigen::Vector3d direction = Eigen::Vector3d(newGoalPose.translation()[0] - oldLocationPose.translation()[0],
+                                                newGoalPose.translation()[1] - oldLocationPose.translation()[1],
+                                                newGoalPose.translation()[2] - oldLocationPose.translation()[2]);
+    double distance = direction.norm();
+    constraintTSR->mT0_w = dart::math::computeTransform(direction / direction.norm(),
+                                                        oldLocationPose.translation(),
+                                                        dart::math::AxisType::AXIS_Z);
+    constraintTSR->mTw_e = constraintTSR->mT0_w.inverse() * oldLocationPose;
+    constraintTSR->mBw << -epsilon, epsilon, -epsilon, epsilon,
+        std::min(0., distance), std::max(0., distance), -M_PI / 16, M_PI / 16, -M_PI / 16, M_PI / 16, -M_PI / 16, M_PI
+        / 16;
+    auto offset = Eigen::Isometry3d::Identity();
+    offset(2, 3) = distance;
+    newLocationTSR->mT0_w = constraintTSR->mT0_w * offset;
+    newLocationTSR->mTw_e = constraintTSR->mTw_e;
+    auto motion1 = std::make_shared<TSRMotionwithConstraintPlanner>(newLocationTSR,
+                                                                    constraintTSR,
+                                                                    oldLocationBodyNodePtr,
+                                                                    nullptr,
+                                                                    armSpace,
+                                                                    armSkeleton,
+                                                                    nullptr,
+                                                                    false);
+    subMotions.emplace_back(motion1);
+
+    // rotate bowl to pour food
+//    auto rotateTSR = std::make_shared<aikido::constraint::dart::TSR>();
+//    rotateTSR->mT0_w = newGoalPose;
+//    Eigen::Matrix3d rot;
+//    rot << 0.5000, 0.500000, 0.7071, 0.5000, 0.5000, -0.7071, -0.7071, 0.7071, 0.0000;
+    // quat: 0.4999997, 0.4999997, 0, 0.7071073 x, y, z, w
+    // ori: 0, 0, 0, 1
+//    rotateTSR->mTw_e.linear() = rot;
+//    auto motion2 = std::make_shared<TSRMotionPlanner>(rotateTSR,
+//                                                      oldLocationBodyNodePtr,
+//                                                      nullptr,
+//                                                      armSpace,
+//                                                      armSkeleton,
+//                                                      nullptr,
+//                                                      false);
+    // TODO rotate
+    Eigen::Vector3d delta_x(1.5707945 / 50, 0.7853981 / 50, -0.7853969 / 50);
+    auto motion2 = std::make_shared<AngularDeltaMotionPlanner>(oldLocationBodyNodePtr, delta_x, 50, armSpace, armSkeleton, nullptr);
+    subMotions.emplace_back(motion2);
   } else {
 
   }

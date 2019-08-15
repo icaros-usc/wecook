@@ -26,7 +26,9 @@ class TSRPreCondition : public PreCondition {
     state.setIsometry(transform);
     auto satisfied = m_targetTSR->isSatisfied(state);
     if (satisfied) {
-      std::cout << transform.translation() << std::endl;
+      // test again;
+      ros::Duration(2.0).sleep();
+      satisfied = m_targetTSR->isSatisfied(state);
     }
     return satisfied;
   }

@@ -2,21 +2,21 @@
 // Created by hejia on 8/6/19.
 //
 
-#ifndef WECOOK_DELTAMOTIONPLANNER_H
-#define WECOOK_DELTAMOTIONPLANNER_H
+#ifndef WECOOK_LINEARDELTAMOTIONPLANNER_H
+#define WECOOK_LINEARDELTAMOTIONPLANNER_H
 
 #include "MotionPlanner.h"
 
 namespace wecook {
 
-class DeltaMotionPlanner : public MotionPlanner {
+class LinearDeltaMotionPlanner : public MotionPlanner {
  public:
-  DeltaMotionPlanner(dart::dynamics::BodyNode *bn,
-                     const Eigen::VectorXd &delta_x,
-                     double repeat_time,
-                     const aikido::statespace::dart::MetaSkeletonStateSpacePtr &stateSpace,
-                     const dart::dynamics::MetaSkeletonPtr &skeleton,
-                     const std::shared_ptr<PreCondition> &condition = nullptr) : MotionPlanner(stateSpace,
+  LinearDeltaMotionPlanner(dart::dynamics::BodyNode *bn,
+                           const Eigen::VectorXd &delta_x,
+                           double repeat_time,
+                           const aikido::statespace::dart::MetaSkeletonStateSpacePtr &stateSpace,
+                           const dart::dynamics::MetaSkeletonPtr &skeleton,
+                           const std::shared_ptr<PreCondition> &condition = nullptr) : MotionPlanner(stateSpace,
                                                                                                skeleton,
                                                                                                condition),
                                                                                  m_bn(bn),
@@ -34,4 +34,4 @@ class DeltaMotionPlanner : public MotionPlanner {
 
 }
 
-#endif //WECOOK_DELTAMOTIONPLANNER_H
+#endif //WECOOK_LINEARDELTAMOTIONPLANNER_H

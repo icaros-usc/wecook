@@ -4,11 +4,11 @@
 
 #include <aikido/common/PseudoInverse.hpp>
 
-#include "wecook/DeltaMotionPlanner.h"
+#include "wecook/LinearDeltaMotionPlanner.h"
 
 using namespace wecook;
 
-void DeltaMotionPlanner::plan(const std::shared_ptr<ada::Ada> &ada) {
+void LinearDeltaMotionPlanner::plan(const std::shared_ptr<ada::Ada> &ada) {
   Eigen::VectorXd delta_q(6);
 
   for (int i = 0; i < m_repeat_time; i++) {

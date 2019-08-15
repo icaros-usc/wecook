@@ -14,7 +14,7 @@
 #include "ConfMotionPlanner.h"
 #include "GrabMotionPlanner.h"
 #include "TSRMotionPlanner.h"
-#include "DeltaMotionPlanner.h"
+#include "LinearDeltaMotionPlanner.h"
 
 namespace wecook {
 class Robot {
