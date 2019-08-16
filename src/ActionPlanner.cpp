@@ -244,10 +244,48 @@ void ActionPlanner::planStir(Action &action,
   auto handSkeleton = robotHand->getMetaSkeleton();
   auto handSpace = std::make_shared<aikido::statespace::dart::MetaSkeletonStateSpace>(handSkeleton.get());
 
+
   // create motion that moves hand to be above spoon
   // first construct spoon tsr
   auto world = robot->getWorld();
   auto spoonName = action.get_tool();
+  // first check if robot has grabbed spoon
+  if (robotHand->isGrabbing(spoonName) == 0) {
+    ROS_INFO("Spoon has been grabbed!");
+
+  } else if (robotHand->isGrabbing(spoonName) == 1) {
+    ROS_INFO("Ada is grabbing something else, placing the grabbed object first...");
+    auto tableSkeleton = world->getSkeleton("table0");
+    auto tablePose = getObjectPose(tableSkeleton, containingMap);
+    aikido::constraint::dart::TSRPtr tableTSR = std::make_shared<aikido::constraint::dart::TSR>();
+    tableTSR->mT0_w.translation() = tablePose.translation();
+    std::cout << "placing..." << tablePose.translation() << std::endl;
+    tableTSR->mTw_e.translation() = Eigen::Vector3d(-0.2, -0.65, 0.7);
+    std::cout << (tableTSR->mT0_w * tableTSR->mTw_e).linear() << std::endl;
+    std::cout << (tableTSR->mT0_w * tableTSR->mTw_e).translation() << std::endl;
+    auto epsilon = 0.02;
+    tableTSR->mBw
+        << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
+    auto motion0 = std::make_shared<TSRMotionPlanner>(tableTSR,
+                                                      robotHand->getGrabbedBodyNode(),
+                                                      nullptr,
+                                                      armSpace,
+                                                      armSkeleton,
+                                                      nullptr,
+                                                      false);
+    subMotions.emplace_back(motion0);
+
+    // ungrab
+    auto conf = Eigen::Vector2d();
+    conf << 0., 0.;
+    auto motion2 = std::make_shared<ConfMotionPlanner>(conf, handSpace, handSkeleton);
+    subMotions.emplace_back(motion2);
+
+    auto motion1 = std::make_shared<GrabMotionPlanner>(nullptr, false, armSpace, armSkeleton);
+    subMotions.emplace_back(motion1);
+  } else if (robotHand->isGrabbing(spoonName) == 2) {
+    ROS_INFO("Ada is not grabbing anything, grabbing spoon...");
+  }
   auto spoonSkeleton = world->getSkeleton(spoonName);
   auto spoonPose = getObjectPose(spoonSkeleton, containingMap);
   aikido::constraint::dart::TSR spoonTSR = getDefaultSpoonTSR();
@@ -587,7 +625,7 @@ void ActionPlanner::planTransfer(Action &action,
     dart::dynamics::BodyNode *oldLocationBodyNodePtr = nullptr; // need to find it out later
 
     // first check if oldlocation has been grabbed
-    if (robotHand->isGrabbing(oldLocationName)) {
+    if (robotHand->isGrabbing(oldLocationName) == 0) {
       ROS_INFO("The old location object has been grabbed!");
       oldLocationBodyNodePtr = robotHand->getGrabbedBodyNode();
       oldLocationPose = oldLocationBodyNodePtr->getWorldTransform();
