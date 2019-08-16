@@ -4,17 +4,17 @@
 
 #include <aikido/common/PseudoInverse.hpp>
 
-#include "wecook/AngularDeltaMotionPlanner.h"
+#include "wecook/DeltaMotionPlanner.h"
 
 using namespace wecook;
 
-void AngularDeltaMotionPlanner::plan(const std::shared_ptr<ada::Ada> &ada) {
+void DeltaMotionPlanner::plan(const std::shared_ptr<ada::Ada> &ada) {
   Eigen::VectorXd delta_q(6);
 
   for (int i = 0; i < m_repeat_time; i++) {
-    auto jac = m_skeleton->getAngularJacobian(m_bn, m_incoordinatesOf);
-    auto pseudoinverse = aikido::common::pseudoinverse(jac);
-    delta_q << pseudoinverse * m_delta_x;
+    auto jac = m_skeleton->getJacobian(m_bn, m_incoordinatesOf);
+    std::cout << jac << std::endl;
+    delta_q << aikido::common::pseudoinverse(jac) * m_delta_x;
     Eigen::VectorXd currPos = m_skeleton->getPositions();
     ros::Duration(0.1).sleep();
     Eigen::VectorXd new_pos = currPos + delta_q;

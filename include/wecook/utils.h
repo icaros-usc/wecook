@@ -57,7 +57,8 @@ inline std::shared_ptr<::dart::dynamics::Skeleton> addBodyFromURDF(aikido::plann
   return skeleton;
 }
 
-inline Eigen::Isometry3d getObjectPose(const dart::dynamics::SkeletonPtr &skeleton, const std::shared_ptr<ContainingMap> &containingMap) {
+inline Eigen::Isometry3d getObjectPose(const dart::dynamics::SkeletonPtr &skeleton,
+                                       const std::shared_ptr<ContainingMap> &containingMap) {
   if (skeleton->getNumBodyNodes() > 0) {
     auto body = skeleton->getBodyNode(0);
     auto pose = body->getWorldTransform();
@@ -68,7 +69,8 @@ inline Eigen::Isometry3d getObjectPose(const dart::dynamics::SkeletonPtr &skelet
   }
 }
 
-inline Eigen::Isometry3d getObjectPose(const dart::dynamics::MetaSkeletonPtr &skeleton, const std::shared_ptr<ContainingMap> &containingMap) {
+inline Eigen::Isometry3d getObjectPose(const dart::dynamics::MetaSkeletonPtr &skeleton,
+                                       const std::shared_ptr<ContainingMap> &containingMap) {
   if (skeleton->getNumBodyNodes() > 0) {
     auto body = skeleton->getBodyNode(0);
     auto pose = body->getWorldTransform();
@@ -77,6 +79,14 @@ inline Eigen::Isometry3d getObjectPose(const dart::dynamics::MetaSkeletonPtr &sk
     // need to find
     return containingMap->getContainedPose(skeleton->getName());
   }
+}
+
+inline Eigen::Vector6d TransformMatrix2SpatialVector(const Eigen::Isometry3d &transform) {
+  auto rotation = transform.linear().eulerAngles(0, 1, 2);
+  auto translation = transform.translation();
+  Eigen::Vector6d spatialVector = Eigen::Vector6d::Zero();
+  spatialVector << rotation(0, 0), rotation(1, 0), rotation(2, 0), translation[0], translation[1], translation[2];
+  return spatialVector;
 }
 
 }

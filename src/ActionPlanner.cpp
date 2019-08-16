@@ -22,6 +22,9 @@
 #include "wecook/TSRPreCondition.h"
 #include "wecook/ConfPreCondition.h"
 #include "wecook/AngularDeltaMotionPlanner.h"
+#include "wecook/dart/FixedFrame.h"
+#include "wecook/IKMotionPlanner.h"
+#include "wecook/DeltaMotionPlanner.h"
 
 using namespace wecook;
 
@@ -209,7 +212,7 @@ void ActionPlanner::planHandover(Action &action,
   // moving robotM a little bit
   Eigen::Vector3d delta_x(0., 0., 0.001);
   auto motionM7 =
-      std::make_shared<LinearDeltaMotionPlanner>(robotMHand->getEndEffectorBodyNode(), delta_x, 50, armMSpace, armMSkeleton);
+      std::make_shared<LinearDeltaMotionPlanner>(robotMHand->getEndEffectorBodyNode(), delta_x, dart::dynamics::Frame::World(), 50, armMSpace, armMSkeleton);
   subMotionsM.emplace_back(motionM7);
 
   robotM->addSubMotions(subMotionsM);
@@ -304,12 +307,12 @@ void ActionPlanner::planStir(Action &action,
   for (int j = 0; j < 3; j++) {
     Eigen::Vector3d delta_x(-0.001, 0., -0.);
     auto motion5 =
-        std::make_shared<LinearDeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(), delta_x, 30, armSpace, armSkeleton);
+        std::make_shared<LinearDeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(), delta_x, dart::dynamics::Frame::World(), 30, armSpace, armSkeleton);
     subMotions.emplace_back(motion5);
 
     delta_x << +0.001, 0., 0.00;
     auto motion6 =
-        std::make_shared<LinearDeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(), delta_x, 30, armSpace, armSkeleton);
+        std::make_shared<LinearDeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(), delta_x, dart::dynamics::Frame::World(), 30, armSpace, armSkeleton);
     subMotions.emplace_back(motion6);
   }
 
@@ -408,12 +411,12 @@ void ActionPlanner::planCut(Action &action,
   for (int j = 0; j < 3; j++) {
     Eigen::Vector3d delta_x(0., 0., -0.001);
     auto motion4 =
-        std::make_shared<LinearDeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(), delta_x, 30, armSpace, armSkeleton);
+        std::make_shared<LinearDeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(), delta_x, dart::dynamics::Frame::World(), 30, armSpace, armSkeleton);
     subMotions.emplace_back(motion4);
 
     delta_x << 0., 0., 0.001;
     auto motion5 =
-        std::make_shared<LinearDeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(), delta_x, 30, armSpace, armSkeleton);
+        std::make_shared<LinearDeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(), delta_x, dart::dynamics::Frame::World(), 30, armSpace, armSkeleton);
     subMotions.emplace_back(motion5);
   }
 
@@ -501,7 +504,7 @@ void ActionPlanner::planTransfer(Action &action,
     for (int j = 0; j < 1; j++) {
       Eigen::Vector3d delta_x(0., 0., 0.001);
       auto motion7 =
-          std::make_shared<LinearDeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(), delta_x, 30, armSpace, armSkeleton);
+          std::make_shared<LinearDeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(), delta_x, dart::dynamics::Frame::World(), 30, armSpace, armSkeleton);
       subMotions.emplace_back(motion7);
     }
 
@@ -620,8 +623,20 @@ void ActionPlanner::planTransfer(Action &action,
 //                                                      nullptr,
 //                                                      false);
     // TODO rotate
-    Eigen::Vector3d delta_x(1.5707945 / 50, 0.7853981 / 50, -0.7853969 / 50);
-    auto motion2 = std::make_shared<AngularDeltaMotionPlanner>(oldLocationBodyNodePtr, delta_x, 50, armSpace, armSkeleton, nullptr);
+    auto rotatePoseTWE = Eigen::Isometry3d::Identity();
+    Eigen::Matrix3d rot;
+    rot << 0.5000, 0.500000, 0.7071, 0.5000, 0.5000, -0.7071, -0.7071, 0.7071, 0.0000;
+    rotatePoseTWE.linear() = rot;
+    auto rotatePoseT0E = newGoalPose * rotatePoseTWE;
+    std::cout << rotatePoseT0E.linear() << std::endl;
+    auto rotateEuler = rotatePoseT0E.linear().eulerAngles(0, 1, 2);
+    std::cout << rotateEuler << std::endl;
+    // compute delta_x w.r.t world farame
+    Eigen::Vector6d delta_x = Eigen::Vector6d::Zero();
+    delta_x << rotateEuler(0, 0) / 50, rotateEuler(1, 0) / 50, rotateEuler(2, 0) / 50, 0., 0., 0.;
+
+//    auto incoordinatesOf = new FixedFrame(dart::dynamics::Frame::World(), newLocationPose);
+    auto motion2 = std::make_shared<IKMotionPlanner>(oldLocationBodyNodePtr, rotatePoseT0E, dart::dynamics::Frame::World(), 50, armSpace, armSkeleton, nullptr);
     subMotions.emplace_back(motion2);
   } else {
 
