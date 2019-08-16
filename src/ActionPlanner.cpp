@@ -25,6 +25,7 @@
 #include "wecook/dart/FixedFrame.h"
 #include "wecook/IKMotionPlanner.h"
 #include "wecook/DeltaMotionPlanner.h"
+#include "wecook/GravityMotionPlanner.h"
 
 using namespace wecook;
 
@@ -212,7 +213,12 @@ void ActionPlanner::planHandover(Action &action,
   // moving robotM a little bit
   Eigen::Vector3d delta_x(0., 0., 0.001);
   auto motionM7 =
-      std::make_shared<LinearDeltaMotionPlanner>(robotMHand->getEndEffectorBodyNode(), delta_x, dart::dynamics::Frame::World(), 50, armMSpace, armMSkeleton);
+      std::make_shared<LinearDeltaMotionPlanner>(robotMHand->getEndEffectorBodyNode(),
+                                                 delta_x,
+                                                 dart::dynamics::Frame::World(),
+                                                 50,
+                                                 armMSpace,
+                                                 armMSkeleton);
   subMotionsM.emplace_back(motionM7);
 
   robotM->addSubMotions(subMotionsM);
@@ -307,12 +313,22 @@ void ActionPlanner::planStir(Action &action,
   for (int j = 0; j < 3; j++) {
     Eigen::Vector3d delta_x(-0.001, 0., -0.);
     auto motion5 =
-        std::make_shared<LinearDeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(), delta_x, dart::dynamics::Frame::World(), 30, armSpace, armSkeleton);
+        std::make_shared<LinearDeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(),
+                                                   delta_x,
+                                                   dart::dynamics::Frame::World(),
+                                                   30,
+                                                   armSpace,
+                                                   armSkeleton);
     subMotions.emplace_back(motion5);
 
     delta_x << +0.001, 0., 0.00;
     auto motion6 =
-        std::make_shared<LinearDeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(), delta_x, dart::dynamics::Frame::World(), 30, armSpace, armSkeleton);
+        std::make_shared<LinearDeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(),
+                                                   delta_x,
+                                                   dart::dynamics::Frame::World(),
+                                                   30,
+                                                   armSpace,
+                                                   armSkeleton);
     subMotions.emplace_back(motion6);
   }
 
@@ -411,12 +427,22 @@ void ActionPlanner::planCut(Action &action,
   for (int j = 0; j < 3; j++) {
     Eigen::Vector3d delta_x(0., 0., -0.001);
     auto motion4 =
-        std::make_shared<LinearDeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(), delta_x, dart::dynamics::Frame::World(), 30, armSpace, armSkeleton);
+        std::make_shared<LinearDeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(),
+                                                   delta_x,
+                                                   dart::dynamics::Frame::World(),
+                                                   30,
+                                                   armSpace,
+                                                   armSkeleton);
     subMotions.emplace_back(motion4);
 
     delta_x << 0., 0., 0.001;
     auto motion5 =
-        std::make_shared<LinearDeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(), delta_x, dart::dynamics::Frame::World(), 30, armSpace, armSkeleton);
+        std::make_shared<LinearDeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(),
+                                                   delta_x,
+                                                   dart::dynamics::Frame::World(),
+                                                   30,
+                                                   armSpace,
+                                                   armSkeleton);
     subMotions.emplace_back(motion5);
   }
 
@@ -504,7 +530,12 @@ void ActionPlanner::planTransfer(Action &action,
     for (int j = 0; j < 1; j++) {
       Eigen::Vector3d delta_x(0., 0., 0.001);
       auto motion7 =
-          std::make_shared<LinearDeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(), delta_x, dart::dynamics::Frame::World(), 30, armSpace, armSkeleton);
+          std::make_shared<LinearDeltaMotionPlanner>(robotHand->getEndEffectorBodyNode(),
+                                                     delta_x,
+                                                     dart::dynamics::Frame::World(),
+                                                     30,
+                                                     armSpace,
+                                                     armSkeleton);
       subMotions.emplace_back(motion7);
     }
 
@@ -636,8 +667,44 @@ void ActionPlanner::planTransfer(Action &action,
     delta_x << rotateEuler(0, 0) / 50, rotateEuler(1, 0) / 50, rotateEuler(2, 0) / 50, 0., 0., 0.;
 
 //    auto incoordinatesOf = new FixedFrame(dart::dynamics::Frame::World(), newLocationPose);
-    auto motion2 = std::make_shared<IKMotionPlanner>(oldLocationBodyNodePtr, rotatePoseT0E, dart::dynamics::Frame::World(), 50, armSpace, armSkeleton, nullptr);
+    auto motion2 = std::make_shared<IKMotionPlanner>(oldLocationBodyNodePtr,
+                                                     rotatePoseT0E,
+                                                     dart::dynamics::Frame::World(),
+                                                     50,
+                                                     armSpace,
+                                                     armSkeleton,
+                                                     nullptr);
     subMotions.emplace_back(motion2);
+
+    // now food in the old container will be moved to the new container
+    // unconnect
+    auto foodName = action.get_ingredients()[0];
+    auto foodSkeleton = world->getSkeleton(foodName);
+    auto motion3 = std::make_shared<ConnMotionPlanner>(foodSkeleton,
+                                                       oldLocationSkeleton,
+                                                       oldLocationName,
+                                                       foodName,
+                                                       containingMap,
+                                                       false,
+                                                       armSpace,
+                                                       armSkeleton);
+    subMotions.emplace_back(motion3);
+
+    // move food into new location
+    auto motion4 = std::make_shared<GravityMotionPlanner>(foodSkeleton,
+                                                          20, armSpace, armSkeleton);
+    subMotions.emplace_back(motion4);
+
+    // merge food with new location
+    auto motion5 = std::make_shared<ConnMotionPlanner>(foodSkeleton,
+                                                       newLocationSkeleton,
+                                                       newLocationName,
+                                                       foodName,
+                                                       containingMap,
+                                                       true,
+                                                       armSpace,
+                                                       armSkeleton);
+    subMotions.emplace_back(motion5);
   } else {
 
   }

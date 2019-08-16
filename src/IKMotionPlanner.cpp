@@ -28,7 +28,7 @@ void IKMotionPlanner::plan(const std::shared_ptr<ada::Ada> &ada) {
     std::cout << (targetSpatialVector - currentSpatialVector).norm() << std::endl;
     auto jac = m_skeleton->getJacobian(m_bn, m_incoordinatesOf);
 //    std::cout << jac << std::endl;
-    delta_q << aikido::common::pseudoinverse(jac) * (targetSpatialVector - currentSpatialVector) * 0.0005;
+    delta_q << aikido::common::pseudoinverse(jac) * (targetSpatialVector - currentSpatialVector) * 0.005;
     Eigen::VectorXd currPos = m_skeleton->getPositions();
     ros::Duration(0.1).sleep();
     Eigen::VectorXd new_pos = currPos + delta_q;

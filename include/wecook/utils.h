@@ -15,6 +15,7 @@
 #include <aikido/io/CatkinResourceRetriever.hpp>
 #include <ros/ros.h>
 #include "ContainingMap.h"
+#include <tf2/LinearMath/Matrix3x3.h>
 
 namespace wecook {
 
@@ -82,7 +83,7 @@ inline Eigen::Isometry3d getObjectPose(const dart::dynamics::MetaSkeletonPtr &sk
 }
 
 inline Eigen::Vector6d TransformMatrix2SpatialVector(const Eigen::Isometry3d &transform) {
-  auto rotation = transform.linear().eulerAngles(0, 1, 2);
+  auto rotation = dart::math::matrixToEulerXYZ(transform.linear());
   auto translation = transform.translation();
   Eigen::Vector6d spatialVector = Eigen::Vector6d::Zero();
   spatialVector << rotation(0, 0), rotation(1, 0), rotation(2, 0), translation[0], translation[1], translation[2];
