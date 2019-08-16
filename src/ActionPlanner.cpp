@@ -228,7 +228,199 @@ void ActionPlanner::planHandover(Action &action,
 void ActionPlanner::planHolding(Action &action,
                                 std::map<std::string, std::shared_ptr<Robot>> &robots,
                                 std::shared_ptr<ContainingMap> &containingMap) {
+  std::vector<std::shared_ptr<MotionPlanner>> subMotionsM;
+  std::vector<std::shared_ptr<MotionPlanner>> subMotionsS;
+  // like handover, robot master is the agent initiating the intersection
+  auto robotM = robots[action.get_pid()[0]];
+  auto robotMHand = robotM->getHand();
+  auto robotMArm = robotM->getArm();
+  auto armMSkeleton = robotMArm->getMetaSkeleton();
+  auto armMSpace = std::make_shared<aikido::statespace::dart::MetaSkeletonStateSpace>(armMSkeleton.get());
+  auto handMSkeleton = robotMHand->getMetaSkeleton();
+  auto handMSpace = std::make_shared<aikido::statespace::dart::MetaSkeletonStateSpace>(handMSkeleton.get());
+  auto worldM = robotM->getWorld();
 
+  auto robotS = robots[action.get_pid()[1]];
+  auto robotSHand = robotS->getHand();
+  auto robotSArm = robotS->getArm();
+  auto armSSkeleton = robotSArm->getMetaSkeleton();
+  auto armSSpace = std::make_shared<aikido::statespace::dart::MetaSkeletonStateSpace>(armSSkeleton.get());
+  auto handSSkeleton = robotSHand->getMetaSkeleton();
+  auto handSSpace = std::make_shared<aikido::statespace::dart::MetaSkeletonStateSpace>(handSSkeleton.get());
+  auto worldS = robotS->getWorld();
+
+  auto actionName = action.get_verb();
+  auto occurances = findAllOccurances(actionName, '_');
+  auto collaborativeAction = actionName.substr(occurances[1] + 1);
+  auto holdedObjectName = actionName.substr(occurances[0] + 1, occurances[1] - occurances[0] - 1);
+  if (collaborativeAction == "transfer") {
+    ROS_INFO("Collaborative transferring!");
+    ROS_INFO_STREAM(holdedObjectName << " " << collaborativeAction);
+
+    if (holdedObjectName != action.get_location()[0]) {
+      // we need robot to move holded object to collaborative point
+      auto collaborativePoint = Eigen::Isometry3d::Identity();
+      collaborativePoint.translation() = Eigen::Vector3d(0.3, 0., 0.85);
+
+      // first move holded object to collaborative point
+      auto holdedObjectSkeleton = worldM->getSkeleton(holdedObjectName);
+      auto holdedObjectPose = getObjectPose(holdedObjectSkeleton, containingMap);
+      auto holdedObjectTSR = std::make_shared<aikido::constraint::dart::TSR>();
+      holdedObjectTSR->mT0_w = holdedObjectPose;
+      Eigen::Matrix3d rot;
+      rot <<
+          -1, 0, 0,
+          0, 1, 0,
+          0, 0, -1;
+      Eigen::Matrix3d rot2;
+      rot2 <<
+           0.7071072, 0.7071063, 0.0000000,
+          -0.7071063, 0.7071072, 0.0000000,
+          0.0000000, 0.0000000, 1.0000000;
+      holdedObjectTSR->mTw_e.linear() = rot2 * rot;
+      holdedObjectTSR->mTw_e.translation() = Eigen::Vector3d(-0.07, -0.07, 0.08);
+      holdedObjectTSR->mBw = Eigen::Matrix<double, 6, 2>::Zero();
+      holdedObjectTSR->mBw(2, 0) = -0.01;
+      holdedObjectTSR->mBw(2, 1) = 0.01;
+      holdedObjectTSR->mBw(0, 0) = -0.01;
+      holdedObjectTSR->mBw(0, 1) = 0.01;
+      holdedObjectTSR->mBw(5, 0) = -M_PI;
+      holdedObjectTSR->mBw(5, 1) = M_PI;
+      holdedObjectTSR->mBw(4, 0) = -M_PI / 8;
+      holdedObjectTSR->mBw(4, 1) = M_PI / 8;
+      holdedObjectTSR->mBw(3, 0) = -M_PI / 8;
+      holdedObjectTSR->mBw(3, 1) = M_PI / 8;
+      auto motionM1 = std::make_shared<TSRMotionPlanner>(holdedObjectTSR,
+                                                         robotMHand->getEndEffectorBodyNode(),
+                                                         nullptr,
+                                                         armMSpace,
+                                                         armMSkeleton,
+                                                         nullptr,
+                                                         false);
+      subMotionsM.emplace_back(motionM1);
+
+      auto conf = Eigen::Vector2d();
+      conf << 0.75, 0.75;
+      auto motionM2 = std::make_shared<ConfMotionPlanner>(conf, handMSpace, handMSkeleton);
+      subMotionsM.emplace_back(motionM2);
+      auto motionM3 =
+          std::make_shared<GrabMotionPlanner>(holdedObjectSkeleton, true, armMSpace, armMSkeleton);
+      subMotionsM.emplace_back(motionM3);
+
+      // move holded object a little bit up
+      for (int j = 0; j < 1; j++) {
+        Eigen::Vector3d delta_x(0., 0., 0.001);
+        auto motionM5 =
+            std::make_shared<LinearDeltaMotionPlanner>(holdedObjectSkeleton->getBodyNode(0),
+                                                       delta_x,
+                                                       dart::dynamics::Frame::World(),
+                                                       60,
+                                                       armMSpace,
+                                                       armMSkeleton);
+        subMotionsM.emplace_back(motionM5);
+      }
+
+      // now move the holded object to the collaborative point
+      auto newHoldedObjectPose = holdedObjectPose;
+      newHoldedObjectPose.translation()[2] += 0.06;
+      Eigen::Vector3d direction =
+          Eigen::Vector3d(collaborativePoint.translation()[0] - newHoldedObjectPose.translation()[0],
+                          collaborativePoint.translation()[1] - newHoldedObjectPose.translation()[1],
+                          collaborativePoint.translation()[2] - newHoldedObjectPose.translation()[2]);
+      double distance = direction.norm();
+      auto constraintTSR = std::make_shared<aikido::constraint::dart::TSR>();
+      constraintTSR->mT0_w = dart::math::computeTransform(direction / direction.norm(),
+                                                          newHoldedObjectPose.translation(),
+                                                          dart::math::AxisType::AXIS_Z);
+      constraintTSR->mTw_e = constraintTSR->mT0_w.inverse() * newHoldedObjectPose;
+      double epsilon = 0.01;
+      constraintTSR->mBw << -epsilon, epsilon, -epsilon, epsilon,
+          std::min(0., distance), std::max(0., distance), -M_PI / 16, M_PI / 16, -M_PI / 16, M_PI / 16, -M_PI / 16, M_PI
+          / 16;
+      auto goalTSRM2 = std::make_shared<aikido::constraint::dart::TSR>();
+      auto offset = Eigen::Isometry3d::Identity();
+      offset(2, 3) = distance;
+      goalTSRM2->mT0_w = constraintTSR->mT0_w * offset;
+      goalTSRM2->mTw_e = constraintTSR->mTw_e;
+      goalTSRM2->mBw << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon,
+          -M_PI / 16, M_PI / 16, -M_PI / 16, M_PI / 16, -M_PI / 16, M_PI / 16;
+
+      auto motionM4 = std::make_shared<TSRMotionwithConstraintPlanner>(goalTSRM2,
+                                                                       constraintTSR,
+                                                                       holdedObjectSkeleton->getBodyNode(0),
+                                                                       nullptr,
+                                                                       armMSpace,
+                                                                       armMSkeleton,
+                                                                       nullptr,
+                                                                       false);
+      subMotionsM.emplace_back(motionM4);
+
+      // Move robotS to grab spoon
+      auto toolName = action.get_tool();
+      auto toolSkeleton = worldS->getSkeleton(toolName);
+      auto toolPose = getObjectPose(toolSkeleton, containingMap);
+      auto toolTSR = std::make_shared<aikido::constraint::dart::TSR>();
+      toolTSR->mT0_w.translation() = toolPose.translation();
+      toolTSR->mTw_e.translation() = Eigen::Vector3d(0.03, 0., 0.);
+      rot << -1., 0., 0., 0., 1., 0., 0., 0., -1.;
+      rot2 << 1, 0, 0, 0, 0, 1, 0, -1, 0;
+      toolTSR->mTw_e.linear() = rot2 * rot;
+      toolTSR->mBw << -0.02, 0.02, -0.02, 0.02, -0.02, 0.02, -0.02, 0.02, -0.02, 0.02, -0.02, 0.02;
+      auto motionS1 = std::make_shared<TSRMotionPlanner>(toolTSR,
+                                                         robotSHand->getEndEffectorBodyNode(),
+                                                         nullptr, armSSpace, armSSkeleton, nullptr, false);
+      subMotionsS.emplace_back(motionS1);
+
+      // grab spoon
+      conf << 0.75, 0.75;
+      auto motionS2 = std::make_shared<ConfMotionPlanner>(conf, handSSpace, handSSkeleton);
+      subMotionsS.emplace_back(motionS2);
+
+      auto motionS3 =
+          std::make_shared<GrabMotionPlanner>(toolSkeleton, true, armSSpace, armSSkeleton);
+      subMotionsS.emplace_back(motionS3);
+
+      // Move spoon to be inside pot
+      auto oldLocationName = action.get_location()[0];
+      auto oldLocationSkeleton = worldS->getSkeleton(oldLocationName);
+      auto oldLocationPose = getObjectPose(oldLocationSkeleton, containingMap);
+      aikido::constraint::dart::TSR oldLocationTSR = getDefaultPotTSR();
+      oldLocationTSR.mT0_w = oldLocationPose * oldLocationTSR.mT0_w;
+      rot <<
+          -1, 0, 0,
+          0, 1, 0,
+          0, 0, -1;
+      rot2 <<
+           -1, 0, 0,
+          0, -1, 0,
+          0, 0, 1;
+      oldLocationTSR.mTw_e.linear() = rot * rot2;
+      oldLocationTSR.mTw_e.translation() = Eigen::Vector3d(0, 0, 0.25);
+      auto goalTSR2 = std::make_shared<aikido::constraint::dart::TSR>(oldLocationTSR);
+      // First setup collision detector
+      dart::collision::FCLCollisionDetectorPtr collisionDetector = dart::collision::FCLCollisionDetector::create();
+      std::shared_ptr<dart::collision::CollisionGroup>
+          armCollisionGroup = collisionDetector->createCollisionGroup(armSSkeleton.get(), toolSkeleton.get());
+      std::shared_ptr<dart::collision::CollisionGroup>
+          envCollisionGroup = collisionDetector->createCollisionGroup(oldLocationSkeleton->getBodyNode(0));
+      std::shared_ptr<aikido::constraint::dart::CollisionFree> collisionFreeConstraint =
+          std::make_shared<aikido::constraint::dart::CollisionFree>(armSSpace, armSSkeleton, collisionDetector);
+      collisionFreeConstraint->addPairwiseCheck(armCollisionGroup, envCollisionGroup);
+      auto motionS4 = std::make_shared<TSRMotionPlanner>(goalTSR2,
+                                                        toolSkeleton->getBodyNode(0),
+                                                        collisionFreeConstraint,
+                                                        armSSpace,
+                                                        armSSkeleton,
+                                                        nullptr,
+                                                        false);
+      subMotionsS.emplace_back(motionS4);
+
+    } else {
+
+    }
+  }
+  robotS->addSubMotions(subMotionsS);
+  robotM->addSubMotions(subMotionsM);
 }
 
 void ActionPlanner::planStir(Action &action,
