@@ -43,6 +43,14 @@ class Container {
     return m_connMetadata->m_bodyNode->getWorldTransform();
   }
 
+  inline std::string getContainerName() const {
+    return m_name;
+  }
+
+  inline std::string getContainedName() const {
+    return m_containedName;
+  }
+
  private:
   std::string m_name;
   std::string m_containedName;

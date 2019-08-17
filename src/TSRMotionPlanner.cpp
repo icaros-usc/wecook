@@ -121,10 +121,10 @@ void TSRMotionPlanner::plan(const std::shared_ptr<ada::Ada> &ada) {
                                                    m_collisionFree,
                                                    10);
         if (trajectory) {
-//          aikido::trajectory::TrajectoryPtr timedTrajectory
-//              =
-//              ada->smoothPath(m_skeleton, trajectory.get(), std::make_shared<aikido::constraint::Satisfied>(m_stateSpace));
-          auto future = ada->executeTrajectory(trajectory);
+          aikido::trajectory::TrajectoryPtr timedTrajectory
+              =
+              ada->smoothPath(m_skeleton, trajectory.get(), std::make_shared<aikido::constraint::Satisfied>(m_stateSpace));
+          auto future = ada->executeTrajectory(timedTrajectory);
           future.wait();
         }
       } else {

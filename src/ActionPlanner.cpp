@@ -26,6 +26,8 @@
 #include "wecook/IKMotionPlanner.h"
 #include "wecook/DeltaMotionPlanner.h"
 #include "wecook/GravityMotionPlanner.h"
+#include "wecook/GrabPreCondition.h"
+#include "wecook/ConnPreCondition.h"
 
 using namespace wecook;
 
@@ -260,7 +262,7 @@ void ActionPlanner::planHolding(Action &action,
     if (holdedObjectName != action.get_location()[0]) {
       // we need robot to move holded object to collaborative point
       auto collaborativePoint = Eigen::Isometry3d::Identity();
-      collaborativePoint.translation() = Eigen::Vector3d(0.3, 0., 0.85);
+      collaborativePoint.translation() = Eigen::Vector3d(0.3, -0.175, 0.85);
 
       // first move holded object to collaborative point
       auto holdedObjectSkeleton = worldM->getSkeleton(holdedObjectName);
@@ -361,10 +363,9 @@ void ActionPlanner::planHolding(Action &action,
       auto toolPose = getObjectPose(toolSkeleton, containingMap);
       auto toolTSR = std::make_shared<aikido::constraint::dart::TSR>();
       toolTSR->mT0_w.translation() = toolPose.translation();
-      toolTSR->mTw_e.translation() = Eigen::Vector3d(0.03, 0., 0.);
-      rot << -1., 0., 0., 0., 1., 0., 0., 0., -1.;
-      rot2 << 1, 0, 0, 0, 0, 1, 0, -1, 0;
-      toolTSR->mTw_e.linear() = rot2 * rot;
+      toolTSR->mTw_e.translation() = Eigen::Vector3d(-0.20, 0., 0.);
+      rot << 0.0, 0., 1., 0., 1., 0., -1., 0., 0.;
+      toolTSR->mTw_e.linear() = rot;
       toolTSR->mBw << -0.02, 0.02, -0.02, 0.02, -0.02, 0.02, -0.02, 0.02, -0.02, 0.02, -0.02, 0.02;
       auto motionS1 = std::make_shared<TSRMotionPlanner>(toolTSR,
                                                          robotSHand->getEndEffectorBodyNode(),
@@ -380,41 +381,163 @@ void ActionPlanner::planHolding(Action &action,
           std::make_shared<GrabMotionPlanner>(toolSkeleton, true, armSSpace, armSSkeleton);
       subMotionsS.emplace_back(motionS3);
 
-      // Move spoon to be inside pot
-      auto oldLocationName = action.get_location()[0];
-      auto oldLocationSkeleton = worldS->getSkeleton(oldLocationName);
-      auto oldLocationPose = getObjectPose(oldLocationSkeleton, containingMap);
-      aikido::constraint::dart::TSR oldLocationTSR = getDefaultPotTSR();
-      oldLocationTSR.mT0_w = oldLocationPose * oldLocationTSR.mT0_w;
-      rot <<
-          -1, 0, 0,
-          0, 1, 0,
-          0, 0, -1;
-      rot2 <<
-           -1, 0, 0,
-          0, -1, 0,
-          0, 0, 1;
-      oldLocationTSR.mTw_e.linear() = rot * rot2;
-      oldLocationTSR.mTw_e.translation() = Eigen::Vector3d(0, 0, 0.25);
-      auto goalTSR2 = std::make_shared<aikido::constraint::dart::TSR>(oldLocationTSR);
-      // First setup collision detector
-      dart::collision::FCLCollisionDetectorPtr collisionDetector = dart::collision::FCLCollisionDetector::create();
-      std::shared_ptr<dart::collision::CollisionGroup>
-          armCollisionGroup = collisionDetector->createCollisionGroup(armSSkeleton.get(), toolSkeleton.get());
-      std::shared_ptr<dart::collision::CollisionGroup>
-          envCollisionGroup = collisionDetector->createCollisionGroup(oldLocationSkeleton->getBodyNode(0));
-      std::shared_ptr<aikido::constraint::dart::CollisionFree> collisionFreeConstraint =
-          std::make_shared<aikido::constraint::dart::CollisionFree>(armSSpace, armSSkeleton, collisionDetector);
-      collisionFreeConstraint->addPairwiseCheck(armCollisionGroup, envCollisionGroup);
-      auto motionS4 = std::make_shared<TSRMotionPlanner>(goalTSR2,
-                                                        toolSkeleton->getBodyNode(0),
-                                                        collisionFreeConstraint,
-                                                        armSSpace,
-                                                        armSSkeleton,
-                                                        nullptr,
-                                                        false);
-      subMotionsS.emplace_back(motionS4);
+      for (auto foodName : action.get_ingredients()) {
+        // Move spoon to be inside pot
+        auto oldLocationName = action.get_location()[0];
+        auto oldLocationSkeleton = worldS->getSkeleton(oldLocationName);
+        auto oldLocationPose = getObjectPose(oldLocationSkeleton, containingMap);
+        auto oldLocationTSR = std::make_shared<aikido::constraint::dart::TSR>();
+        oldLocationTSR->mT0_w.translation() = oldLocationPose.translation();
+        rot << -1, 0, 0, 0, 1, 0, 0, 0, -1;
+        rot2 << 1, 0, 0,
+            0, 0.8660, -0.5,
+            0, 0.5, 0.866;;
+        oldLocationTSR->mTw_e.linear() = rot2 * rot;
+        oldLocationTSR->mTw_e.translation() = Eigen::Vector3d(0, 0, 0.08);
+        std::cout << (oldLocationTSR->mT0_w * oldLocationTSR->mTw_e).linear() << std::endl;
+        std::cout << (oldLocationTSR->mT0_w * oldLocationTSR->mTw_e).translation() << std::endl;
+        oldLocationTSR->mBw << -0.02, 0.02, -0.02, 0.02, -0.02, 0.02, -0.02, 0.02, -0.02, 0.02, -0.02, 0.02;
+        // First setup collision detector
+        dart::collision::FCLCollisionDetectorPtr collisionDetector = dart::collision::FCLCollisionDetector::create();
+        std::shared_ptr<dart::collision::CollisionGroup>
+            armCollisionGroup = collisionDetector->createCollisionGroup(armSSkeleton.get(), toolSkeleton.get());
+        std::shared_ptr<dart::collision::CollisionGroup>
+            envCollisionGroup = collisionDetector->createCollisionGroup(oldLocationSkeleton->getBodyNode(0));
+        std::shared_ptr<aikido::constraint::dart::CollisionFree> collisionFreeConstraint =
+            std::make_shared<aikido::constraint::dart::CollisionFree>(armSSpace, armSSkeleton, collisionDetector);
+        collisionFreeConstraint->addPairwiseCheck(armCollisionGroup, envCollisionGroup);
+        auto motionS4 = std::make_shared<TSRMotionPlanner>(oldLocationTSR,
+                                                           toolSkeleton->getBodyNode(0),
+                                                           collisionFreeConstraint,
+                                                           armSSpace,
+                                                           armSSkeleton,
+                                                           nullptr,
+                                                           false);
+        subMotionsS.emplace_back(motionS4);
 
+        // connect food with tool
+        auto foodSkeleton = worldS->getSkeleton(foodName);
+        // unconnect food with old location
+        auto motionS5 = std::make_shared<ConnMotionPlanner>(foodSkeleton,
+                                                            oldLocationSkeleton,
+                                                            oldLocationName,
+                                                            foodName,
+                                                            containingMap,
+                                                            false,
+                                                            armSSpace,
+                                                            armSSkeleton);
+        subMotionsS.emplace_back(motionS5);
+        // unconnect tool with hand
+        auto motionS8 = std::make_shared<GrabMotionPlanner>(toolSkeleton, false, armSSpace, armSSkeleton, nullptr);
+        subMotionsS.emplace_back(motionS8);
+
+        auto motionS6 = std::make_shared<ConnMotionPlanner>(foodSkeleton,
+                                                            toolSkeleton,
+                                                            toolName,
+                                                            foodName,
+                                                            containingMap,
+                                                            true,
+                                                            armSSpace,
+                                                            armSSkeleton);
+        subMotionsS.emplace_back(motionS6);
+
+        // connect tool with hand again
+        auto motionS9 = std::make_shared<GrabMotionPlanner>(toolSkeleton, true, armSSpace, armSSkeleton, nullptr);
+        subMotionsS.emplace_back(motionS9);
+
+        // raise up food
+        Eigen::Vector3d delta_x(0., 0., 0.001);
+        auto motionS7 = std::make_shared<LinearDeltaMotionPlanner>(robotSHand->getEndEffectorBodyNode(),
+                                                                   delta_x,
+                                                                   dart::dynamics::Frame::World(),
+                                                                   200,
+                                                                   armSSpace,
+                                                                   armSSkeleton);
+        subMotionsS.emplace_back(motionS7);
+
+        // sent food to collaborative point
+        // now move the holded object to the collaborative point
+        auto newToolPose = oldLocationTSR->mT0_w * oldLocationTSR->mTw_e;
+        newToolPose.translation()[2] += 0.2;
+        collaborativePoint.translation() = collaborativePoint.translation() + Eigen::Vector3d(0, 0, 0.05);
+        direction =
+            Eigen::Vector3d(collaborativePoint.translation()[0] - newToolPose.translation()[0],
+                            collaborativePoint.translation()[1] - newToolPose.translation()[1],
+                            collaborativePoint.translation()[2] + 0.05 - newToolPose.translation()[2]);
+        distance = direction.norm();
+        auto constraintTSRS1 = std::make_shared<aikido::constraint::dart::TSR>();
+        constraintTSRS1->mT0_w = dart::math::computeTransform(direction / direction.norm(),
+                                                              newToolPose.translation(),
+                                                              dart::math::AxisType::AXIS_Z);
+        constraintTSRS1->mTw_e = constraintTSRS1->mT0_w.inverse() * newToolPose;
+        epsilon = 0.01;
+        constraintTSRS1->mBw << -0.1, 0.1, -0.1, 0.1,
+            std::min(0., distance), std::max(0., distance), -M_PI / 16, M_PI / 16, -M_PI / 16, M_PI / 16, -M_PI / 16, M_PI
+            / 16;
+        auto goalTSRS2 = std::make_shared<aikido::constraint::dart::TSR>();
+        offset = Eigen::Isometry3d::Identity();
+        offset(2, 3) = distance;
+        goalTSRS2->mT0_w = constraintTSRS1->mT0_w * offset;
+        goalTSRS2->mTw_e = constraintTSRS1->mTw_e;
+        goalTSRS2->mBw << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon,
+            -M_PI / 16, M_PI / 16, -M_PI / 16, M_PI / 16, -M_PI / 16, M_PI / 16;
+
+      auto motionS10 = std::make_shared<TSRMotionwithConstraintPlanner>(goalTSRS2,
+                                                                        constraintTSRS1,
+                                                                        toolSkeleton->getBodyNode(0),
+                                                                        nullptr,
+                                                                        armSSpace,
+                                                                        armSSkeleton,
+                                                                        nullptr,
+                                                                        false);
+
+//        auto motionS10 = std::make_shared<TSRMotionPlanner>(goalTSRS2,
+//                                                            toolSkeleton->getBodyNode(0),
+//                                                            nullptr,
+//                                                            armSSpace,
+//                                                            armSSkeleton,
+//                                                            nullptr,
+//                                                            false);
+
+        subMotionsS.emplace_back(motionS10);
+
+
+        auto motionM5 = std::make_shared<GrabMotionPlanner>(holdedObjectSkeleton, false, armMSpace, armMSkeleton);
+        subMotionsM.emplace_back(motionM5);
+
+        auto condition = std::make_shared<GrabPreCondition>(holdedObjectSkeleton, robotMHand, false);
+        auto motionS11 = std::make_shared<ConnMotionPlanner>(foodSkeleton,
+                                                             toolSkeleton,
+                                                             toolName,
+                                                             foodName,
+                                                             containingMap,
+                                                             false,
+                                                             armSSpace,
+                                                             armSSkeleton,
+                                                             condition);
+        subMotionsS.emplace_back(motionS11);
+
+        // move food into new location
+        auto motionS12 = std::make_shared<GravityMotionPlanner>(foodSkeleton,
+                                                                5, armSSpace, armSSkeleton);
+        subMotionsS.emplace_back(motionS12);
+
+        // merge food with new location
+        auto motionS13 = std::make_shared<ConnMotionPlanner>(foodSkeleton,
+                                                             holdedObjectSkeleton,
+                                                             holdedObjectName,
+                                                             foodName,
+                                                             containingMap,
+                                                             true,
+                                                             armSSpace,
+                                                             armSSkeleton);
+        subMotionsS.emplace_back(motionS13);
+
+        // grab holded object again
+        auto condition2 = std::make_shared<ConnPreCondition>(containingMap, holdedObjectName, foodName, true);
+        auto motionM6 = std::make_shared<GrabMotionPlanner>(holdedObjectSkeleton, true, armMSpace, armMSkeleton, condition2);
+        subMotionsM.emplace_back(motionM6);
+      }
     } else {
 
     }
@@ -480,10 +603,16 @@ void ActionPlanner::planStir(Action &action,
   }
   auto spoonSkeleton = world->getSkeleton(spoonName);
   auto spoonPose = getObjectPose(spoonSkeleton, containingMap);
-  aikido::constraint::dart::TSR spoonTSR = getDefaultSpoonTSR();
-  spoonTSR.mT0_w = spoonPose * spoonTSR.mT0_w;
-  auto goalTSR = std::make_shared<aikido::constraint::dart::TSR>(spoonTSR);
-  auto motion1 = std::make_shared<TSRMotionPlanner>(goalTSR,
+  auto spoonTSR = std::make_shared<aikido::constraint::dart::TSR>();
+  spoonTSR->mT0_w.translation() = spoonPose.translation();
+  Eigen::Matrix3d rot;
+  rot << 1.0, 0., 0., 0., 0., -1, 0., 1., 0.;
+  spoonTSR->mTw_e.translation() = Eigen::Vector3d(-0.20, 0., 0.);
+  spoonTSR->mTw_e.linear() = rot;
+  double epsilon = 0.02;
+  spoonTSR->mBw
+      << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
+  auto motion1 = std::make_shared<TSRMotionPlanner>(spoonTSR,
                                                     robotHand->getEndEffectorBodyNode(),
                                                     nullptr,
                                                     armSpace,
@@ -506,21 +635,17 @@ void ActionPlanner::planStir(Action &action,
   auto locationName = action.get_location()[0];
   auto locationSkeleton = world->getSkeleton(locationName);
   auto locationPose = getObjectPose(locationSkeleton, containingMap);
-  aikido::constraint::dart::TSR locationTSR = getDefaultPotTSR();
-  locationTSR.mT0_w = locationPose * locationTSR.mT0_w;
-  Eigen::Matrix3d rot;
-  rot <<
-      -1, 0, 0,
-      0, 1, 0,
-      0, 0, -1;
+  auto locationTSR = std::make_shared<aikido::constraint::dart::TSR>();
+  locationTSR->mT0_w.translation() = locationPose.translation();
+  rot << -1, 0, 0, 0, 1, 0, 0, 0, -1;
   Eigen::Matrix3d rot2 = Eigen::Matrix3d::Identity();
   rot2 <<
        -1, 0, 0,
       0, -1, 0,
       0, 0, 1;
-  locationTSR.mTw_e.linear() = rot * rot2;
-  locationTSR.mTw_e.translation() = Eigen::Vector3d(0, 0, 0.25);
-  auto goalTSR2 = std::make_shared<aikido::constraint::dart::TSR>(locationTSR);
+  locationTSR->mTw_e.linear() = rot;
+  locationTSR->mTw_e.translation() = Eigen::Vector3d(0, 0, 0.05);
+  locationTSR->mBw << -0.02, 0.02, -0.02, 0.02, -0.02, 0.02, -0.02, 0.02, -0.02, 0.02, -M_PI, M_PI;
   // First setup collision detector
   dart::collision::FCLCollisionDetectorPtr collisionDetector = dart::collision::FCLCollisionDetector::create();
   std::shared_ptr<dart::collision::CollisionGroup>
@@ -530,7 +655,7 @@ void ActionPlanner::planStir(Action &action,
   std::shared_ptr<aikido::constraint::dart::CollisionFree> collisionFreeConstraint =
       std::make_shared<aikido::constraint::dart::CollisionFree>(armSpace, armSkeleton, collisionDetector);
   collisionFreeConstraint->addPairwiseCheck(armCollisionGroup, envCollisionGroup);
-  auto motion4 = std::make_shared<TSRMotionPlanner>(goalTSR2,
+  auto motion4 = std::make_shared<TSRMotionPlanner>(locationTSR,
                                                     spoonSkeleton->getBodyNode(0),
                                                     collisionFreeConstraint,
                                                     armSpace,

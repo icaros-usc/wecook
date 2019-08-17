@@ -10,6 +10,8 @@
 
 #include "PreCondition.h"
 
+
+
 class ConfPreCondition : public PreCondition {
  public:
   ConfPreCondition(const Eigen::VectorXd &conf, const dart::dynamics::MetaSkeletonPtr &skeleton) :

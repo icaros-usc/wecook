@@ -36,6 +36,15 @@ class ContainingMap {
     }
   }
 
+  inline bool hasTuple(const std::string &containerName, const std::string &containedName) {
+    for (const auto &container : m_containers) {
+      if (container.getContainerName() == containerName && container.getContainedName() == containedName) {
+        return true;
+      }
+    }
+    return false;
+  }
+
  private:
   std::vector<Container> m_containers;
   aikido::planner::WorldPtr m_env;
