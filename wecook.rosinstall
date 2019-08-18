@@ -1,0 +1,53 @@
+- git:
+    local-name: ada_description
+    uri: https://github.com/usc-csci-545/ada_description.git
+    version: wecook
+- git:
+    local-name: ada_launch
+    uri: https://github.com/usc-csci-545/ada_launch.git
+- git:
+    local-name: aikido
+    uri: https://github.com/usc-csci-545/aikido.git
+    version: wecook
+- git:
+    local-name: aikidopy
+    uri: https://github.com/usc-csci-545/aikidopy.git
+- git:
+    local-name: jaco_hardware
+    uri: https://github.com/usc-csci-545/jaco_hardware.git
+- git:
+    local-name: libada
+    uri: https://github.com/usc-csci-545/libada.git
+    version: wecook
+- git:
+    local-name: pr_assets
+    uri: https://github.com/usc-csci-545/pr_assets.git
+- git:
+    local-name: pr_control_msgs
+    uri: https://github.com/usc-csci-545/pr_control_msgs.git
+- git:
+    local-name: pr_hardware_interfaces
+    uri: https://github.com/usc-csci-545/pr_hardware_interfaces.git
+- git:
+    local-name: pr_ros_controllers
+    uri: https://github.com/usc-csci-545/pr_ros_controllers.git
+- git:
+    local-name: pr_tsr
+    uri: https://github.com/usc-csci-545/pr_tsr.git
+- git:
+    local-name: rewd_controllers
+    uri: https://github.com/usc-csci-545/rewd_controllers.git
+- git:
+    local-name: roscpp_initializer
+    uri: https://github.com/usc-csci-545/roscpp_initializer.git
+- git:
+    local-name: wecook
+    uri: https://github.com/icaros-usc/wecook.git
+    version: master
+- git:
+    local-name: wecook_assets
+    uri: https://github.com/icaros-usc/wecook_assets.git
+    version: master
+- git:
+    local-name: pybind11_catkin
+    uri: https://github.com/usc-csci-545/pybind11_catkin.git
