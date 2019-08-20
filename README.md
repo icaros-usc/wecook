@@ -1,6 +1,7 @@
 # WeCook
 
-WeCook is a platform for developing/testing/
+WeCook is targeting at becoming a benchmark platform for robotic manipulation 
+and human-robot collaboration research.
 
 ## Setup Instructions
 **WeCook is supported on the following systems:**
@@ -9,11 +10,24 @@ WeCook is a platform for developing/testing/
 
 ### [Setup Instructions](docs/instructions.md)
 
-## Demo
+## [Demo](#demo)
 ### Broccoli Beef
 <p align="center">
 <img src="https://github.com/icaros-usc/wecook/blob/master/docs/demo0.png" width="300">
 </p>
+
 **To run the demo, type in following commands in your terminal**
+
+```bash
+# Open one terminal
+$ roscore
+# Open another terminal
+$ rviz
+# Open another terminal
+$ rosrun wecook wecook
+# Open another terminal
+$ rosrun wecook demo1.py
+```
+
 
 
