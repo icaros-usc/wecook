@@ -32,3 +32,7 @@ void Robot::run() {
     m_isFree = true;
   }
 }
+
+void Robot::moveToHome() {
+  m_ada->getArm()->getMetaSkeleton()->setPositions(m_homePositions);
+}

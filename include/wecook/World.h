@@ -26,6 +26,9 @@ class World {
     // construct robot in the env
     for (const auto &robot : m_robots) {
       robot.second->createAda(m_env);
+      robot.second->moveToHome();
+      auto skeleton = robot.second->m_ada->getArm()->getMetaSkeleton();
+      ROS_INFO_STREAM("Robot initial position: " << skeleton->getPositions());
     }
 
     m_viewer = std::make_shared<aikido::rviz::WorldInteractiveMarkerViewer>(m_env, "wecook", "map");

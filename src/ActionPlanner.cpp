@@ -564,7 +564,6 @@ void ActionPlanner::planStir(Action &action,
   // first construct spoon tsr
   auto world = robot->getWorld();
   auto tableSkeleton = world->getSkeleton("table0");
-  std::cout << "Table has " << tableSkeleton->getNumBodyNodes() << " body nodes" << std::endl;
   auto spoonName = action.get_tool();
   // first check if robot has grabbed spoon
   if (robotHand->isGrabbing(spoonName) == 0) {

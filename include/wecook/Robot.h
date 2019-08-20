@@ -17,11 +17,17 @@
 #include "LinearDeltaMotionPlanner.h"
 
 namespace wecook {
+
 class Robot {
+
  public:
   Robot(const Eigen::Isometry3d &transform,
-        const std::string &name) : m_thread(&Robot::run, this), m_transform(transform), m_name(name) {
-
+        const std::string &name,
+        std::vector<double> homePositions = std::vector<double>{4.8, 2.9147, 1.009, 4.1957, 1.44237, 1.3166})
+      : m_thread(&Robot::run, this),
+        m_transform(transform),
+        m_name(name) {
+    m_homePositions = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(homePositions.data(), homePositions.size());
   }
 
   int execute(Action &action);
@@ -72,6 +78,8 @@ class Robot {
     m_ada = std::make_shared<ada::Ada>(env, true, m_name, m_transform);
   }
 
+  void moveToHome();
+
   std::shared_ptr<ada::Ada> m_ada = nullptr;
 
  private:
@@ -85,6 +93,7 @@ class Robot {
   std::vector<Action> m_action;
   Eigen::Isometry3d m_transform;
   std::vector<std::shared_ptr<MotionPlanner>> m_subMotions;
+  Eigen::VectorXd m_homePositions;
 };
 }
 #endif //WECOOK_ROBOT_H
