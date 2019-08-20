@@ -11,7 +11,9 @@ WeCook is a platform for developing/testing/
 
 ## Demo
 ### Broccoli Beef
-![](docs/demo0.png)
+<p align="center">
+<img src="https://github.com/icaros-usc/wecook/blob/master/docs/demo0.png" width="300">
+</p>
 **To run the demo, type in following commands in your terminal**
 
 
