@@ -16,7 +16,6 @@ class IKMotionPlanner : public MotionPlanner {
   IKMotionPlanner(dart::dynamics::BodyNode *bn,
                   const Eigen::Isometry3d &targetPose,
                   dart::dynamics::Frame *incoordinatesOf,
-                  double repeat_time,
                   const aikido::statespace::dart::MetaSkeletonStateSpacePtr &stateSpace,
                   const dart::dynamics::MetaSkeletonPtr &skeleton,
                   const std::shared_ptr<PreCondition> &condition = nullptr) : MotionPlanner(stateSpace,
@@ -24,15 +23,13 @@ class IKMotionPlanner : public MotionPlanner {
                                                                                             condition),
                                                                               m_bn(bn),
                                                                               m_targetPose(targetPose),
-                                                                              m_incoordinatesOf(incoordinatesOf),
-                                                                              m_repeat_time(repeat_time) {
+                                                                              m_incoordinatesOf(incoordinatesOf) {
 
   }
 
   void plan(const std::shared_ptr<ada::Ada> &ada);
 
   Eigen::Isometry3d m_targetPose;
-  double m_repeat_time;
   dart::dynamics::BodyNode *m_bn = nullptr;
   dart::dynamics::Frame *m_incoordinatesOf = nullptr;
 };

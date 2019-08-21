@@ -10,24 +10,28 @@
 using namespace wecook;
 
 void IKMotionPlanner::plan(const std::shared_ptr<ada::Ada> &ada) {
+  if (m_condition) {
+    ROS_INFO("[IKMotionPlanner::plan]: Waiting for condition to be verified!");
+    while (!m_condition->isSatisfied()) {
+      // sleep a little bit
+      ros::Duration(1.).sleep();
+    }
+    ROS_INFO("[IKMotionPlanner::plan]: Condition is verified!");
+  }
+
   Eigen::VectorXd delta_q(6);
 
   auto currentPose = m_bn->getTransform(m_incoordinatesOf);
   std::cout << currentPose.linear() << std::endl;
   std::cout << currentPose.translation() << std::endl;
   auto currentSpatialVector = TransformMatrix2SpatialVector(currentPose);
-//  currentSpatialVector(0, 0) = -0.1699226;
-//  currentSpatialVector(1, 0) = -0.0829827;
-//  currentSpatialVector(2, 0) = -0.139742;
   std::cout << "Current pose: " << currentSpatialVector << std::endl;
   auto targetSpatialVector = TransformMatrix2SpatialVector(m_targetPose);
   std::cout << "Target pose: " << targetSpatialVector << std::endl;
-  auto delta_x = (targetSpatialVector - currentSpatialVector) / m_repeat_time;
 
   while ((targetSpatialVector - currentSpatialVector).norm() > 0.45) {
     std::cout << (targetSpatialVector - currentSpatialVector).norm() << std::endl;
     auto jac = m_skeleton->getJacobian(m_bn, m_incoordinatesOf);
-//    std::cout << jac << std::endl;
     delta_q << aikido::common::pseudoinverse(jac) * (targetSpatialVector - currentSpatialVector) * 0.005;
     Eigen::VectorXd currPos = m_skeleton->getPositions();
     ros::Duration(0.1).sleep();

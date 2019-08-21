@@ -1,32 +1,36 @@
 //
-// Created by hejia on 8/6/19.
+// Created by hejia on 8/20/19.
 //
 
 #include <aikido/constraint/dart/InverseKinematicsSampleable.hpp>
 #include <aikido/constraint/dart/JointStateSpaceHelpers.hpp>
 #include <aikido/constraint/TestableIntersection.hpp>
-#include "wecook/TSRMotionPlanner.h"
+#include <aikido/statespace/GeodesicInterpolator.hpp>
+#include <aikido/planner/SnapConfigurationToConfigurationPlanner.hpp>
+#include <aikido/planner/ConfigurationToConfiguration.hpp>
+
+#include "wecook/TSRIKPlanner.h"
 
 using namespace wecook;
 
-void TSRMotionPlanner::plan(const std::shared_ptr<ada::Ada> &ada) {
+void TSRIKPlanner::plan(const std::shared_ptr<ada::Ada> &ada) {
   if (m_condition) {
-    ROS_INFO("Waiting for condition to be verified!");
+    ROS_INFO("[TSRIKPlanner::plan]: Waiting for condition to be verified!");
     while (!m_condition->isSatisfied()) {
       // sleep a little bit
       ros::Duration(1.).sleep();
     }
-    ROS_INFO("Condition is verified!");
+    ROS_INFO("[TSRIKPlanner::plan]: Condition is verified!");
   }
 
+  // first we need to sample a valid goal state
   if (!m_bn)
-    throw std::invalid_argument("[TSRMotionPlanner::plan]: m_bn is NULL");
+    throw std::invalid_argument("[TSRIKPlanner::plan]: m_bn is NULL");
   auto ik = dart::dynamics::InverseKinematics::create(m_bn);
-
   if (!m_skeleton)
-    throw std::invalid_argument("[TSRMotionPlanner::plan]: m_skeleton is NULL");
+    throw std::invalid_argument("[TSRIKPlanner::plan]: m_skeleton is NULL");
   if (m_skeleton->getNumDofs() == 0)
-    throw std::invalid_argument("[TSRMotionPlanner::plan]: m_skeleton has 0 degrees of freedom.");
+    throw std::invalid_argument("[TSRIKPlanner::plan]: m_skeleton has 0 degrees of freedom.");
   ik->setDofs(m_skeleton->getDofs());
 
   auto rng = std::unique_ptr<aikido::common::RNG>(new aikido::common::RNGWrapper<std::default_random_engine>(0));
@@ -62,28 +66,14 @@ void TSRMotionPlanner::plan(const std::shared_ptr<ada::Ada> &ada) {
     if (!configurations.empty()) {
       ROS_INFO("Found a valid goal state!");
       ROS_INFO("Start planning a path to the goal configuration!");
-      auto trajectory = ada->planToConfiguration(m_stateSpace,
-                                                 m_skeleton,
-                                                 configurations[0],
-                                                 m_collisionFree,
-                                                 10);
-      if (trajectory) {
-        ROS_INFO("Found the trajectory!");
-        std::vector<aikido::constraint::ConstTestablePtr> constraints;
-        if (m_collisionFree)
-          constraints.push_back(m_collisionFree);
-        auto testable = std::make_shared<aikido::constraint::TestableIntersection>(m_stateSpace, constraints);
-        std::unique_lock<std::mutex> lock(m_skeleton->getBodyNode(0)->getSkeleton()->getMutex());
-        aikido::trajectory::TrajectoryPtr timedTrajectory = ada->smoothPath(m_skeleton,
-                                                                            trajectory.get(),
-                                                                            testable);
-        m_stateSpace->setState(m_skeleton.get(), startState.getState());
-        lock.unlock();
-        auto future = ada->executeTrajectory(trajectory);
-        future.wait();
-      } else {
-        ROS_INFO("[TSRMotionPlanner::plan]: Didn't find a valid trajectory!");
-      }
+
+      // run snap planner
+      auto snapPlanner = std::make_shared<aikido::planner::SnapConfigurationToConfigurationPlanner>(m_stateSpace,
+                                                                                                    std::make_shared<
+                                                                                                        aikido::statespace::GeodesicInterpolator>(
+                                                                                                        m_stateSpace));
+      auto problem = aikido::planner::ConfigurationToConfiguration(m_stateSpace, startState, configurations[0], )
+      m_stateSpace->setState(m_skeleton.get(), configurations[0]);
     } else {
       ROS_INFO("Didn't find a valid goal state!");
     }
