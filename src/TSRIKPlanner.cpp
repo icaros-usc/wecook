@@ -67,13 +67,37 @@ void TSRIKPlanner::plan(const std::shared_ptr<ada::Ada> &ada) {
       ROS_INFO("Found a valid goal state!");
       ROS_INFO("Start planning a path to the goal configuration!");
 
+      std::unique_lock<std::mutex> lock(m_skeleton->getBodyNode(0)->getSkeleton()->getMutex());
+
       // run snap planner
       auto snapPlanner = std::make_shared<aikido::planner::SnapConfigurationToConfigurationPlanner>(m_stateSpace,
                                                                                                     std::make_shared<
                                                                                                         aikido::statespace::GeodesicInterpolator>(
                                                                                                         m_stateSpace));
-      auto problem = aikido::planner::ConfigurationToConfiguration(m_stateSpace, startState, configurations[0], )
-      m_stateSpace->setState(m_skeleton.get(), configurations[0]);
+      auto collisionConstraint = ada->getFullCollisionConstraint(m_stateSpace, m_skeleton, m_collisionFree);
+      auto problem = aikido::planner::ConfigurationToConfiguration(m_stateSpace,
+                                                                   startState,
+                                                                   configurations[0],
+                                                                   collisionConstraint);
+      aikido::planner::SnapConfigurationToConfigurationPlanner::Result pResult;
+      auto utimedTrajectory = snapPlanner->plan(problem, &pResult);
+
+      lock.unlock();
+      if (utimedTrajectory) {
+        ROS_INFO("Found the trajectory!");
+        std::vector<aikido::constraint::ConstTestablePtr> constraints;
+        if (m_collisionFree)
+          constraints.push_back(m_collisionFree);
+        auto testable = std::make_shared<aikido::constraint::TestableIntersection>(m_stateSpace, constraints);
+        std::unique_lock<std::mutex> slock(m_skeleton->getBodyNode(0)->getSkeleton()->getMutex());
+        aikido::trajectory::TrajectoryPtr timedTrajectory = ada->smoothPath(m_skeleton, utimedTrajectory.get(), testable);
+        m_stateSpace->setState(m_skeleton.get(), startState.getState());
+        slock.unlock();
+        auto future = ada->executeTrajectory(utimedTrajectory);
+        future.wait();
+      } else {
+        ROS_INFO("[TSRIKPlanner::plan]: Didn't find a valid trajectory!");
+      }
     } else {
       ROS_INFO("Didn't find a valid goal state!");
     }

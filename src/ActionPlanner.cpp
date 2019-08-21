@@ -674,7 +674,12 @@ void ActionPlanner::planStir(Action &action,
   insideTSR->mTw_e = locationTSR->mTw_e;
   insideTSR->mBw = locationTSR->mBw;
   insideTSR->mTw_e.translation() = Eigen::Vector3d(0, 0, 0.05);
-  auto motion5 = std::make_shared<TSRIKPlanner>(insideTSR, spoonSkeleton->getBodyNode(0), 200, armSpace, armSkeleton);
+//  auto motion5 = std::make_shared<TSRIKPlanner>(insideTSR, spoonSkeleton->getBodyNode(0), nullptr, 200, armSpace, armSkeleton);
+  auto motion5 = std::make_shared<TSRMotionPlanner>(insideTSR,
+                                                    spoonSkeleton->getBodyNode(0),
+                                                    nullptr,
+                                                    armSpace,
+                                                    armSkeleton);
   subMotions.emplace_back(motion5);
 
   // Start stiring
@@ -706,8 +711,8 @@ void ActionPlanner::planStir(Action &action,
 //  outsideTSR->mTw_e = locationTSR->mTw_e;
 //  outsideTSR->mBw = locationTSR->mBw;
 //  outsideTSR->mTw_e.translation() = Eigen::Vector3d(0, 0, 0.25);
-  motion5 = std::make_shared<TSRIKPlanner>(locationTSR, spoonSkeleton->getBodyNode(0), 200, armSpace, armSkeleton);
-  subMotions.emplace_back(motion5);
+  auto motion6 = std::make_shared<TSRIKPlanner>(locationTSR, spoonSkeleton->getBodyNode(0), nullptr, 200, armSpace, armSkeleton);
+  subMotions.emplace_back(motion6);
 
   // Put spoon back
   aikido::constraint::dart::TSR poseTSR = getDefaultPoseTSR();

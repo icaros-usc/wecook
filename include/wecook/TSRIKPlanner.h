@@ -13,6 +13,7 @@ class TSRIKPlanner : public MotionPlanner {
  public:
   TSRIKPlanner(const aikido::constraint::dart::TSRPtr &goalTSR,
                dart::dynamics::BodyNode *bn,
+               const aikido::constraint::dart::CollisionFreePtr &collisionFree,
                int interpolating_num,
                const aikido::statespace::dart::MetaSkeletonStateSpacePtr &stateSpace,
                const dart::dynamics::MetaSkeletonPtr &skeleton,
@@ -21,12 +22,14 @@ class TSRIKPlanner : public MotionPlanner {
                                      m_goalTSR(goalTSR),
                                      m_bn(bn),
                                      m_debug(debug),
-                                     m_interpolating_num(interpolating_num) {
+                                     m_interpolating_num(interpolating_num),
+                                     m_collisionFree(collisionFree) {
 
   }
 
   void plan(const std::shared_ptr<ada::Ada> &ada);
 
+  aikido::constraint::dart::CollisionFreePtr m_collisionFree = nullptr;
   int m_interpolating_num;
   dart::dynamics::BodyNode *m_bn = nullptr;
   aikido::constraint::dart::TSRPtr m_goalTSR;
