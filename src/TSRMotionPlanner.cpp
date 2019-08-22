@@ -5,6 +5,7 @@
 #include <aikido/constraint/dart/InverseKinematicsSampleable.hpp>
 #include <aikido/constraint/dart/JointStateSpaceHelpers.hpp>
 #include <aikido/constraint/TestableIntersection.hpp>
+#include <aikido/distance/NominalConfigurationRanker.hpp>
 #include "wecook/TSRMotionPlanner.h"
 
 using namespace wecook;
@@ -59,9 +60,16 @@ void TSRMotionPlanner::plan(const std::shared_ptr<ada::Ada> &ada) {
 
     if (!m_debug)
       m_stateSpace->setState(m_skeleton.get(), startState.getState());
+
     if (!configurations.empty()) {
       ROS_INFO("Found a valid goal state!");
       ROS_INFO("Start planning a path to the goal configuration!");
+      // rank configurations we got
+      aikido::distance::ConstConfigurationRankerPtr configurationRanker(nullptr);
+      auto nominalState = m_stateSpace->createState();
+      configurationRanker =
+          std::make_shared<const aikido::distance::NominalConfigurationRanker>(m_stateSpace, m_skeleton, startState);
+      configurationRanker->rankConfigurations(configurations);
       auto trajectory = ada->planToConfiguration(m_stateSpace,
                                                  m_skeleton,
                                                  configurations[0],
@@ -69,6 +77,9 @@ void TSRMotionPlanner::plan(const std::shared_ptr<ada::Ada> &ada) {
                                                  10);
       if (trajectory) {
         ROS_INFO("Found the trajectory!");
+        ROS_INFO_STREAM("[TSRMotionPlanner::plan]: The trajectory has "
+                            << dynamic_cast<aikido::trajectory::Interpolated *>(trajectory.get())->getNumWaypoints()
+                            << " waypoints");
         std::vector<aikido::constraint::ConstTestablePtr> constraints;
         if (m_collisionFree)
           constraints.push_back(m_collisionFree);
@@ -79,7 +90,7 @@ void TSRMotionPlanner::plan(const std::shared_ptr<ada::Ada> &ada) {
                                                                             testable);
         m_stateSpace->setState(m_skeleton.get(), startState.getState());
         lock.unlock();
-        auto future = ada->executeTrajectory(trajectory);
+        auto future = ada->executeTrajectory(timedTrajectory);
         future.wait();
       } else {
         ROS_INFO("[TSRMotionPlanner::plan]: Didn't find a valid trajectory!");

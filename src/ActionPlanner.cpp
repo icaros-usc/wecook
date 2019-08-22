@@ -711,7 +711,7 @@ void ActionPlanner::planStir(Action &action,
 //  outsideTSR->mTw_e = locationTSR->mTw_e;
 //  outsideTSR->mBw = locationTSR->mBw;
 //  outsideTSR->mTw_e.translation() = Eigen::Vector3d(0, 0, 0.25);
-  auto motion6 = std::make_shared<TSRIKPlanner>(locationTSR, spoonSkeleton->getBodyNode(0), nullptr, 200, armSpace, armSkeleton);
+  auto motion6 = std::make_shared<TSRMotionPlanner>(locationTSR, spoonSkeleton->getBodyNode(0), nullptr, armSpace, armSkeleton);
   subMotions.emplace_back(motion6);
 
   // Put spoon back
