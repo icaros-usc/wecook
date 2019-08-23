@@ -2,27 +2,27 @@
 // Created by hejia on 8/12/19.
 //
 
-#ifndef WECOOK_CONNMOTIONPLANNER_H
-#define WECOOK_CONNMOTIONPLANNER_H
+#ifndef WECOOK_CONNMOTIONNODE_H
+#define WECOOK_CONNMOTIONNODE_H
 
-#include "MotionPlanner.h"
+#include "MotionNode.h"
 #include "ContainingMap.h"
 
 namespace wecook {
 
-class ConnMotionPlanner : public MotionPlanner {
+class ConnMotionNode : public MotionNode {
  public:
-  ConnMotionPlanner(const dart::dynamics::SkeletonPtr &bodyToConn,
-                    const dart::dynamics::SkeletonPtr &bodyThatConns,
-                    const std::string &containerName,
-                    const std::string &objectName,
-                    std::shared_ptr<ContainingMap> &containingMap,
-                    bool conn,
-                    const aikido::statespace::dart::MetaSkeletonStateSpacePtr &stateSpace,
-                    const dart::dynamics::MetaSkeletonPtr &skeleton,
-                    const std::shared_ptr<PreCondition> &condition = nullptr) : MotionPlanner(stateSpace,
-                                                                                              skeleton,
-                                                                                              condition),
+  ConnMotionNode(const dart::dynamics::SkeletonPtr &bodyToConn,
+                 const dart::dynamics::SkeletonPtr &bodyThatConns,
+                 const std::string &containerName,
+                 const std::string &objectName,
+                 std::shared_ptr<ContainingMap> &containingMap,
+                 bool conn,
+                 const aikido::statespace::dart::MetaSkeletonStateSpacePtr &stateSpace,
+                 const dart::dynamics::MetaSkeletonPtr &skeleton,
+                 const std::shared_ptr<PreCondition> &condition = nullptr) : MotionNode(stateSpace,
+                                                                                           skeleton,
+                                                                                           condition),
                                                                                 m_bodyToConn(bodyToConn),
                                                                                 m_bodyThatConns(bodyThatConns),
                                                                                 m_conn(conn),
@@ -46,4 +46,4 @@ class ConnMotionPlanner : public MotionPlanner {
 
 }
 
-#endif //WECOOK_CONNMOTIONPLANNER_H
+#endif //WECOOK_CONNMOTIONNODE_H

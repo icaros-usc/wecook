@@ -2,39 +2,40 @@
 // Created by hejia on 7/30/19.
 //
 
-#ifndef WECOOK_ROBOT_H
-#define WECOOK_ROBOT_H
+#ifndef WECOOK_AGENT_H
+#define WECOOK_AGENT_H
 
 #include <boost/thread.hpp>
 #include <libada/Ada.hpp>
 #include <Eigen/Dense>
 
 #include "Action.h"
-#include "MotionPlanner.h"
-#include "ConfMotionPlanner.h"
-#include "GrabMotionPlanner.h"
-#include "TSRMotionPlanner.h"
-#include "LinearDeltaMotionPlanner.h"
+#include "MotionNode.h"
+#include "ConfMotionNode.h"
+#include "GrabMotionNode.h"
+#include "TSRMotionNode.h"
+#include "LinearDeltaMotionNode.h"
+#include "TaskGraph.h"
 
 namespace wecook {
 
-class Robot {
+typedef boost::function<void(ActionNode *)> syncCallback;
+
+class Agent {
 
  public:
-  Robot(const Eigen::Isometry3d &transform,
-        const std::string &name,
+  Agent(const Eigen::Isometry3d &transform,
+        const std::string &pid,
         std::vector<double> homePositions = std::vector<double>{4.8, 2.9147, 1.009, 4.1957, 1.44237, 1.3166})
-      : m_thread(&Robot::run, this),
+      : m_thread(&Agent::run, this),
         m_transform(transform),
-        m_name(name) {
+        m_pid(pid) {
     m_homePositions = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(homePositions.data(), homePositions.size());
   }
 
-  int execute(Action &action);
-
   void stop();
 
-  inline void addSubMotions(const std::vector<std::shared_ptr<MotionPlanner>> &subMotions) {
+  inline void addSubMotions(const std::vector<std::shared_ptr<MotionNode>> &subMotions) {
     m_subMotions = subMotions;
   }
 
@@ -70,30 +71,37 @@ class Robot {
     return m_ada->executeTrajectory(traj);
   }
 
-  inline auto retimePath(const dart::dynamics::MetaSkeletonPtr &armSkeleton, aikido::trajectory::Trajectory *traj) {
-    return m_ada->retimePath(armSkeleton, traj);
-  }
-
   void createAda(const aikido::planner::WorldPtr &env) {
-    m_ada = std::make_shared<ada::Ada>(env, true, m_name, m_transform);
+    m_ada = std::make_shared<ada::Ada>(env, true, m_pid, m_transform);
   }
 
   void moveToHome();
+
+  inline void addNewTask(std::shared_ptr<TaskGraph> &taskGraph, syncCallback callback) {
+    m_syncCallback = callback;
+    m_currentTask = taskGraph;
+  }
+
+  inline ActionNode *getCurrentActionNode() {
+    return m_currentActionNode;
+  }
 
   std::shared_ptr<ada::Ada> m_ada = nullptr;
 
  private:
   void run();
 
-  std::string m_name;
+  std::string m_pid;
 
   boost::thread m_thread;
   bool m_isFree = true;
   bool m_isEnd = false;
-  std::vector<Action> m_action;
   Eigen::Isometry3d m_transform;
-  std::vector<std::shared_ptr<MotionPlanner>> m_subMotions;
+  std::vector<std::shared_ptr<MotionNode>> m_subMotions;
   Eigen::VectorXd m_homePositions;
+  ActionNode *m_currentActionNode;
+  std::shared_ptr<TaskGraph> m_currentTask = nullptr;
+  syncCallback m_syncCallback;
 };
 }
-#endif //WECOOK_ROBOT_H
+#endif //WECOOK_AGENT_H

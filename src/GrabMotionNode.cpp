@@ -2,18 +2,18 @@
 // Created by hejia on 8/6/19.
 //
 
-#include "wecook/GrabMotionPlanner.h"
+#include "wecook/GrabMotionNode.h"
 
 using namespace wecook;
 
-void GrabMotionPlanner::plan(const std::shared_ptr<ada::Ada> &ada) {
+void GrabMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
   if (m_condition) {
-    ROS_INFO("GrabMotionPlanner: waiting for condition...");
+    ROS_INFO("GrabMotionNode: waiting for condition...");
     while (!m_condition->isSatisfied()) {
       // sleep a little bit
       ros::Duration(1.).sleep();
     }
-    ROS_INFO("GrabMotionPlanner: Condition is verified!");
+    ROS_INFO("GrabMotionNode: Condition is verified!");
   }
 
   if (m_grab) {

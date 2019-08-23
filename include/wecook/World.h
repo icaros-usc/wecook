@@ -13,7 +13,7 @@
 #include <libada/Ada.hpp>
 
 #include "Task.h"
-#include "Robot.h"
+#include "Agent.h"
 #include "utils.h"
 #include "ActionPlanner.h"
 #include "ContainingMap.h"
@@ -21,14 +21,14 @@
 namespace wecook {
 class World {
  public:
-  World(const std::map<std::string, std::shared_ptr<Robot>> &robots) : m_thread(&World::run, this), m_robots(robots) {
+  World(const std::map<std::string, std::shared_ptr<Agent>> &robots) : m_thread(&World::run, this), m_robots(robots) {
     m_env = std::make_shared<aikido::planner::World>("wecook");
     // construct robot in the env
     for (const auto &robot : m_robots) {
       robot.second->createAda(m_env);
       robot.second->moveToHome();
       auto skeleton = robot.second->m_ada->getArm()->getMetaSkeleton();
-      ROS_INFO_STREAM("Robot initial position: " << skeleton->getPositions());
+      ROS_INFO_STREAM("Agent initial position: " << skeleton->getPositions());
     }
 
     m_viewer = std::make_shared<aikido::rviz::WorldInteractiveMarkerViewer>(m_env, "wecook", "map");
@@ -44,6 +44,8 @@ class World {
 
   void stop();
 
+  void syncToActionNode(ActionNode *actionNode);
+
  private:
   void run();
 
@@ -54,7 +56,7 @@ class World {
   aikido::rviz::WorldInteractiveMarkerViewerPtr m_viewer = nullptr;
   aikido::planner::WorldPtr m_env = nullptr;
   boost::thread m_thread;
-  std::map<std::string, std::shared_ptr<Robot>> m_robots;
+  std::map<std::string, std::shared_ptr<Agent>> m_robots;
   bool m_isFree = true;
   bool m_isEnd = false;
   std::vector<Task> m_tasks;

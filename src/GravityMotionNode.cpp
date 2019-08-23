@@ -2,11 +2,11 @@
 // Created by hejia on 8/15/19.
 //
 
-#include "wecook/GravityMotionPlanner.h"
+#include "wecook/GravityMotionNode.h"
 
 using namespace wecook;
 
-void GravityMotionPlanner::plan(const std::shared_ptr<ada::Ada> &ada) {
+void GravityMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
   Eigen::VectorXd delta_q(6);
 
   for (int i = 0; i < m_repeat_time; i++) {

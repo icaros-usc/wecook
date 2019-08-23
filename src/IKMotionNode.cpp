@@ -4,19 +4,19 @@
 
 #include <aikido/common/PseudoInverse.hpp>
 
-#include "wecook/IKMotionPlanner.h"
+#include "wecook/IKMotionNode.h"
 #include "wecook/utils.h"
 
 using namespace wecook;
 
-void IKMotionPlanner::plan(const std::shared_ptr<ada::Ada> &ada) {
+void IKMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
   if (m_condition) {
-    ROS_INFO("[IKMotionPlanner::plan]: Waiting for condition to be verified!");
+    ROS_INFO("[IKMotionNode::plan]: Waiting for condition to be verified!");
     while (!m_condition->isSatisfied()) {
       // sleep a little bit
       ros::Duration(1.).sleep();
     }
-    ROS_INFO("[IKMotionPlanner::plan]: Condition is verified!");
+    ROS_INFO("[IKMotionNode::plan]: Condition is verified!");
   }
 
   Eigen::VectorXd delta_q(6);

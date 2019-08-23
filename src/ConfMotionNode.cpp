@@ -2,18 +2,18 @@
 // Created by hejia on 8/6/19.
 //
 
-#include "wecook/ConfMotionPlanner.h"
+#include "wecook/ConfMotionNode.h"
 
 using namespace wecook;
 
-void ConfMotionPlanner::plan(const std::shared_ptr<ada::Ada> &ada) {
+void ConfMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
   if (m_condition) {
-    ROS_INFO("ConfMotionPlanner: waiting for condition...");
+    ROS_INFO("ConfMotionNode: waiting for condition...");
     while (!m_condition->isSatisfied()) {
       // sleep a little bit
       ros::Duration(1.).sleep();
     }
-    ROS_INFO("ConfMotionPlanner: Condition is verified!");
+    ROS_INFO("ConfMotionNode: Condition is verified!");
   }
 
   auto goalState = m_stateSpace->createState();

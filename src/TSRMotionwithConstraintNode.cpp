@@ -12,11 +12,11 @@
 #include <aikido/distance/defaults.hpp>
 #include <aikido/planner/ompl/Planner.hpp>
 #include <aikido/planner/ompl/CRRTConnect.hpp>
-#include "wecook/TSRMotionwithConstraintPlanner.h"
+#include "wecook/TSRMotionwithConstraintNode.h"
 
 using namespace wecook;
 
-void TSRMotionwithConstraintPlanner::plan(const std::shared_ptr<ada::Ada> &ada) {
+void TSRMotionwithConstraintNode::plan(const std::shared_ptr<ada::Ada> &ada) {
   auto rng = std::unique_ptr<aikido::common::RNG>(new aikido::common::RNGWrapper<std::default_random_engine>(0));
   auto crrtParameters = aikido::robot::util::CRRTPlannerParameters{rng.get()};
   // Create seed constraint

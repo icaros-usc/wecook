@@ -2,18 +2,18 @@
 // Created by hejia on 8/12/19.
 //
 
-#include "wecook/ConnMotionPlanner.h"
+#include "wecook/ConnMotionNode.h"
 
 using namespace wecook;
 
-void ConnMotionPlanner::plan(const std::shared_ptr<ada::Ada> &ada) {
+void ConnMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
   if (m_condition) {
-    ROS_INFO("ConnMotionPlanner: waiting for condition...");
+    ROS_INFO("ConnMotionNode: waiting for condition...");
     while (!m_condition->isSatisfied()) {
       // sleep a little bit
       ros::Duration(1.).sleep();
     }
-    ROS_INFO("ConnMotionPlanner: Condition is verified!");
+    ROS_INFO("ConnMotionNode: Condition is verified!");
   }
 
   if (m_conn) {
