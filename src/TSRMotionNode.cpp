@@ -47,7 +47,7 @@ void TSRMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
     auto generator = ikSampleable.createSampleGenerator();
     std::vector<aikido::statespace::dart::MetaSkeletonStateSpace::ScopedState> configurations;
     auto goalState = m_stateSpace->createState();
-    static const std::size_t maxSnapSamples{20};
+    static const std::size_t maxSnapSamples{30};
     std::size_t snapSamples = 0;
     while (snapSamples < maxSnapSamples && generator->canSample()) {
       std::lock_guard<std::mutex> lock(m_skeleton->getBodyNode(0)->getSkeleton()->getMutex());
@@ -91,6 +91,9 @@ void TSRMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
                                                                             testable);
         m_stateSpace->setState(m_skeleton.get(), startState.getState());
         lock.unlock();
+        ROS_INFO_STREAM("[TSRMotionNode::plan]: The smoothed trajectory has "
+                            << dynamic_cast<aikido::trajectory::Spline *>(timedTrajectory.get())->getNumWaypoints()
+                            << " waypoints");
         auto future = ada->executeTrajectory(timedTrajectory);
         future.wait();
       } else {

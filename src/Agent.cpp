@@ -5,7 +5,6 @@
 #include <iostream>
 #include <aikido/common/PseudoInverse.hpp>
 #include <aikido/constraint/dart/InverseKinematicsSampleable.hpp>
-#include <aikido/constraint/dart/JointStateSpaceHelpers.hpp>
 
 #include "wecook/Agent.h"
 

@@ -56,7 +56,7 @@ void ActionPlanner::planHandover(ActionNode *actionNode,
                                  std::map<std::string,
                                           std::shared_ptr<Agent>> &robots,
                                  std::shared_ptr<ContainingMap> &containingMap) {
-  std::vector<std::shared_ptr<MotionNode>> subMotionsM;
+  std::vector<std::shared_ptr<MotionNode>> motionSeqM;
   // this actionNode will invlove two agents, robot master and robot slave
   // robot master is the agent initiating the interaction
   auto robotM = robots[actionNode->getAction().get_pids()[0]];
@@ -106,16 +106,16 @@ void ActionPlanner::planHandover(ActionNode *actionNode,
                                                   armMSkeleton,
                                                   nullptr,
                                                   false);
-  subMotionsM.emplace_back(motionM1);
+  motionSeqM.emplace_back(motionM1);
 
   // grab the bowl
   auto conf = Eigen::Vector2d();
   conf << 0.8, 0.8;
   auto motionM2 = std::make_shared<ConfMotionNode>(conf, handMSpace, handMSkeleton);
-  subMotionsM.emplace_back(motionM2);
+  motionSeqM.emplace_back(motionM2);
   auto motionM3 =
       std::make_shared<GrabMotionNode>(objectSkeleton, true, armMSpace, armMSkeleton);
-  subMotionsM.emplace_back(motionM3);
+  motionSeqM.emplace_back(motionM3);
 
   // move the bowl to the centor of two agents
   // first get robot slave
@@ -169,10 +169,10 @@ void ActionPlanner::planHandover(ActionNode *actionNode,
                                                                 armMSkeleton,
                                                                 nullptr,
                                                                 false);
-  subMotionsM.emplace_back(motionM4);
+  motionSeqM.emplace_back(motionM4);
 
   // Move robotS to grab bowl
-  std::vector<std::shared_ptr<MotionNode>> subMotionsS;
+  std::vector<std::shared_ptr<MotionNode>> motionSeqS;
   auto goalTSRS1 = std::make_shared<aikido::constraint::dart::TSR>();
   goalTSRS1->mT0_w = goalTSRM2->mT0_w;
   goalTSRS1->mT0_w.linear() = objectPose.linear();
@@ -200,25 +200,25 @@ void ActionPlanner::planHandover(ActionNode *actionNode,
                                                   armSSkeleton,
                                                   condition1,
                                                   false);
-  subMotionsS.emplace_back(motionS1);
+  motionSeqS.emplace_back(motionS1);
 
   // Close robotS hand
   auto motionS2 = std::make_shared<ConfMotionNode>(conf, handSSpace, handSSkeleton);
-  subMotionsS.emplace_back(motionS2);
+  motionSeqS.emplace_back(motionS2);
 
   // Ungrab robotM hand
   auto condition2 = std::make_shared<ConfPreCondition>(conf, handSSkeleton);
   auto motionM5 = std::make_shared<GrabMotionNode>(objectSkeleton, false, armMSpace, armMSkeleton, condition2);
-  subMotionsM.emplace_back(motionM5);
+  motionSeqM.emplace_back(motionM5);
 
   conf << 0., 0.;
   auto motionM6 = std::make_shared<ConfMotionNode>(conf, handMSpace, handMSkeleton);
-  subMotionsM.emplace_back(motionM6);
+  motionSeqM.emplace_back(motionM6);
 
   // robotS grab object
   auto condition3 = std::make_shared<ConfPreCondition>(conf, handMSkeleton);
   auto motionS3 = std::make_shared<GrabMotionNode>(objectSkeleton, true, armSSpace, armSSkeleton, condition3);
-  subMotionsS.emplace_back(motionS3);
+  motionSeqS.emplace_back(motionS3);
 
   // moving robotM a little bit
   Eigen::Vector3d delta_x(0., 0., 0.001);
@@ -229,18 +229,18 @@ void ActionPlanner::planHandover(ActionNode *actionNode,
                                               50,
                                               armMSpace,
                                               armMSkeleton);
-  subMotionsM.emplace_back(motionM7);
+  motionSeqM.emplace_back(motionM7);
 
-  actionNode->addMotionSeq(robotMPid, subMotionsM);
-  actionNode->addMotionSeq(robotSPid, subMotionsS);
+  actionNode->addMotionSeq(robotMPid, motionSeqM);
+  actionNode->addMotionSeq(robotSPid, motionSeqS);
 }
 
 void ActionPlanner::planHolding(ActionNode *actionNode,
                                 std::map<std::string,
                                          std::shared_ptr<Agent>> &robots,
                                 std::shared_ptr<ContainingMap> &containingMap) {
-  std::vector<std::shared_ptr<MotionNode>> subMotionsM;
-  std::vector<std::shared_ptr<MotionNode>> subMotionsS;
+  std::vector<std::shared_ptr<MotionNode>> motionSeqM;
+  std::vector<std::shared_ptr<MotionNode>> motionSeqS;
   // like handover, robot master is the agent initiating the intersection
   auto robotM = robots[actionNode->getAction().get_pids()[0]];
   auto robotMHand = robotM->getHand();
@@ -310,15 +310,15 @@ void ActionPlanner::planHolding(ActionNode *actionNode,
                                                       armMSkeleton,
                                                       nullptr,
                                                       false);
-      subMotionsM.emplace_back(motionM1);
+      motionSeqM.emplace_back(motionM1);
 
       auto conf = Eigen::Vector2d();
       conf << 0.75, 0.75;
       auto motionM2 = std::make_shared<ConfMotionNode>(conf, handMSpace, handMSkeleton);
-      subMotionsM.emplace_back(motionM2);
+      motionSeqM.emplace_back(motionM2);
       auto motionM3 =
           std::make_shared<GrabMotionNode>(holdedObjectSkeleton, true, armMSpace, armMSkeleton);
-      subMotionsM.emplace_back(motionM3);
+      motionSeqM.emplace_back(motionM3);
 
       // move holded object a little bit up
       for (int j = 0; j < 1; j++) {
@@ -330,7 +330,7 @@ void ActionPlanner::planHolding(ActionNode *actionNode,
                                                     60,
                                                     armMSpace,
                                                     armMSkeleton);
-        subMotionsM.emplace_back(motionM5);
+        motionSeqM.emplace_back(motionM5);
       }
 
       // now move the holded object to the collaborative point
@@ -366,7 +366,7 @@ void ActionPlanner::planHolding(ActionNode *actionNode,
                                                                     armMSkeleton,
                                                                     nullptr,
                                                                     false);
-      subMotionsM.emplace_back(motionM4);
+      motionSeqM.emplace_back(motionM4);
 
       // Move robotS to grab spoon
       auto toolName = actionNode->getAction().get_tool();
@@ -381,16 +381,16 @@ void ActionPlanner::planHolding(ActionNode *actionNode,
       auto motionS1 = std::make_shared<TSRMotionNode>(toolTSR,
                                                       robotSHand->getEndEffectorBodyNode(),
                                                       nullptr, armSSpace, armSSkeleton, nullptr, false);
-      subMotionsS.emplace_back(motionS1);
+      motionSeqS.emplace_back(motionS1);
 
       // grab spoon
       conf << 0.75, 0.75;
       auto motionS2 = std::make_shared<ConfMotionNode>(conf, handSSpace, handSSkeleton);
-      subMotionsS.emplace_back(motionS2);
+      motionSeqS.emplace_back(motionS2);
 
       auto motionS3 =
           std::make_shared<GrabMotionNode>(toolSkeleton, true, armSSpace, armSSkeleton);
-      subMotionsS.emplace_back(motionS3);
+      motionSeqS.emplace_back(motionS3);
 
       for (auto foodName : actionNode->getAction().get_ingredients()) {
         // Move spoon to be inside pot
@@ -424,7 +424,7 @@ void ActionPlanner::planHolding(ActionNode *actionNode,
                                                         armSSkeleton,
                                                         nullptr,
                                                         false);
-        subMotionsS.emplace_back(motionS4);
+        motionSeqS.emplace_back(motionS4);
 
         // connect food with tool
         auto foodSkeleton = worldS->getSkeleton(foodName);
@@ -437,10 +437,10 @@ void ActionPlanner::planHolding(ActionNode *actionNode,
                                                          false,
                                                          armSSpace,
                                                          armSSkeleton);
-        subMotionsS.emplace_back(motionS5);
+        motionSeqS.emplace_back(motionS5);
         // unconnect tool with hand
         auto motionS8 = std::make_shared<GrabMotionNode>(toolSkeleton, false, armSSpace, armSSkeleton, nullptr);
-        subMotionsS.emplace_back(motionS8);
+        motionSeqS.emplace_back(motionS8);
 
         auto motionS6 = std::make_shared<ConnMotionNode>(foodSkeleton,
                                                          toolSkeleton,
@@ -450,11 +450,11 @@ void ActionPlanner::planHolding(ActionNode *actionNode,
                                                          true,
                                                          armSSpace,
                                                          armSSkeleton);
-        subMotionsS.emplace_back(motionS6);
+        motionSeqS.emplace_back(motionS6);
 
         // connect tool with hand again
         auto motionS9 = std::make_shared<GrabMotionNode>(toolSkeleton, true, armSSpace, armSSkeleton, nullptr);
-        subMotionsS.emplace_back(motionS9);
+        motionSeqS.emplace_back(motionS9);
 
         // raise up food
         Eigen::Vector3d delta_x(0., 0., 0.001);
@@ -464,7 +464,7 @@ void ActionPlanner::planHolding(ActionNode *actionNode,
                                                                 200,
                                                                 armSSpace,
                                                                 armSSkeleton);
-        subMotionsS.emplace_back(motionS7);
+        motionSeqS.emplace_back(motionS7);
 
         // sent food to collaborative point
         // now move the holded object to the collaborative point
@@ -503,10 +503,10 @@ void ActionPlanner::planHolding(ActionNode *actionNode,
                                                                        nullptr,
                                                                        false);
 
-        subMotionsS.emplace_back(motionS10);
+        motionSeqS.emplace_back(motionS10);
 
         auto motionM5 = std::make_shared<GrabMotionNode>(holdedObjectSkeleton, false, armMSpace, armMSkeleton);
-        subMotionsM.emplace_back(motionM5);
+        motionSeqM.emplace_back(motionM5);
 
         auto condition = std::make_shared<GrabPreCondition>(holdedObjectSkeleton, robotMHand, false);
         auto motionS11 = std::make_shared<ConnMotionNode>(foodSkeleton,
@@ -518,12 +518,12 @@ void ActionPlanner::planHolding(ActionNode *actionNode,
                                                           armSSpace,
                                                           armSSkeleton,
                                                           condition);
-        subMotionsS.emplace_back(motionS11);
+        motionSeqS.emplace_back(motionS11);
 
         // move food into new location
         auto motionS12 = std::make_shared<GravityMotionNode>(foodSkeleton,
                                                              5, armSSpace, armSSkeleton);
-        subMotionsS.emplace_back(motionS12);
+        motionSeqS.emplace_back(motionS12);
 
         // merge food with new location
         auto motionS13 = std::make_shared<ConnMotionNode>(foodSkeleton,
@@ -534,27 +534,27 @@ void ActionPlanner::planHolding(ActionNode *actionNode,
                                                           true,
                                                           armSSpace,
                                                           armSSkeleton);
-        subMotionsS.emplace_back(motionS13);
+        motionSeqS.emplace_back(motionS13);
 
         // grab holded object again
         auto condition2 = std::make_shared<ConnPreCondition>(containingMap, holdedObjectName, foodName, true);
         auto motionM6 =
             std::make_shared<GrabMotionNode>(holdedObjectSkeleton, true, armMSpace, armMSkeleton, condition2);
-        subMotionsM.emplace_back(motionM6);
+        motionSeqM.emplace_back(motionM6);
       }
     } else {
 
     }
   }
-  actionNode->addMotionSeq(robotMPid, subMotionsM);
-  actionNode->addMotionSeq(robotSPid, subMotionsS);
+  actionNode->addMotionSeq(robotMPid, motionSeqM);
+  actionNode->addMotionSeq(robotSPid, motionSeqS);
 }
 
 void ActionPlanner::planStir(ActionNode *actionNode,
                              std::map<std::string,
                                       std::shared_ptr<Agent>> &robots,
                              std::shared_ptr<ContainingMap> &containingMap) {
-  std::vector<std::shared_ptr<MotionNode>> subMotions;
+  std::vector<std::shared_ptr<MotionNode>> motionSeq;
   // since this actionNode will only involve one agent
   auto robot = robots[actionNode->getAction().get_pids()[0]];
   auto robotHand = robot->getHand();
@@ -594,16 +594,16 @@ void ActionPlanner::planStir(ActionNode *actionNode,
                                                    armSkeleton,
                                                    nullptr,
                                                    false);
-    subMotions.emplace_back(motion0);
+    motionSeq.emplace_back(motion0);
 
     // ungrab
     auto conf = Eigen::Vector2d();
     conf << 0., 0.;
     auto motion2 = std::make_shared<ConfMotionNode>(conf, handSpace, handSkeleton);
-    subMotions.emplace_back(motion2);
+    motionSeq.emplace_back(motion2);
 
     auto motion1 = std::make_shared<GrabMotionNode>(nullptr, false, armSpace, armSkeleton);
-    subMotions.emplace_back(motion1);
+    motionSeq.emplace_back(motion1);
   } else if (robotHand->isGrabbing(spoonName) == 2) {
     ROS_INFO("Ada is not grabbing anything, grabbing spoon...");
   }
@@ -625,17 +625,17 @@ void ActionPlanner::planStir(ActionNode *actionNode,
                                                  armSkeleton,
                                                  nullptr,
                                                  false);
-  subMotions.emplace_back(motion1);
+  motionSeq.emplace_back(motion1);
 
   // grab spoon
   auto conf = Eigen::Vector2d();
   conf << 0.75, 0.75;
   auto motion2 = std::make_shared<ConfMotionNode>(conf, handSpace, handSkeleton);
-  subMotions.emplace_back(motion2);
+  motionSeq.emplace_back(motion2);
 
   auto motion3 =
       std::make_shared<GrabMotionNode>(spoonSkeleton, true, armSpace, armSkeleton);
-  subMotions.emplace_back(motion3);
+  motionSeq.emplace_back(motion3);
 
   // Move spoon to be above pot
   auto locationName = actionNode->getAction().get_location()[0];
@@ -650,7 +650,7 @@ void ActionPlanner::planStir(ActionNode *actionNode,
       0, -1, 0,
       0, 0, 1;
   locationTSR->mTw_e.linear() = rot;
-  locationTSR->mTw_e.translation() = Eigen::Vector3d(0, 0, 0.25);
+  locationTSR->mTw_e.translation() = Eigen::Vector3d(0, 0, 0.05);
   locationTSR->mBw << -0.02, 0.02, -0.02, 0.02, -0.02, 0.02, -0.02, 0.02, -0.02, 0.02, -M_PI, M_PI;
   // First setup collision detector
   dart::collision::FCLCollisionDetectorPtr collisionDetector = dart::collision::FCLCollisionDetector::create();
@@ -669,21 +669,7 @@ void ActionPlanner::planStir(ActionNode *actionNode,
                                                  armSkeleton,
                                                  nullptr,
                                                  false);
-  subMotions.emplace_back(motion4);
-
-  // Move spoon to be inside pot
-  auto insideTSR = std::make_shared<aikido::constraint::dart::TSR>();
-  insideTSR->mT0_w = locationTSR->mT0_w;
-  insideTSR->mTw_e = locationTSR->mTw_e;
-  insideTSR->mBw = locationTSR->mBw;
-  insideTSR->mTw_e.translation() = Eigen::Vector3d(0, 0, 0.05);
-//  auto motion5 = std::make_shared<TSRIKNode>(insideTSR, spoonSkeleton->getBodyNode(0), nullptr, 200, armSpace, armSkeleton);
-  auto motion5 = std::make_shared<TSRMotionNode>(insideTSR,
-                                                 spoonSkeleton->getBodyNode(0),
-                                                 nullptr,
-                                                 armSpace,
-                                                 armSkeleton);
-  subMotions.emplace_back(motion5);
+  motionSeq.emplace_back(motion4);
 
   // Start stiring
   for (int j = 0; j < 3; j++) {
@@ -695,7 +681,7 @@ void ActionPlanner::planStir(ActionNode *actionNode,
                                                 30,
                                                 armSpace,
                                                 armSkeleton);
-    subMotions.emplace_back(motion5);
+    motionSeq.emplace_back(motion5);
 
     delta_x << +0.001, 0., 0.00;
     auto motion6 =
@@ -705,18 +691,8 @@ void ActionPlanner::planStir(ActionNode *actionNode,
                                                 30,
                                                 armSpace,
                                                 armSkeleton);
-    subMotions.emplace_back(motion6);
+    motionSeq.emplace_back(motion6);
   }
-
-  // Move spoon to be outside pot
-//  auto outsideTSR = std::make_shared<aikido::constraint::dart::TSR>();
-//  outsideTSR->mT0_w = locationTSR->mT0_w;
-//  outsideTSR->mTw_e = locationTSR->mTw_e;
-//  outsideTSR->mBw = locationTSR->mBw;
-//  outsideTSR->mTw_e.translation() = Eigen::Vector3d(0, 0, 0.25);
-  auto motion6 =
-      std::make_shared<TSRMotionNode>(locationTSR, spoonSkeleton->getBodyNode(0), nullptr, armSpace, armSkeleton);
-  subMotions.emplace_back(motion6);
 
   // Put spoon back
   aikido::constraint::dart::TSR poseTSR = getDefaultPoseTSR();
@@ -730,26 +706,26 @@ void ActionPlanner::planStir(ActionNode *actionNode,
                                       armSkeleton,
                                       nullptr,
                                       false);
-  subMotions.emplace_back(motion7);
+  motionSeq.emplace_back(motion7);
 
   // release
   // ungrab spoon
   conf << 0., 0.;
   auto motion8 = std::make_shared<ConfMotionNode>(conf, handSpace, handSkeleton);
-  subMotions.emplace_back(motion8);
+  motionSeq.emplace_back(motion8);
 
   auto motion9 =
       std::make_shared<GrabMotionNode>(spoonSkeleton, false, armSpace, armSkeleton);
-  subMotions.emplace_back(motion9);
+  motionSeq.emplace_back(motion9);
 
-  actionNode->addMotionSeq(robotPid, subMotions);
+  actionNode->addMotionSeq(robotPid, motionSeq);
 }
 
 void ActionPlanner::planCut(ActionNode *actionNode,
                             std::map<std::string,
                                      std::shared_ptr<Agent>> &robots,
                             std::shared_ptr<ContainingMap> &containingMap) {
-  std::vector<std::shared_ptr<MotionNode>> subMotions;
+  std::vector<std::shared_ptr<MotionNode>> motionSeq;
 
   auto robot = robots[actionNode->getAction().get_pids()[0]];
   auto robotHand = robot->getHand();
@@ -777,16 +753,16 @@ void ActionPlanner::planCut(ActionNode *actionNode,
                                       armSkeleton,
                                       nullptr,
                                       false);
-  subMotions.emplace_back(motion1);
+  motionSeq.emplace_back(motion1);
 
   // grab knife
   auto conf = Eigen::Vector2d();
   conf << 0.75, 0.75;
   auto motion2 = std::make_shared<ConfMotionNode>(conf, handSpace, handSkeleton);
-  subMotions.emplace_back(motion2);
+  motionSeq.emplace_back(motion2);
   auto motion7 =
       std::make_shared<GrabMotionNode>(knifeSkeleton, true, armSpace, armSkeleton);
-  subMotions.emplace_back(motion7);
+  motionSeq.emplace_back(motion7);
 
   // Move knife to be above food
   auto foodName = actionNode->getAction().get_ingredients()[0];
@@ -809,7 +785,7 @@ void ActionPlanner::planCut(ActionNode *actionNode,
                                                  armSkeleton,
                                                  nullptr,
                                                  false);
-  subMotions.emplace_back(motion3);
+  motionSeq.emplace_back(motion3);
 
   // Cutting
   for (int j = 0; j < 3; j++) {
@@ -821,7 +797,7 @@ void ActionPlanner::planCut(ActionNode *actionNode,
                                                 30,
                                                 armSpace,
                                                 armSkeleton);
-    subMotions.emplace_back(motion4);
+    motionSeq.emplace_back(motion4);
 
     delta_x << 0., 0., 0.001;
     auto motion5 =
@@ -831,7 +807,7 @@ void ActionPlanner::planCut(ActionNode *actionNode,
                                                 30,
                                                 armSpace,
                                                 armSkeleton);
-    subMotions.emplace_back(motion5);
+    motionSeq.emplace_back(motion5);
   }
 
   aikido::constraint::dart::TSR poseTSR = getDefaultPoseTSR();
@@ -839,25 +815,25 @@ void ActionPlanner::planCut(ActionNode *actionNode,
   auto goalTSR3 = std::make_shared<aikido::constraint::dart::TSR>(poseTSR);
   auto motion6 = std::make_shared<TSRMotionNode>(goalTSR3, knifeSkeleton->getBodyNode(0),
                                                  nullptr, armSpace, armSkeleton, nullptr, false);
-  subMotions.emplace_back(motion6);
+  motionSeq.emplace_back(motion6);
 
   // ungrab knife
   conf << 0., 0.;
   auto motion8 = std::make_shared<ConfMotionNode>(conf, handSpace, handSkeleton);
-  subMotions.emplace_back(motion8);
+  motionSeq.emplace_back(motion8);
 
   auto motion9 =
       std::make_shared<GrabMotionNode>(knifeSkeleton, false, armSpace, armSkeleton);
-  subMotions.emplace_back(motion9);
+  motionSeq.emplace_back(motion9);
 
-  actionNode->addMotionSeq(robotPid, subMotions);
+  actionNode->addMotionSeq(robotPid, motionSeq);
 }
 
 void ActionPlanner::planTransfer(ActionNode *actionNode,
                                  std::map<std::string,
                                           std::shared_ptr<Agent>> &robots,
                                  std::shared_ptr<ContainingMap> &containingMap) {
-  std::vector<std::shared_ptr<MotionNode>> subMotions;
+  std::vector<std::shared_ptr<MotionNode>> motionSeq;
 
   auto robot = robots[actionNode->getAction().get_pids()[0]];
   auto robotHand = robot->getHand();
@@ -902,7 +878,7 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
                                                    armSkeleton,
                                                    nullptr,
                                                    false);
-    subMotions.emplace_back(motion1);
+    motionSeq.emplace_back(motion1);
 
     // unconnect food with old container
     auto oldLocationName = actionNode->getAction().get_location()[0];
@@ -915,16 +891,16 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
                                                     false,
                                                     armSpace,
                                                     armSkeleton);
-    subMotions.emplace_back(motion8);
+    motionSeq.emplace_back(motion8);
 
     // grab food
     auto conf = Eigen::Vector2d();
     conf << 0.75, 0.75;
     auto motion2 = std::make_shared<ConfMotionNode>(conf, handSpace, handSkeleton);
-    subMotions.emplace_back(motion2);
+    motionSeq.emplace_back(motion2);
     auto motion3 =
         std::make_shared<GrabMotionNode>(foodSkeleton, true, armSpace, armSkeleton);
-    subMotions.emplace_back(motion3);
+    motionSeq.emplace_back(motion3);
 
     // move food a little bit up
     for (int j = 0; j < 1; j++) {
@@ -936,7 +912,7 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
                                                   30,
                                                   armSpace,
                                                   armSkeleton);
-      subMotions.emplace_back(motion7);
+      motionSeq.emplace_back(motion7);
     }
 
     // move food to new position
@@ -957,23 +933,23 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
                                                    armSkeleton,
                                                    nullptr,
                                                    false);
-    subMotions.emplace_back(motion4);
+    motionSeq.emplace_back(motion4);
 
 
     // ungrab food
     conf << 0., 0.;
     auto motion5 = std::make_shared<ConfMotionNode>(conf, handSpace, handSkeleton);
-    subMotions.emplace_back(motion5);
+    motionSeq.emplace_back(motion5);
     auto motion6 =
         std::make_shared<GrabMotionNode>(foodSkeleton, false, armSpace, armSkeleton);
-    subMotions.emplace_back(motion6);
+    motionSeq.emplace_back(motion6);
 
     // now food should be place in a good place
     auto motion10 = std::make_shared<FakeMotionNode>(foodSkeleton,
                                                      locationPose.translation() + Eigen::Vector3d(0., 0., 0.025),
                                                      armSpace,
                                                      armSkeleton);
-    subMotions.emplace_back(motion10);
+    motionSeq.emplace_back(motion10);
 
     // connect food and new location
     auto motion9 = std::make_shared<ConnMotionNode>(foodSkeleton,
@@ -984,7 +960,7 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
                                                     true,
                                                     armSpace,
                                                     armSkeleton);
-    subMotions.emplace_back(motion9);
+    motionSeq.emplace_back(motion9);
   } else if (actionNode->getAction().get_tool() == actionNode->getAction().get_location()[0]) {
     ROS_INFO_STREAM(
         "Transferring " << actionNode->getAction().get_ingredients()[0] << " from " << actionNode->getAction().get_location()[0] << "  to "
@@ -1045,7 +1021,7 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
                                                                  armSkeleton,
                                                                  nullptr,
                                                                  false);
-    subMotions.emplace_back(motion1);
+    motionSeq.emplace_back(motion1);
 
     // rotate bowl to pour food
 //    auto rotateTSR = std::make_shared<aikido::constraint::dart::TSR>();
@@ -1082,7 +1058,7 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
                                                   armSpace,
                                                   armSkeleton,
                                                   nullptr);
-    subMotions.emplace_back(motion2);
+    motionSeq.emplace_back(motion2);
 
     // now food in the old container will be moved to the new container
     // unconnect
@@ -1096,12 +1072,12 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
                                                     false,
                                                     armSpace,
                                                     armSkeleton);
-    subMotions.emplace_back(motion3);
+    motionSeq.emplace_back(motion3);
 
     // move food into new location
     auto motion4 = std::make_shared<GravityMotionNode>(foodSkeleton,
                                                        20, armSpace, armSkeleton);
-    subMotions.emplace_back(motion4);
+    motionSeq.emplace_back(motion4);
 
     // merge food with new location
     auto motion5 = std::make_shared<ConnMotionNode>(foodSkeleton,
@@ -1112,9 +1088,9 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
                                                     true,
                                                     armSpace,
                                                     armSkeleton);
-    subMotions.emplace_back(motion5);
+    motionSeq.emplace_back(motion5);
   } else {
 
   }
-  actionNode->addMotionSeq(robotPid, subMotions);
+  actionNode->addMotionSeq(robotPid, motionSeq);
 }

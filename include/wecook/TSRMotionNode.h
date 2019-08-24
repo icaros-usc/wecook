@@ -18,10 +18,10 @@ class TSRMotionNode : public MotionNode {
                 const dart::dynamics::MetaSkeletonPtr &skeleton,
                 const std::shared_ptr<PreCondition> &condition = nullptr,
                 bool debug = false) : MotionNode(stateSpace, skeleton, condition),
-                                         m_goalTSR(goalTSR),
-                                         m_collisionFree(collisionFree),
-                                         m_bn(bn),
-                                         m_debug(debug) {
+                                      m_goalTSR(goalTSR),
+                                      m_collisionFree(collisionFree),
+                                      m_bn(bn),
+                                      m_debug(debug) {
 
   }
 
