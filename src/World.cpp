@@ -5,6 +5,7 @@
 #include "wecook/TaskGraph.h"
 #include "wecook/World.h"
 #include "wecook/utils.h"
+#include "wecook/PrimitiveTaskGraph.h"
 
 using namespace wecook;
 
@@ -13,7 +14,7 @@ int World::addTask(wecook::Task &task) {
 }
 
 void World::stop() {
-  for (auto &robot : m_robots) {
+  for (auto &robot : m_agents) {
     robot.second->stop();
   }
   m_isEnd = true;
@@ -28,16 +29,18 @@ void World::run() {
       setup(task);
       std::vector<Action> subgoals = task.getSubgoals();
       auto taskGraph = std::make_shared<TaskGraph>(subgoals);
-      m_actionPlanner.compile(taskGraph, m_robots, m_containingMap);
+      auto primitiveTaskGraph = std::make_shared<PrimitiveTaskGraph>();
+      // transfer taskGraph to primitive taskGraph
+      m_actionPlanner.compile(taskGraph, primitiveTaskGraph, m_agents, m_containingMap);
 
       // now dispatch taskgraph to all agents
-      for (const auto &robot : m_robots) {
-        robot.second->addNewTask(taskGraph, boost::bind(&World::syncToActionNode, this, ::_1));
+      for (const auto &agent : m_agents) {
+        agent.second->addNewTask(taskGraph, boost::bind(&World::syncToActionNode, this, ::_1));
       }
 
       // wait for robots to be free
-      for (const auto &robot : m_robots) {
-        while (!robot.second->isFree()) {
+      for (const auto &agent : m_agents) {
+        while (!agent.second->isFree()) {
         }
       }
       clean(task);
@@ -68,7 +71,7 @@ void World::clean(const Task &task) {
 void World::syncToActionNode(ActionNode *actionNode) {
   auto pids = actionNode->getAction().get_pids();
   for (const auto &pid : pids) {
-    auto robot = m_robots[pid];
+    auto robot = m_agents[pid];
     while (robot->getCurrentActionNode() != actionNode) ros::Duration(0.5).sleep();
   }
 }

@@ -22,7 +22,7 @@ void TaskGraph::addNode(const wecook::Action &action) {
   }
 
   if (fatherNodes.empty()) {
-    auto newNode = new ActionNode(action, true);
+    auto newNode = new ActionNode(action, pids, true);
     m_heads.emplace_back(newNode);
     m_nodes.emplace_back(newNode);
     // if this node is a head node then every agent invloved in this action should use this as head action node
@@ -30,7 +30,7 @@ void TaskGraph::addNode(const wecook::Action &action) {
       m_headMap.emplace(std::pair<std::string, ActionNode *>{pid, newNode});
     }
   } else {
-    auto newNode = new ActionNode(action, false);
+    auto newNode = new ActionNode(action, pids, false);
     for (auto &fatherNode : fatherNodes) {
       fatherNode->addChild(newNode);
       newNode->addFather(fatherNode);
@@ -81,4 +81,29 @@ ActionNode * TaskGraph::findFatherNode(const std::string &pid) {
     }
   }
   return fatherNode;
+}
+
+void TaskGraph::merge(std::shared_ptr<PrimitiveTaskGraph> &ptg) {
+  // when we merge sub primitive task graph of each action ndoe in task graph,
+  // we want to remove redundant primitive node, for example we don't want to
+  // grab the same object twice. We also want to add necessary primitive motion,
+  // for example place grabbed object first to grab another object
+  for (const auto &pair : m_headMap) {
+    auto pid = pair.first;
+    auto last = pair.second;
+    ActionNode *curr = nullptr;
+    // find child
+    auto children = last->getChildren();
+    for (auto &child : children) {
+      auto childPids = child->getPids();
+      if (std::find(childPids.begin(), childPids.end(), pid) != childPids.end()) {
+        curr = child;
+        break;
+      }
+    }
+    while (curr) {
+      // we want to check if there are redundant primitive node
+
+    }
+  }
 }

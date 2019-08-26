@@ -90,6 +90,17 @@ inline Eigen::Vector6d TransformMatrix2SpatialVector(const Eigen::Isometry3d &tr
   return spatialVector;
 }
 
+inline dart::dynamics::BodyNode *getBodyNode(const std::string &name,
+                                             const std::shared_ptr<ContainingMap> &containingMap,
+                                             const aikido::planner::WorldPtr &world) {
+  auto skeleton = world->getSkeleton(name);
+  if (skeleton->getNumBodyNodes() > 0) {
+    return skeleton->getBodyNode(0);
+  } else {
+    return containingMap->getContainedBodyNode(name);
+  }
+}
+
 }
 
 #endif //WECOOK_UTILS_H

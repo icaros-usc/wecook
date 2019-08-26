@@ -21,10 +21,10 @@
 namespace wecook {
 class World {
  public:
-  World(const std::map<std::string, std::shared_ptr<Agent>> &robots) : m_thread(&World::run, this), m_robots(robots) {
+  World(const std::map<std::string, std::shared_ptr<Agent>> &robots) : m_thread(&World::run, this), m_agents(robots) {
     m_env = std::make_shared<aikido::planner::World>("wecook");
     // construct robot in the env
-    for (const auto &robot : m_robots) {
+    for (const auto &robot : m_agents) {
       robot.second->createAda(m_env);
       robot.second->moveToHome();
       auto skeleton = robot.second->m_ada->getArm()->getMetaSkeleton();
@@ -56,7 +56,7 @@ class World {
   aikido::rviz::WorldInteractiveMarkerViewerPtr m_viewer = nullptr;
   aikido::planner::WorldPtr m_env = nullptr;
   boost::thread m_thread;
-  std::map<std::string, std::shared_ptr<Agent>> m_robots;
+  std::map<std::string, std::shared_ptr<Agent>> m_agents;
   bool m_isFree = true;
   bool m_isEnd = false;
   std::vector<Task> m_tasks;

@@ -43,6 +43,10 @@ class Container {
     return m_connMetadata->m_bodyNode->getWorldTransform();
   }
 
+  inline dart::dynamics::BodyNode *getContainedBodyNode() const {
+    return m_connMetadata->m_bodyNode;
+  }
+
   inline std::string getContainerName() const {
     return m_name;
   }

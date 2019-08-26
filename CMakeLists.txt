@@ -122,7 +122,7 @@ add_executable(wecook
         src/TSRIKNode.cpp
         include/wecook/TaskGraph.h
         src/TaskGraph.cpp
-        include/wecook/ActionNode.h)
+        include/wecook/ActionNode.h include/wecook/PrimitiveTaskGraph.h include/wecook/PrimitiveActionNode.h include/wecook/PrimitiveGrabNode.h include/wecook/Human.h include/wecook/Robot.h include/wecook/PrimitiveMoveToNode.h include/wecook/PrimitivePredefinedNode.h include/wecook/PrimitivePlaceNode.h include/wecook/RelativeIKMotionNode.h src/RelativeIKMotionNode.cpp)
 add_dependencies(wecook wecook_generate_messages_cpp)
 target_link_libraries(wecook
         ${DART_LIBRARIES}

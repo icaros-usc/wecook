@@ -12,7 +12,8 @@ namespace wecook {
 
 class ActionNode {
  public:
-  ActionNode(const Action& action, bool ifHead=false) : m_action(action), m_ifHead(ifHead) {}
+  ActionNode(const Action &action, const std::vector<std::string> &pids, bool ifHead = false)
+      : m_action(action), m_pids(pids), m_ifHead(ifHead) {}
 
   inline Action getAction() {
     return m_action;
@@ -30,6 +31,10 @@ class ActionNode {
     m_fathers.emplace_back(actionNode);
   }
 
+  inline std::vector<std::string> getPids() {
+    return m_pids;
+  }
+
   inline void addMotionSeq(std::string &pid, std::vector<std::shared_ptr<MotionNode>> &motionSeq) {
     std::pair<std::string, std::vector<std::shared_ptr<MotionNode>>> motionSeqPair{pid, motionSeq};
     m_motionSeqMap.emplace(motionSeqPair);
@@ -39,12 +44,19 @@ class ActionNode {
     return m_motionSeqMap;
   }
 
+  inline void setPrimitiveTaskGraph(const PrimitiveTaskGraph &ptg) {
+    m_primitiveTaskGraph = ptg;
+  }
+
   std::map<std::string, std::vector<std::shared_ptr<MotionNode>>> m_motionSeqMap;
+
+  PrimitiveTaskGraph m_primitiveTaskGraph;
  private:
   Action m_action;
   bool m_ifHead;
   std::vector<ActionNode *> m_children;
   std::vector<ActionNode *> m_fathers;
+  std::vector<std::string> m_pids;
 };
 
 }

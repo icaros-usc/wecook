@@ -6,6 +6,7 @@
 #define WECOOK_ACTIONGRAPH_H
 
 #include "ActionNode.h"
+#include "PrimitiveTaskGraph.h"
 
 namespace wecook {
 
@@ -40,6 +41,8 @@ class TaskGraph {
   inline ActionNode * getHeadNode(const std::string &pid) {
     return m_headMap[pid];
   }
+
+  void merge(std::shared_ptr<PrimitiveTaskGraph> &primitiveTaskGraph);
 
  private:
   ActionNode *findFatherNode(const std::string &pid);
