@@ -53,7 +53,7 @@ void TaskGraph::visualize() {
 
 }
 
-ActionNode * TaskGraph::findFatherNode(const std::string &pid) {
+ActionNode *TaskGraph::findFatherNode(const std::string &pid) {
   ActionNode *fatherNode = nullptr;
   // for each pid there will be only one father node
   for (const auto &head : m_heads) {
@@ -83,7 +83,7 @@ ActionNode * TaskGraph::findFatherNode(const std::string &pid) {
   return fatherNode;
 }
 
-void TaskGraph::merge(std::shared_ptr<PrimitiveTaskGraph> &ptg) {
+void TaskGraph::merge() {
   // when we merge sub primitive task graph of each action ndoe in task graph,
   // we want to remove redundant primitive node, for example we don't want to
   // grab the same object twice. We also want to add necessary primitive motion,
@@ -103,7 +103,31 @@ void TaskGraph::merge(std::shared_ptr<PrimitiveTaskGraph> &ptg) {
     }
     while (curr) {
       // we want to check if there are redundant primitive node
+      auto currPHN = curr->m_primitiveTaskGraph.getHeadNode(pid);
+      auto lastPTN = last->m_primitiveTaskGraph.getTailNode(pid);
 
+      if (currPHN->getType() == "grab" && lastPTN->getType() == "place"
+          && currPHN->getGrabbingObj() == lastPTN->getPlacingObj()) {
+        // we need to remove place node (tail node) in last action node and remove grab node in current action node
+        last->m_primitiveTaskGraph.removeTailNode(pid);
+        curr->m_primitiveTaskGraph.removeHeadNode(pid);
+
+      } else if (currPHN->getType() == "grab" && currPHN->getGrabbingObj() == lastPTN->getGrabbingObj()) {
+        // we need to remove grab node in current action node
+        curr->m_primitiveTaskGraph.removeHeadNode(pid);
+      }
+
+      // now we need to find the next action node
+      last = curr;
+      curr = nullptr;
+      children = last->getChildren();
+      for (auto &child : children) {
+        auto childPids = child->getPids();
+        if (std::find(childPids.begin(), childPids.end(), pid) != childPids.end()) {
+          curr = child;
+          break;
+        }
+      }
     }
   }
 }

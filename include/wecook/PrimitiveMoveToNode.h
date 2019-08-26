@@ -19,12 +19,22 @@ class PrimitiveMoveToNode : public PrimitiveActionNode {
                       dart::dynamics::BodyNode *refBodyNode,
                       dart::dynamics::BodyNode *toMoveBodyNode,
                       const std::string &pid,
-                      bool ifHead = false) : PrimitiveActionNode(pid, "moveto", ifHead),
+                      const std::string &grabbingObj,
+                      const std::string &placingObj,
+                      bool ifHead = false,
+                      bool ifTail = false) : PrimitiveActionNode(pid,
+                                                                 "moveto",
+                                                                 grabbingObj,
+                                                                 placingObj,
+                                                                 ifHead,
+                                                                 ifTail),
                                              m_refBodyNode(refBodyNode),
                                              m_toMoveBodyNode(toMoveBodyNode),
                                              m_targetPose(targetPose),
                                              m_toMove(toMove) {
   }
+
+  void execute();
 
  private:
   std::string m_toMove;

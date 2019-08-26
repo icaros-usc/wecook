@@ -18,13 +18,21 @@ class PrimitiveGrabNode : public PrimitiveActionNode {
                     const std::string &toGrab,
                     dart::dynamics::BodyNode *refBodyNode,
                     const std::string &pid,
-                    bool ifHead = false) : PrimitiveActionNode(pid,
+                    const std::string &grabbingObj,
+                    const std::string &placingObj,
+                    bool ifHead = false,
+                    bool ifTail = false) : PrimitiveActionNode(pid,
                                                                "grab",
-                                                               ifHead),
+                                                               grabbingObj,
+                                                               placingObj,
+                                                               ifHead,
+                                                               ifTail),
                                            m_toGrab(toGrab),
                                            m_grabPose(grabPose),
                                            m_refBodyNode(refBodyNode) {
   }
+
+  void execute();
 
  private:
   std::string m_toGrab;

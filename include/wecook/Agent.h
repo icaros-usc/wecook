@@ -16,6 +16,7 @@
 #include "TSRMotionNode.h"
 #include "LinearDeltaMotionNode.h"
 #include "TaskGraph.h"
+#include "PrimitiveActionExecutor.h"
 
 namespace wecook {
 
@@ -102,6 +103,7 @@ class Agent {
   ActionNode *m_currentActionNode;
   std::shared_ptr<TaskGraph> m_currentTask = nullptr;
   syncCallback m_syncCallback;
+  PrimitiveActionExecutor m_pap;
 };
 }
 #endif //WECOOK_AGENT_H

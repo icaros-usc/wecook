@@ -5,8 +5,7 @@
 #ifndef WECOOK_PRIMITIVEPLACENODE_H
 #define WECOOK_PRIMITIVEPLACENODE_H
 
-#include "Action.h"
-#include "MotionNode.h"
+#include "PrimitiveActionNode.h"
 
 namespace wecook {
 
@@ -16,13 +15,20 @@ class PrimitivePlaceNode : public PrimitiveActionNode {
                      const std::string &toPlace,
                      dart::dynamics::BodyNode *refBodyNode,
                      dart::dynamics::BodyNode *toPlaceBodyNode,
-                     const std::string &pid, bool ifHead = false) : PrimitiveActionNode(pid, "place", ifHead),
-                                                                    m_refBodyNode(refBodyNode),
-                                                                    m_toPlaceBodyNode(toPlaceBodyNode),
-                                                                    m_targetPose(targetPose),
-                                                                    m_toPlace(toPlace) {
+                     const std::string &pid,
+                     const std::string &grabbingObj,
+                     const std::string &placingObj,
+                     bool ifHead = false,
+                     bool ifTail = false)
+      : PrimitiveActionNode(pid, "place", grabbingObj, placingObj, ifHead, ifTail),
+        m_refBodyNode(refBodyNode),
+        m_toPlaceBodyNode(toPlaceBodyNode),
+        m_targetPose(targetPose),
+        m_toPlace(toPlace) {
 
   }
+
+  void execute();
 
  private:
   std::string m_toPlace;

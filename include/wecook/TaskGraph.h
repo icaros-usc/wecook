@@ -42,7 +42,7 @@ class TaskGraph {
     return m_headMap[pid];
   }
 
-  void merge(std::shared_ptr<PrimitiveTaskGraph> &primitiveTaskGraph);
+  void merge();
 
  private:
   ActionNode *findFatherNode(const std::string &pid);

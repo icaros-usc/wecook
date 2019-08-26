@@ -14,11 +14,21 @@ namespace wecook {
 
 class PrimitivePredefinedNode : public PrimitiveActionNode {
  public:
-  PrimitivePredefinedNode(const std::string &pid, bool ifHead = false) : PrimitiveActionNode(pid,
-                                                                                             "predefined",
-                                                                                             ifHead) {
+  PrimitivePredefinedNode(const std::string &pid,
+                          const std::string &grabbingObj,
+                          const std::string &placingObj,
+                          bool ifHead = false,
+                          bool ifTail = false)
+      : PrimitiveActionNode(pid,
+                            "predefined",
+                            grabbingObj,
+                            placingObj,
+                            ifHead,
+                            ifTail) {
 
   }
+
+  void execute();
 
  private:
 

@@ -50,7 +50,7 @@ void ActionPlanner::compile(std::shared_ptr<TaskGraph> &taskGraph,
   for (auto &actionNode : actionNodes) {
     plan(actionNode, agents, containingMap);
   }
-  taskGraph->merge(primitiveTaskGraph);
+  taskGraph->merge();
 }
 
 void ActionPlanner::plan(ActionNode *actionNode,
@@ -92,7 +92,8 @@ void ActionPlanner::planCut(ActionNode *actionNode,
   auto robot = agents[pid];
   auto world = robot->getWorld();
   auto grabRefBodyNode = getBodyNode(toolName, containingMap, world);
-  auto grabNode = std::make_shared<PrimitiveGrabNode>(grabPose, toolName, grabRefBodyNode, pid, true);
+  auto grabNode =
+      std::make_shared<PrimitiveGrabNode>(grabPose, toolName, grabRefBodyNode, pid, toolName, "", true, false);
 
   // 2) create move to node
   // create start pose
@@ -103,14 +104,22 @@ void ActionPlanner::planCut(ActionNode *actionNode,
   auto toCutName = actionNode->getAction().get_ingredients()[0];
   auto toCutBodyNode = getBodyNode(toCutName, containingMap, world);
   auto moveToNode =
-      std::make_shared<PrimitiveMoveToNode>(targetPose, toolName, toCutBodyNode, grabRefBodyNode, pid, false);
+      std::make_shared<PrimitiveMoveToNode>(targetPose,
+                                            toolName,
+                                            toCutBodyNode,
+                                            grabRefBodyNode,
+                                            pid,
+                                            toolName,
+                                            "",
+                                            false,
+                                            false);
 
   // 3) create predefined cutting node
   auto robotArm = robot->getArm();
   auto robotHand = robot->getHand();
   auto armSkeleton = robotArm->getMetaSkeleton();
   auto armSpace = std::make_shared<aikido::statespace::dart::MetaSkeletonStateSpace>(armSkeleton.get());
-  auto predefinedNode = std::make_shared<PrimitivePredefinedNode>(pid, false);
+  auto predefinedNode = std::make_shared<PrimitivePredefinedNode>(pid, toolName, "", false, false);
   std::vector<std::shared_ptr<MotionNode>> motionSeq;
   for (int j = 0; j < 3; j++) {
     Eigen::Vector3d delta_x(0., 0., -0.001);
@@ -142,7 +151,16 @@ void ActionPlanner::planCut(ActionNode *actionNode,
   placePose->mBw
       << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
   auto
-      placeNode = std::make_shared<PrimitivePlaceNode>(placePose, toolName, tableBodyNode, grabRefBodyNode, pid, false);
+      placeNode =
+      std::make_shared<PrimitivePlaceNode>(placePose,
+                                           toolName,
+                                           tableBodyNode,
+                                           grabRefBodyNode,
+                                           pid,
+                                           "",
+                                           toolName,
+                                           false,
+                                           true);
 
   // connect these body nodes
   grabNode->addChild(moveToNode);
@@ -185,7 +203,8 @@ void ActionPlanner::planStir(ActionNode *actionNode,
   auto robot = agents[pid];
   auto world = robot->getWorld();
   auto grabRefBodyNode = getBodyNode(toolName, containingMap, world);
-  auto grabNode = std::make_shared<PrimitiveGrabNode>(grabPose, toolName, grabRefBodyNode, pid, true);
+  auto grabNode =
+      std::make_shared<PrimitiveGrabNode>(grabPose, toolName, grabRefBodyNode, pid, toolName, "", true, false);
 
   // 2) create move to node
   // create start pose
@@ -196,14 +215,22 @@ void ActionPlanner::planStir(ActionNode *actionNode,
   auto toStirName = actionNode->getAction().get_location()[0];
   auto toStirBodyNode = getBodyNode(toStirName, containingMap, world);
   auto moveToNode =
-      std::make_shared<PrimitiveMoveToNode>(targetPose, toolName, toStirBodyNode, grabRefBodyNode, pid, false);
+      std::make_shared<PrimitiveMoveToNode>(targetPose,
+                                            toolName,
+                                            toStirBodyNode,
+                                            grabRefBodyNode,
+                                            pid,
+                                            toolName,
+                                            "",
+                                            false,
+                                            false);
 
   // 3) create predefined stirring node
   auto robotArm = robot->getArm();
   auto robotHand = robot->getHand();
   auto armSkeleton = robotArm->getMetaSkeleton();
   auto armSpace = std::make_shared<aikido::statespace::dart::MetaSkeletonStateSpace>(armSkeleton.get());
-  auto predefinedNode = std::make_shared<PrimitivePredefinedNode>(pid, false);
+  auto predefinedNode = std::make_shared<PrimitivePredefinedNode>(pid, toolName, "", false, false);
   std::vector<std::shared_ptr<MotionNode>> motionSeq;
   for (int j = 0; j < 3; j++) {
     Eigen::Vector3d delta_x(-0.001, 0., -0.);
@@ -235,7 +262,16 @@ void ActionPlanner::planStir(ActionNode *actionNode,
   placePose->mBw
       << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
   auto
-      placeNode = std::make_shared<PrimitivePlaceNode>(placePose, toolName, tableBodyNode, grabRefBodyNode, pid, false);
+      placeNode =
+      std::make_shared<PrimitivePlaceNode>(placePose,
+                                           toolName,
+                                           tableBodyNode,
+                                           grabRefBodyNode,
+                                           pid,
+                                           "",
+                                           toolName,
+                                           false,
+                                           true);
 
   // connect these nodes
   grabNode->addChild(moveToNode);
@@ -279,7 +315,8 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
     auto robot = agents[pid];
     auto world = robot->getWorld();
     auto grabRefBodyNode = getBodyNode(objectName, containingMap, world);
-    auto grabNode = std::make_shared<PrimitiveGrabNode>(grabPose, objectName, grabRefBodyNode, pid, true);
+    auto grabNode =
+        std::make_shared<PrimitiveGrabNode>(grabPose, objectName, grabRefBodyNode, pid, objectName, "", true, false);
 
     // 2) create place node
     auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
@@ -290,7 +327,15 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
         << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -M_PI / 8, M_PI / 8, -M_PI / 8, M_PI
         / 8, -M_PI, M_PI;
     auto placeNode =
-        std::make_shared<PrimitivePlaceNode>(placePose, objectName, placeRefBodyNode, grabRefBodyNode, pid, false);
+        std::make_shared<PrimitivePlaceNode>(placePose,
+                                             objectName,
+                                             placeRefBodyNode,
+                                             grabRefBodyNode,
+                                             pid,
+                                             "",
+                                             objectName,
+                                             false,
+                                             true);
 
     // connect these nodes
     grabNode->addChild(placeNode);
@@ -328,7 +373,8 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
     auto robot = agents[pid];
     auto world = robot->getWorld();
     auto grabRefBodyNode = getBodyNode(objectName, containingMap, world);
-    auto grabNode = std::make_shared<PrimitiveGrabNode>(grabPose, objectName, grabRefBodyNode, pid, true);
+    auto grabNode =
+        std::make_shared<PrimitiveGrabNode>(grabPose, objectName, grabRefBodyNode, pid, objectName, "", true, false);
 
     // 2) create move to node
     auto targetPose = std::make_shared<aikido::constraint::dart::TSR>();
@@ -339,7 +385,15 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
     auto newLocationName = actionNode->getAction().get_location()[1];
     auto newLocationBodyNode = getBodyNode(newLocationName, containingMap, world);
     auto moveToNode =
-        std::make_shared<PrimitiveMoveToNode>(targetPose, objectName, newLocationBodyNode, grabRefBodyNode, pid, false);
+        std::make_shared<PrimitiveMoveToNode>(targetPose,
+                                              objectName,
+                                              newLocationBodyNode,
+                                              grabRefBodyNode,
+                                              pid,
+                                              objectName,
+                                              "",
+                                              false,
+                                              false);
 
     // 3) create predefined pouring node
     auto robotArm = robot->getArm();
@@ -355,7 +409,7 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
                                                          armSkeleton);
     std::vector<std::shared_ptr<MotionNode>> motionSeq;
     motionSeq.emplace_back(motion);
-    auto predefinedNode = std::make_shared<PrimitivePredefinedNode>(pid, false);
+    auto predefinedNode = std::make_shared<PrimitivePredefinedNode>(pid, objectName, "", false, false);
     predefinedNode->setMotionSeq(motionSeq);
 
     // 4) create place back node
@@ -365,7 +419,15 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
     placePose->mBw
         << -0.2, 0.2, -0.2, 0.2, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
     auto placeNode =
-        std::make_shared<PrimitivePlaceNode>(placePose, objectName, tableBodyNode, grabRefBodyNode, pid, false);
+        std::make_shared<PrimitivePlaceNode>(placePose,
+                                             objectName,
+                                             tableBodyNode,
+                                             grabRefBodyNode,
+                                             pid,
+                                             "",
+                                             objectName,
+                                             false,
+                                             true);
 
     // connect these nodes
     grabNode->addChild(moveToNode);
@@ -406,7 +468,9 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
     auto robot = agents[pid];
     auto world = robot->getWorld();
     auto grabRefBodyNode = getBodyNode(toolName, containingMap, world);
-    auto grabNode = std::make_shared<PrimitiveGrabNode>(grabPose, toolName, grabRefBodyNode, pid, true);
+    auto
+        grabNode =
+        std::make_shared<PrimitiveGrabNode>(grabPose, toolName, grabRefBodyNode, pid, toolName, "", true, false);
 
     // 2) create move to node
     // create start pose
@@ -417,7 +481,15 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
     auto oldLocationName = actionNode->getAction().get_location()[0];
     auto oldLocationBodyNode = getBodyNode(oldLocationName, containingMap, world);
     auto moveToNode =
-        std::make_shared<PrimitiveMoveToNode>(targetPose, toolName, oldLocationBodyNode, grabRefBodyNode, pid, false);
+        std::make_shared<PrimitiveMoveToNode>(targetPose,
+                                              toolName,
+                                              oldLocationBodyNode,
+                                              grabRefBodyNode,
+                                              pid,
+                                              toolName,
+                                              "",
+                                              false,
+                                              false);
 
     // 3) create predefined motion node
     auto robotArm = robot->getArm();
@@ -445,7 +517,7 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
     std::vector<std::shared_ptr<MotionNode>> motionSeq;
     motionSeq.emplace_back(motion);
     motionSeq.emplace_back(motion2);
-    auto predefinedNode = std::make_shared<PrimitivePredefinedNode>(pid, false);
+    auto predefinedNode = std::make_shared<PrimitivePredefinedNode>(pid, toolName, "", false, false);
     predefinedNode->setMotionSeq(motionSeq);
 
     // 4) move food to new location
@@ -456,7 +528,15 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
     auto newLocationName = actionNode->getAction().get_location()[1];
     auto newLocationBodyNode = getBodyNode(newLocationName, containingMap, world);
     auto moveToNode2 =
-        std::make_shared<PrimitiveMoveToNode>(targetPose2, toolName, newLocationBodyNode, grabRefBodyNode, pid, false);
+        std::make_shared<PrimitiveMoveToNode>(targetPose2,
+                                              toolName,
+                                              newLocationBodyNode,
+                                              grabRefBodyNode,
+                                              pid,
+                                              toolName,
+                                              "",
+                                              false,
+                                              false);
 
 
     // 5) create predefined pouring node
@@ -472,7 +552,7 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
                                                           armSkeleton);
     std::vector<std::shared_ptr<MotionNode>> motionSeq2;
     motionSeq.emplace_back(motion3);
-    auto predefinedNode2 = std::make_shared<PrimitivePredefinedNode>(pid, false);
+    auto predefinedNode2 = std::make_shared<PrimitivePredefinedNode>(pid, toolName, "", false, false);
     predefinedNode2->setMotionSeq(motionSeq2);
 
     // 6) create place back node
@@ -483,7 +563,15 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
         << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
     auto
         placeNode =
-        std::make_shared<PrimitivePlaceNode>(placePose, toolName, tableBodyNode, grabRefBodyNode, pid, false);
+        std::make_shared<PrimitivePlaceNode>(placePose,
+                                             toolName,
+                                             tableBodyNode,
+                                             grabRefBodyNode,
+                                             pid,
+                                             "",
+                                             toolName,
+                                             false,
+                                             true);
 
     // connect these nodes
     grabNode->addChild(moveToNode);
@@ -536,7 +624,8 @@ void ActionPlanner::planHandover(ActionNode *actionNode,
   auto robotM = agents[pidM];
   auto worldM = robotM->getWorld();
   auto grabRefBodyNode = getBodyNode(objectName, containingMap, worldM);
-  auto grabNodeM = std::make_shared<PrimitiveGrabNode>(grabPoseM, objectName, grabRefBodyNode, pidM, true);
+  auto grabNodeM =
+      std::make_shared<PrimitiveGrabNode>(grabPoseM, objectName, grabRefBodyNode, pidM, objectName, "", true, false);
 
   // 2) create move to node
   // create collaborative pose
@@ -554,20 +643,37 @@ void ActionPlanner::planHandover(ActionNode *actionNode,
   auto tableBodyNode = getBodyNode("table0", containingMap, worldM);
   // TODO adding constraint
   auto moveToNodeM =
-      std::make_shared<PrimitiveMoveToNode>(targetPoseM, objectName, tableBodyNode, grabRefBodyNode, pidM, false);
+      std::make_shared<PrimitiveMoveToNode>(targetPoseM,
+                                            objectName,
+                                            tableBodyNode,
+                                            grabRefBodyNode,
+                                            pidM,
+                                            objectName,
+                                            "",
+                                            false,
+                                            false);
 
   // 3) create agent S grab node
   auto grabPoseS = std::make_shared<aikido::constraint::dart::TSR>();
   grabPoseS->mTw_e.linear() = rot2 * rot;
   grabPoseS->mTw_e.translation() = Eigen::Vector3d(-0.05, -0.05, 0.08);
   grabPoseS->mBw << -0.01, 0.01, -0.01, 0.01, -0.01, 0.01, -M_PI / 8, M_PI / 8, -M_PI / 8, M_PI / 8, -M_PI, M_PI;
-  auto grabNodeS = std::make_shared<PrimitiveGrabNode>(grabPoseS, objectName, grabRefBodyNode, pidS, true);
+  auto grabNodeS =
+      std::make_shared<PrimitiveGrabNode>(grabPoseS, objectName, grabRefBodyNode, pidS, objectName, "", true, true);
 
   // 4) create agent M place node
   auto placePoseM = std::make_shared<aikido::constraint::dart::TSR>();
   placePoseM->mBw << -0.005, 0.005, -0.005, 0.005, -0.005, 0.005, -0.005, 0.005, -0.005, 0.005, -0.005, 0.005;
   auto placeNodeM =
-      std::make_shared<PrimitivePlaceNode>(placePoseM, objectName, grabRefBodyNode, grabRefBodyNode, pidM, false);
+      std::make_shared<PrimitivePlaceNode>(placePoseM,
+                                           objectName,
+                                           grabRefBodyNode,
+                                           grabRefBodyNode,
+                                           pidM,
+                                           "",
+                                           objectName,
+                                           false,
+                                           true);
 
   // connect these body nodes
   grabNodeM->addChild(moveToNodeM);
@@ -619,7 +725,14 @@ void ActionPlanner::planHolding(wecook::ActionNode *actionNode,
       auto robotM = agents[pidM];
       auto worldM = robotM->getWorld();
       auto grabRefBodyNode = getBodyNode(holdedObjectName, containingMap, worldM);
-      auto grabNodeM = std::make_shared<PrimitiveGrabNode>(grabPoseM, holdedObjectName, grabRefBodyNode, pidM, true);
+      auto grabNodeM = std::make_shared<PrimitiveGrabNode>(grabPoseM,
+                                                           holdedObjectName,
+                                                           grabRefBodyNode,
+                                                           pidM,
+                                                           holdedObjectName,
+                                                           "",
+                                                           true,
+                                                           false);
 
       // 2) create move to node
       // create collaborative pose
@@ -643,6 +756,9 @@ void ActionPlanner::planHolding(wecook::ActionNode *actionNode,
                                                 tableBodyNode,
                                                 grabRefBodyNode,
                                                 pidM,
+                                                holdedObjectName,
+                                                "",
+                                                false,
                                                 false);
 
       // 3) create agent M place node
@@ -656,7 +772,10 @@ void ActionPlanner::planHolding(wecook::ActionNode *actionNode,
                                                              tableBodyNode,
                                                              grabRefBodyNode,
                                                              pidM,
-                                                             false);
+                                                             "",
+                                                             holdedObjectName,
+                                                             false,
+                                                             true);
 
       // build an new action node and plan it to get the other sub primitiveTaskGraph
       Action action{std::vector<std::string>{pidS}, actionNode->getAction().get_location(),
@@ -696,7 +815,7 @@ void ActionPlanner::planHolding(wecook::ActionNode *actionNode,
 
       actionNode->setPrimitiveTaskGraph(ptg);
 
-      delete(collaborativeActionNode);
+      delete (collaborativeActionNode);
 
       return;
     } else if (holdedObjectName == actionNode->getAction().get_location()[1]) {
