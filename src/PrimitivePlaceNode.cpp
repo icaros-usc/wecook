@@ -26,26 +26,26 @@ void PrimitivePlaceNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
     auto handSpace = std::make_shared<aikido::statespace::dart::MetaSkeletonStateSpace>(handSkeleton.get());
     auto world = robot->getWorld();
 
-    m_targetPose->mT0_w = objMgr->getObjTransform(m_refObject);
-    auto placeBn = objMgr->getObjBodyNode(m_toPlace);
-    auto collisionDetector = dart::collision::FCLCollisionDetector::create();
-    std::shared_ptr<dart::collision::CollisionGroup>
-        armCollisionGroup = collisionDetector->createCollisionGroup(armSkeleton.get(), placeBn);
-    auto envCollisionGroup = objMgr->createCollisionGroupExceptFoodAndMovingObj(m_toPlace, collisionDetector);
-    std::shared_ptr<aikido::constraint::dart::CollisionFree> collisionFreeConstraint =
-        std::make_shared<aikido::constraint::dart::CollisionFree>(armSpace, armSkeleton, collisionDetector);
-    collisionFreeConstraint->addPairwiseCheck(armCollisionGroup, envCollisionGroup);
-
-    auto motion1 = std::make_shared<TSRMotionNode>(m_targetPose,
-                                                   placeBn,
-                                                   collisionFreeConstraint,
-                                                   armSpace,
-                                                   armSkeleton,
-                                                   nullptr,
-                                                   false);
-    motion1->plan(robot->m_ada);
-
     if (robot->getHand()->isGrabbing(m_toPlace) == 0) {
+      m_targetPose->mT0_w = objMgr->getObjTransform(m_refObject);
+      auto placeBn = objMgr->getObjBodyNode(m_toPlace);
+      auto collisionDetector = dart::collision::FCLCollisionDetector::create();
+      std::shared_ptr<dart::collision::CollisionGroup>
+          armCollisionGroup = collisionDetector->createCollisionGroup(armSkeleton.get(), placeBn);
+      auto envCollisionGroup = objMgr->createCollisionGroupExceptFoodAndMovingObj(m_toPlace, collisionDetector);
+      std::shared_ptr<aikido::constraint::dart::CollisionFree> collisionFreeConstraint =
+          std::make_shared<aikido::constraint::dart::CollisionFree>(armSpace, armSkeleton, collisionDetector);
+      collisionFreeConstraint->addPairwiseCheck(armCollisionGroup, envCollisionGroup);
+
+      auto motion1 = std::make_shared<TSRMotionNode>(m_targetPose,
+                                                     placeBn,
+                                                     collisionFreeConstraint,
+                                                     armSpace,
+                                                     armSkeleton,
+                                                     nullptr,
+                                                     false);
+      motion1->plan(robot->m_ada);
+
       auto motion2 = std::make_shared<GrabMotionNode>(world->getSkeleton(m_toPlace), false, armSpace, armSkeleton);
       motion2->plan(robot->m_ada);
     }
@@ -54,6 +54,16 @@ void PrimitivePlaceNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
     conf << 0., 0.;
     auto motion3 = std::make_shared<ConfMotionNode>(conf, handSpace, handSkeleton);
     motion3->plan(robot->m_ada);
+
+    Eigen::Vector3d delta_x(0., 0., 0.001);
+    auto motion4 =
+        std::make_shared<LinearDeltaMotionNode>(robotHand->getEndEffectorBodyNode(),
+                                                delta_x,
+                                                dart::dynamics::Frame::World(),
+                                                50,
+                                                armSpace,
+                                                armSkeleton);
+    motion4->plan(robot->m_ada);
 
     m_ifExecuted = true;
   }

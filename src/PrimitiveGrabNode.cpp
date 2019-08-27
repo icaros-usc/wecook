@@ -32,6 +32,7 @@ void PrimitiveGrabNode::execute(std::map<std::string, std::shared_ptr<Agent>> &a
     auto world = robot->getWorld();
 
     m_grabPose->mT0_w = objMgr->getObjTransform(m_toGrab);
+
     auto motion1 = std::make_shared<TSRMotionNode>(m_grabPose,
                                                    robotHand->getEndEffectorBodyNode(),
                                                    nullptr,
@@ -67,9 +68,13 @@ void PrimitiveGrabNode::execute(std::map<std::string, std::shared_ptr<Agent>> &a
         for (auto &other : agents) {
           if (other.first != m_pid && other.second->getType() == "robot") {
             auto robot2 = std::dynamic_pointer_cast<Robot, Agent>(other.second);
+            auto robotArm2 = robot2->getArm();
+            auto armSkeleton2 = robotArm2->getMetaSkeleton();
+            auto armSpace2 = std::make_shared<aikido::statespace::dart::MetaSkeletonStateSpace>(armSkeleton2.get());
             if (robot2->getHand()->isGrabbing(m_toGrab) == 0) {
+              ROS_INFO("Need to let the other robot ungrabs this object");
               auto
-                  motion = std::make_shared<GrabMotionNode>(world->getSkeleton(m_toGrab), false, armSpace, armSkeleton);
+                  motion = std::make_shared<GrabMotionNode>(world->getSkeleton(m_toGrab), false, armSpace2, armSkeleton2);
               motion->plan(robot2->m_ada);
             } else {
               break;
