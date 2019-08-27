@@ -11,7 +11,6 @@
 using namespace wecook;
 
 void TSRMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
-  ROS_INFO("Debug");
   if (m_condition) {
     ROS_INFO("Waiting for condition to be verified!");
     while (!m_condition->isSatisfied()) {

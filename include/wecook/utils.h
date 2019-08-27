@@ -14,7 +14,6 @@
 #include <dart/utils/urdf/DartLoader.hpp>
 #include <aikido/io/CatkinResourceRetriever.hpp>
 #include <ros/ros.h>
-#include "ContainingMap.h"
 #include <tf2/LinearMath/Matrix3x3.h>
 
 namespace wecook {
@@ -36,10 +35,10 @@ inline Eigen::Isometry3d vectorToIsometry(std::vector<double> &poseVector) {
   return pose;
 }
 
-std::shared_ptr<::dart::dynamics::Skeleton> addBodyFromURDF(aikido::planner::World *world,
-                                                            const std::string &uri,
-                                                            std::vector<double> objectPose,
-                                                            const std::string &name) {
+inline std::shared_ptr<::dart::dynamics::Skeleton> addBodyFromURDF(aikido::planner::World *world,
+                                                                   const std::string &uri,
+                                                                   std::vector<double> objectPose,
+                                                                   const std::string &name) {
   auto transform = vectorToIsometry(objectPose);
 
   dart::utils::DartLoader urdfLoader;
@@ -58,47 +57,12 @@ std::shared_ptr<::dart::dynamics::Skeleton> addBodyFromURDF(aikido::planner::Wor
   return skeleton;
 }
 
-inline Eigen::Isometry3d getObjectPose(const dart::dynamics::SkeletonPtr &skeleton,
-                                       const std::shared_ptr<ContainingMap> &containingMap) {
-  if (skeleton->getNumBodyNodes() > 0) {
-    auto body = skeleton->getBodyNode(0);
-    auto pose = body->getWorldTransform();
-    return pose;
-  } else {
-    // need to find
-    return containingMap->getContainedPose(skeleton->getName());
-  }
-}
-
-inline Eigen::Isometry3d getObjectPose(const dart::dynamics::MetaSkeletonPtr &skeleton,
-                                       const std::shared_ptr<ContainingMap> &containingMap) {
-  if (skeleton->getNumBodyNodes() > 0) {
-    auto body = skeleton->getBodyNode(0);
-    auto pose = body->getWorldTransform();
-    return pose;
-  } else {
-    // need to find
-    return containingMap->getContainedPose(skeleton->getName());
-  }
-}
-
 inline Eigen::Vector6d TransformMatrix2SpatialVector(const Eigen::Isometry3d &transform) {
   auto rotation = dart::math::matrixToEulerXYZ(transform.linear());
   auto translation = transform.translation();
   Eigen::Vector6d spatialVector = Eigen::Vector6d::Zero();
   spatialVector << rotation(0, 0), rotation(1, 0), rotation(2, 0), translation[0], translation[1], translation[2];
   return spatialVector;
-}
-
-inline dart::dynamics::BodyNode *getBodyNode(const std::string &name,
-                                             const std::shared_ptr<ContainingMap> &containingMap,
-                                             const aikido::planner::WorldPtr &world) {
-  auto skeleton = world->getSkeleton(name);
-  if (skeleton->getNumBodyNodes() > 0) {
-    return skeleton->getBodyNode(0);
-  } else {
-    return containingMap->getContainedBodyNode(name);
-  }
 }
 
 }

@@ -34,17 +34,6 @@ using namespace wecook;
 void ActionPlanner::compile(std::shared_ptr<TaskGraph> &taskGraph,
                             std::map<std::string, std::shared_ptr<Agent>> &agents,
                             std::shared_ptr<ContainingMap> &containingMap) {
-  // right now we just plan motion for each action separately.
-  auto actionNodes = taskGraph->getNodes();
-  for (auto &actionNode : actionNodes) {
-    plan(actionNode, agents, containingMap);
-  }
-}
-
-void ActionPlanner::compile(std::shared_ptr<TaskGraph> &taskGraph,
-                            std::shared_ptr<PrimitiveTaskGraph> &primitiveTaskGraph,
-                            std::map<std::string, std::shared_ptr<Agent>> &agents,
-                            std::shared_ptr<ContainingMap> &containingMap) {
   // for each actionNode we first plan primitive task graph for each of them
   auto actionNodes = taskGraph->getNodes();
   for (auto &actionNode : actionNodes) {
@@ -561,7 +550,7 @@ void ActionPlanner::planHolding(wecook::ActionNode *actionNode,
   auto collaborativeAction = actionName.substr(occurances[1] + 1);
   auto holdedObjectName = actionName.substr(occurances[0] + 1, occurances[1] - occurances[0] - 1);
   if (collaborativeAction == "transfer") {
-    if (holdedObjectName == actionNode->getAction().get_location()[0]) {
+    if (holdedObjectName == actionNode->getAction().get_location()[1]) {
       // To do collaborative transferring, we have 9 steps
       // 1) create robotM grab node
       auto grabPoseM = std::make_shared<aikido::constraint::dart::TSR>();

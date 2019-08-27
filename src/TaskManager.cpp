@@ -12,7 +12,7 @@ void TaskManager::start() {
 
 void TaskManager::stop(int signum) {
   ROS_INFO("SIGINT received... Stopping...");
-  m_world.stop();
+  m_world->stop();
   m_isEnd = true;
   ros::shutdown();
 }
@@ -36,9 +36,9 @@ void TaskManager::addNewTask(const TaskMsg::ConstPtr &msg) {
 
 void TaskManager::run() {
   while (!m_isEnd) {
-    if (!m_taskQueue.empty() && m_world.isFree()) {
+    if (!m_taskQueue.empty() && m_world->isFree()) {
       Task task = m_taskQueue.front();
-      m_world.addTask(task);
+      m_world->addTask(task);
       m_taskQueue.pop();
     }
   }

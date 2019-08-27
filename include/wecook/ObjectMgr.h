@@ -22,7 +22,7 @@ class ObjectMgr {
       }
     }
 
-    Eigen::Isometry3d getTransform() {
+    Eigen::Isometry3d getTransform() const {
       if (m_ifSim) {
         return m_bn->getTransform();
       } else {
@@ -30,12 +30,12 @@ class ObjectMgr {
       }
     }
 
-    dart::dynamics::BodyNode *getBodyNode() {
+    dart::dynamics::BodyNode *getBodyNode() const {
       return m_bn;
     }
 
-    bool ifContained() {
-      return m_skeleton->getNumBodyNodes() == 0
+    bool ifContained() const {
+      return m_skeleton->getNumBodyNodes() == 0;
     }
 
    private:
@@ -48,21 +48,25 @@ class ObjectMgr {
  public:
   ObjectMgr() = default;
 
+  ObjectMgr(const ObjectMgr &other) {
+    m_objects = other.m_objects;
+  }
+
   void init(std::vector<Object> &objects, bool ifSim, aikido::planner::WorldPtr &env);
 
   void clear(std::vector<Object> &objects, bool ifSim, aikido::planner::WorldPtr &env);
 
-  inline dart::dynamics::BodyNode *getObjBodyNode(const std::string &obj) const {
-    return m_objects[obj].getBodyNode();
+  dart::dynamics::BodyNode *getObjBodyNode(const std::string &obj) const {
+    return m_objects.at(obj).getBodyNode();
   }
 
-  inline Eigen::Isometry3d getObjTransform(const std::string &obj) const {
-    return m_objects[obj].getTransform();
+  Eigen::Isometry3d getObjTransform(const std::string &obj) const {
+    return m_objects.at(obj).getTransform();
   }
 
-  inline bool ifContained(const std::string &obj) const {
+  bool ifContained(const std::string &obj) const {
     // could be grabbed by hands or connected with other objects
-    return m_objects[obj].ifContained();
+    return m_objects.at(obj).ifContained();
   }
 
  private:

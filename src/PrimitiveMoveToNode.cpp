@@ -17,6 +17,7 @@ void PrimitiveMoveToNode::execute(std::map<std::string, std::shared_ptr<Agent>> 
 
     m_ifExecuted = true;
   } else if (agent->getType() == "robot") {
+    ROS_INFO("Moving...");
     auto robot = std::dynamic_pointer_cast<Robot, Agent>(agent);
     auto robotArm = robot->getArm();
     auto robotHand = robot->getHand();

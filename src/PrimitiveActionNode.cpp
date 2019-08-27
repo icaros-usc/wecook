@@ -7,17 +7,23 @@
 using namespace wecook;
 
 void PrimitiveActionNode::removeChild(std::shared_ptr<PrimitiveActionNode> &child) {
-  for (auto itr = m_children.begin(); itr != m_children.end(); ++itr) {
+  auto itr = m_children.begin();
+  while (itr != m_children.end()) {
     if (*itr == child) {
-      m_children.erase(itr);
+      itr = m_children.erase(itr);
+    } else {
+      ++itr;
     }
   }
 }
 
 void PrimitiveActionNode::removeFather(std::shared_ptr<PrimitiveActionNode> &father) {
-  for (auto itr = m_fathers.begin(); itr != m_fathers.end(); ++itr) {
+  auto itr = m_fathers.begin();
+  while (itr != m_fathers.end()) {
     if (*itr == father) {
-      m_fathers.erase(itr);
+      itr = m_fathers.erase(itr);
+    } else {
+      ++itr;
     }
   }
 }

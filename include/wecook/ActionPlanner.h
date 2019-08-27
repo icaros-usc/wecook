@@ -21,11 +21,6 @@ class ActionPlanner {
                std::map<std::string, std::shared_ptr<Agent>> &agents,
                std::shared_ptr<ContainingMap> &containingMap);
 
-  void compile(std::shared_ptr<TaskGraph> &taskGraph,
-               std::shared_ptr<PrimitiveTaskGraph> &primitiveGraph,
-               std::map<std::string, std::shared_ptr<Agent>> &agents,
-               std::shared_ptr<ContainingMap> &containingMap);
-
  private:
   void plan(ActionNode *actionNode,
             std::map<std::string, std::shared_ptr<Agent>> &agents,

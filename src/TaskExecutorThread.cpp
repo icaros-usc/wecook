@@ -18,6 +18,7 @@ void TaskExecutorThread::run() {
     // get the first primitive action node to execute
     auto currPAN = ptg.getHeadNode(pid);
     while (currPAN) {
+      ROS_INFO("Waiting...");
       // need to wait all of currPAN's father nodes have been executed
       for (auto &father : currPAN->getFathers()) {
         while (!father->ifExecuted()) {
@@ -25,11 +26,16 @@ void TaskExecutorThread::run() {
         }
       }
 
+      ROS_INFO("Executing...");
+
       m_pae->execute(currPAN);
 
+      ROS_INFO("Executed...");
+
       // find next primitive action node to execute
+      auto last = currPAN;
       currPAN = nullptr;
-      for (auto &child : currPAN->getChildren()) {
+      for (auto &child : last->getChildren()) {
         if (child->getPid() == pid) {
           currPAN = child;
         }

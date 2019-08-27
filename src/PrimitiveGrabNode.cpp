@@ -44,6 +44,7 @@ void PrimitiveGrabNode::execute(std::map<std::string, std::shared_ptr<Agent>> &a
     auto conf = Eigen::Vector2d();
     conf << 0.75, 0.75;
     auto motion2 = std::make_shared<ConfMotionNode>(conf, handSpace, handSkeleton);
+    ROS_INFO("Grabbing...Closing gripper");
     motion2->plan(robot->m_ada);
 
     // before do grab, we need to check if to grab object is connected with other object
@@ -66,10 +67,12 @@ void PrimitiveGrabNode::execute(std::map<std::string, std::shared_ptr<Agent>> &a
         for (auto &other : agents) {
           if (other.first != m_pid && other.second->getType() == "robot") {
             auto robot2 = std::dynamic_pointer_cast<Robot, Agent>(other.second);
-            if (robot2->getHand()->isGrabbing(m_toGrab) == 2) {
+            if (robot2->getHand()->isGrabbing(m_toGrab) == 0) {
               auto
                   motion = std::make_shared<GrabMotionNode>(world->getSkeleton(m_toGrab), false, armSpace, armSkeleton);
               motion->plan(robot2->m_ada);
+            } else {
+              break;
             }
           }
         }
@@ -77,6 +80,7 @@ void PrimitiveGrabNode::execute(std::map<std::string, std::shared_ptr<Agent>> &a
     }
     auto motion3 = std::make_shared<GrabMotionNode>(world->getSkeleton(m_toGrab), true, armSpace, armSkeleton);
     motion3->plan(robot->m_ada);
+    ROS_INFO("Grabbing...Connecting");
 
     m_ifExecuted = true;
   }

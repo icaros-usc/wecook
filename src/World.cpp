@@ -26,9 +26,6 @@ void World::initialize() {
 }
 
 void World::stop() {
-  for (auto &agent : m_agents) {
-    agent.second->stop();
-  }
   m_isEnd = true;
   m_thread.join();
 }
@@ -41,9 +38,9 @@ void World::run() {
       setupTask(task);
       std::vector<Action> subgoals = task.getSubgoals();
       auto taskGraph = std::make_shared<TaskGraph>(subgoals);
-      auto primitiveTaskGraph = std::make_shared<PrimitiveTaskGraph>();
+
       // transfer taskGraph to primitive taskGraph
-      m_actionPlanner.compile(taskGraph, primitiveTaskGraph, m_agents, m_containingMap);
+      m_actionPlanner.compile(taskGraph, m_agents, m_containingMap);
 
       // now dispatch taskgraph to all agents
       for (const auto &agent : m_agents) {
@@ -53,12 +50,12 @@ void World::run() {
                                                                        boost::bind(&World::syncToActionNode,
                                                                                    this,
                                                                                    ::_1));
-        m_vecTaskExecutorThread.emplace_back(taskExecutorThread);
+        m_mapTaskExecutorThread.insert(std::make_pair(agent.first, taskExecutorThread));
       }
 
       // wait for agents to be free
-      for (const auto &taskExecutorThread : m_vecTaskExecutorThread) {
-        while (!taskExecutorThread->isEnd()) {
+      for (const auto &taskExecutorThread : m_mapTaskExecutorThread) {
+        while (!taskExecutorThread.second->isEnd()) {
           ros::Duration(0.5).sleep();
         }
       }
@@ -94,13 +91,13 @@ void World::clean(const Task &task) {
   m_objectMgr->clear(objects, m_ifSim, m_env);
   m_objectMgr.reset();
 
-  m_vecTaskExecutorThread.clear();
+  m_mapTaskExecutorThread.clear();
 }
 
 void World::syncToActionNode(ActionNode *actionNode) {
   auto pids = actionNode->getAction().get_pids();
   for (const auto &pid : pids) {
-    auto robot = m_agents[pid];
-    while (robot->getCurrentActionNode() != actionNode) ros::Duration(0.5).sleep();
+    auto thread = m_mapTaskExecutorThread[pid];
+    while (thread->getCurrentActionNode() != actionNode) ros::Duration(0.5).sleep();
   }
 }

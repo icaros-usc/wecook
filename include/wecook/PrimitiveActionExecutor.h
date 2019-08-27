@@ -23,7 +23,7 @@ class PrimitiveActionExecutor {
  private:
   std::map<std::string, std::shared_ptr<Agent>> m_agents;
   std::shared_ptr<ObjectMgr> m_objMgr;
-  std::shared_ptr<ContainingMap> m_containingMap
+  std::shared_ptr<ContainingMap> m_containingMap;
 };
 
 }

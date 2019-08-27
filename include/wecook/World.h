@@ -45,6 +45,10 @@ class World {
 
   void syncToActionNode(ActionNode *actionNode);
 
+  inline bool ifSim() {
+    return m_ifSim;
+  }
+
  private:
   void initialize();
 
@@ -66,7 +70,7 @@ class World {
   bool m_ifSim = true;
   std::shared_ptr<ObjectMgr> m_objectMgr = nullptr;
   std::shared_ptr<PrimitiveActionExecutor> m_primitiveActionExecutor = nullptr;
-  std::vector<std::shared_ptr<TaskExecutorThread>> m_vecTaskExecutorThread;
+  std::map<std::string, std::shared_ptr<TaskExecutorThread>> m_mapTaskExecutorThread;
 };
 }
 #endif //WECOOK_WORLD_H

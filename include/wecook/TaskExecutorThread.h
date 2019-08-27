@@ -6,14 +6,19 @@
 #define WECOOK_TASKEXECUTORTHREAD_H
 
 #include "Agent.h"
+#include "ActionNode.h"
+#include "PrimitiveActionExecutor.h"
+#include "TaskGraph.h"
 
 namespace wecook {
 
 class TaskExecutorThread {
+  typedef boost::function<void(ActionNode *)> syncCallback;
+
  public:
-  TaskExecutorThread(std::shared_ptr<Agent> &agent,
-                     std::shared_ptr<PrimitiveActionExecutor> &pae,
-                     std::shared_ptr<TaskGraph> &taskGraph,
+  TaskExecutorThread(const std::shared_ptr<Agent> &agent,
+                     const std::shared_ptr<PrimitiveActionExecutor> &pae,
+                     const std::shared_ptr<TaskGraph> &taskGraph,
                      syncCallback callback)
       : m_pae(pae),
         m_agent(agent),
@@ -25,6 +30,10 @@ class TaskExecutorThread {
 
   bool isEnd() {
     return m_isEnd;
+  }
+
+  inline ActionNode *getCurrentActionNode() const {
+    return m_currentActionNode;
   }
 
  private:

@@ -58,16 +58,16 @@ class ContainingMap {
 
   inline bool hasObject(const std::string &containedName) {
     for (const auto &container : m_containers) {
-      if (container.getContainedNamed() == containedName) {
+      if (container.getContainedName() == containedName) {
         return true;
       }
     }
     return false;
   }
 
-  inlinie Container getContainer(const std::string &containedName) {
+  inline Container getContainer(const std::string &containedName) {
     for (const auto &container : m_containers) {
-      if (container.getContainedNamed() == containedName) {
+      if (container.getContainedName() == containedName) {
         return container;
       }
     }
@@ -75,8 +75,8 @@ class ContainingMap {
 
  private:
   std::vector<Container> m_containers;
-  aikido::planner::WorldPtr m_env;
-  std::shared_ptr<ObjectMgr> m_objMgr;
+  aikido::planner::WorldPtr m_env = nullptr;
+  std::shared_ptr<ObjectMgr> m_objMgr = nullptr;
 };
 
 }

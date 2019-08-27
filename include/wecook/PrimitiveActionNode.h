@@ -6,8 +6,14 @@
 #define WECOOK_PRIMITIVEACTIONNODE_H
 
 #include "Agent.h"
-#include "Action.h"
-#include "MotionNode.h"
+#include "ObjectMgr.h"
+#include "ContainingMap.h"
+#include "TSRMotionNode.h"
+#include "ConnMotionNode.h"
+#include "GrabMotionNode.h"
+#include "RelativeIKMotionNode.h"
+#include "ConfMotionNode.h"
+#include "LinearDeltaMotionNode.h"
 
 namespace wecook {
 
@@ -26,10 +32,6 @@ class PrimitiveActionNode {
         m_type(type),
         m_ifTail(ifTail) {
 
-  }
-
-  inline void setMotionSeq(const std::vector<std::shared_ptr<MotionNode>> &motionSeq) {
-    m_motionSeq = motionSeq;
   }
 
   inline void addChild(std::shared_ptr<PrimitiveActionNode> child) {
@@ -103,7 +105,6 @@ class PrimitiveActionNode {
   std::string m_pid;
   std::vector<std::shared_ptr<PrimitiveActionNode>> m_children;
   std::vector<std::shared_ptr<PrimitiveActionNode>> m_fathers;
-  std::vector<std::shared_ptr<MotionNode>> m_motionSeq;
   std::string m_type;
   std::string m_grabbingObj;
   std::string m_placingObj;

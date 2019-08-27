@@ -111,17 +111,17 @@ void TaskGraph::merge() {
         // we need to remove place node (tail node) in last action node and remove grab node in current action node
         last->m_primitiveTaskGraph.removeTailNode(pid);
         curr->m_primitiveTaskGraph.removeHeadNode(pid);
-
-      } else if (currPHN->getType() == "grab" && currPHN->getGrabbingObj() == lastPTN->getGrabbingObj()) {
+      } else if (currPHN->getType() == "grab" && !lastPTN->getGrabbingObj().empty()
+          && currPHN->getGrabbingObj() == lastPTN->getGrabbingObj()) {
         // we need to remove grab node in current action node
         curr->m_primitiveTaskGraph.removeHeadNode(pid);
-      } else if (currPHN->getType() == "grab" && lastPTN->getGrabbingObj() != ""
+      } else if (currPHN->getType() == "grab" && !lastPTN->getGrabbingObj().empty()
           && currPHN->getGrabbingObj() != lastPTN->getGrabbingObj()) {
         // we need a add place node in current action node
         // TODO
       }
-        // now we need to find the next action node
-        last = curr;
+      // now we need to find the next action node
+      last = curr;
       curr = nullptr;
       children = last->getChildren();
       for (auto &child : children) {

@@ -5,37 +5,18 @@
 #ifndef WECOOK_AGENT_H
 #define WECOOK_AGENT_H
 
-#include <boost/thread.hpp>
 #include <libada/Ada.hpp>
 #include <Eigen/Dense>
 
-#include "Action.h"
-#include "MotionNode.h"
-#include "ConfMotionNode.h"
-#include "GrabMotionNode.h"
-#include "TSRMotionNode.h"
-#include "LinearDeltaMotionNode.h"
-#include "TaskGraph.h"
-#include "PrimitiveActionExecutor.h"
-
 namespace wecook {
-
-typedef boost::function<void(ActionNode *)> syncCallback;
 
 class Agent {
 
  public:
   Agent(const std::string &pid,
         bool ifSim)
-      : m_thread(&Agent::run, this),
-        m_pid(pid),
+      : m_pid(pid),
         m_ifSim(ifSim) {
-  }
-
-  void stop();
-
-  inline ActionNode *getCurrentActionNode() {
-    return m_currentActionNode;
   }
 
   inline bool ifSim() {

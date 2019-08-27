@@ -22,15 +22,21 @@ void PrimitiveTaskGraph::removeTailNode(const std::string &pid) {
   }
 
   // remove tail node from m_tails and m_nodes
-  for (auto itr = m_tails.begin(); itr != m_tails.end(); ++itr) {
+  auto itr = m_tails.begin();
+  while (itr != m_tails.end()) {
     if (*itr == tailNode) {
-      m_tails.erase(itr);
+      itr = m_tails.erase(itr);
+    } else {
+      ++itr;
     }
   }
 
-  for (auto itr = m_nodes.begin(); itr != m_nodes.end(); ++itr) {
+  itr = m_nodes.begin();
+  while (itr != m_nodes.end()) {
     if (*itr == tailNode) {
-      m_nodes.erase(itr);
+      itr = m_nodes.erase(itr);
+    } else {
+      ++itr;
     }
   }
 }
@@ -51,15 +57,21 @@ void PrimitiveTaskGraph::removeHeadNode(const std::string &pid) {
   }
 
   // remove head node from m_heads and m_nodes
-  for (auto itr = m_heads.begin(); itr != m_heads.end(); ++itr) {
+  auto itr = m_heads.begin();
+  while (itr != m_heads.end()) {
     if (*itr == headNode) {
-      m_heads.erase(itr);
+      itr = m_heads.erase(itr);
+    } else {
+      ++itr;
     }
   }
 
-  for (auto itr = m_nodes.begin(); itr != m_nodes.end(); ++itr) {
+  itr = m_nodes.begin();
+  while (itr != m_nodes.end()) {
     if (*itr == headNode) {
-      m_nodes.erase(itr);
+      itr = m_nodes.erase(itr);
+    } else {
+      ++itr;
     }
   }
 }

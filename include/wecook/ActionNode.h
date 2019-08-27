@@ -7,6 +7,7 @@
 
 #include "Action.h"
 #include "MotionNode.h"
+#include "PrimitiveTaskGraph.h"
 
 namespace wecook {
 
