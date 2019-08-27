@@ -6,9 +6,9 @@
 #define WECOOK_PRIMITIVEGRABNODE_H
 
 #include <aikido/constraint/dart/TSR.hpp>
-#include <dart/dynamics/BodyNode.hpp>
 
 #include "PrimitiveActionNode.h"
+#include "ContainingMap.h"
 
 namespace wecook {
 
@@ -16,7 +16,7 @@ class PrimitiveGrabNode : public PrimitiveActionNode {
  public:
   PrimitiveGrabNode(const aikido::constraint::dart::TSRPtr &grabPose,
                     const std::string &toGrab,
-                    dart::dynamics::BodyNode *refBodyNode,
+                    const std::string &refObject,
                     const std::string &pid,
                     const std::string &grabbingObj,
                     const std::string &placingObj,
@@ -29,15 +29,17 @@ class PrimitiveGrabNode : public PrimitiveActionNode {
                                                                ifTail),
                                            m_toGrab(toGrab),
                                            m_grabPose(grabPose),
-                                           m_refBodyNode(refBodyNode) {
+                                           m_refObject(refObject) {
   }
 
-  void execute();
+  void execute(std::map<std::string, std::shared_ptr<Agent>> &agents,
+               std::shared_ptr<ObjectMgr> &objMgr,
+               std::shared_ptr<ContainingMap> &containingMap);
 
  private:
   std::string m_toGrab;
   aikido::constraint::dart::TSRPtr m_grabPose;
-  dart::dynamics::BodyNode *m_refBodyNode;
+  std::string m_refObject;
 
 };
 

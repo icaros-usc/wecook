@@ -9,12 +9,15 @@
 #include <dart/dynamics/BodyNode.hpp>
 
 #include "PrimitiveActionNode.h"
+#include "ContainingMap.h"
 
 namespace wecook {
 
 class PrimitivePredefinedNode : public PrimitiveActionNode {
  public:
   PrimitivePredefinedNode(const std::string &pid,
+                          const std::string &manipulatedObj,
+                          const std::string &motionType,
                           const std::string &grabbingObj,
                           const std::string &placingObj,
                           bool ifHead = false,
@@ -24,14 +27,17 @@ class PrimitivePredefinedNode : public PrimitiveActionNode {
                             grabbingObj,
                             placingObj,
                             ifHead,
-                            ifTail) {
+                            ifTail), m_motionType(motionType), m_manipulatedObj(manipulatedObj) {
 
   }
 
-  void execute();
+  void execute(std::map<std::string, std::shared_ptr<Agent>> &agents,
+               std::shared_ptr<ObjectMgr> &objMgr,
+               std::shared_ptr<ContainingMap> &containingMap);
 
  private:
-
+  std::string m_motionType;
+  std::string m_manipulatedObj;
 };
 
 }

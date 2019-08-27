@@ -6,9 +6,9 @@
 #define WECOOK_PRIMITIVEMOVETONODE_H
 
 #include <aikido/constraint/dart/TSR.hpp>
-#include <dart/dynamics/BodyNode.hpp>
 
 #include "PrimitiveActionNode.h"
+#include "ContainingMap.h"
 
 namespace wecook {
 
@@ -16,8 +16,7 @@ class PrimitiveMoveToNode : public PrimitiveActionNode {
  public:
   PrimitiveMoveToNode(const aikido::constraint::dart::TSRPtr &targetPose,
                       const std::string &toMove,
-                      dart::dynamics::BodyNode *refBodyNode,
-                      dart::dynamics::BodyNode *toMoveBodyNode,
+                      const std::string &refObject,
                       const std::string &pid,
                       const std::string &grabbingObj,
                       const std::string &placingObj,
@@ -28,19 +27,19 @@ class PrimitiveMoveToNode : public PrimitiveActionNode {
                                                                  placingObj,
                                                                  ifHead,
                                                                  ifTail),
-                                             m_refBodyNode(refBodyNode),
-                                             m_toMoveBodyNode(toMoveBodyNode),
+                                             m_refObject(refObject),
                                              m_targetPose(targetPose),
                                              m_toMove(toMove) {
   }
 
-  void execute();
+  void execute(std::map<std::string, std::shared_ptr<Agent>> &agents,
+               std::shared_ptr<ObjectMgr> &objMgr,
+               std::shared_ptr<ContainingMap> &containingMap);
 
  private:
   std::string m_toMove;
   aikido::constraint::dart::TSRPtr m_targetPose;
-  dart::dynamics::BodyNode *m_refBodyNode;
-  dart::dynamics::BodyNode *m_toMoveBodyNode;
+  std::string m_refObject;
 };
 
 }

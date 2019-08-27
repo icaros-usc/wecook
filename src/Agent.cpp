@@ -67,7 +67,3 @@ void Agent::run() {
     m_isFree = true;
   }
 }
-
-void Agent::moveToHome() {
-  m_ada->getArm()->getMetaSkeleton()->setPositions(m_homePositions);
-}

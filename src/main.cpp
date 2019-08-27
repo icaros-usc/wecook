@@ -4,6 +4,7 @@
 #include <csignal>
 
 #include "wecook/TaskManager.h"
+#include "wecook/Robot.h"
 
 using namespace wecook;
 
@@ -15,23 +16,23 @@ int main(int argc, char **argv) {
   ros::init(argc, argv, "wecook", ros::init_options::NoSigintHandler);
   ros::NodeHandle n;
 
-  std::map<std::string, std::shared_ptr<Agent>> robots{};
+  std::map<std::string, std::shared_ptr<Agent>> agents{};
   Eigen::Isometry3d robotPose1 = Eigen::Isometry3d::Identity();
   Eigen::Matrix3d rot;
   rot << 0, -1, 0, 1, 0, 0, 0, 0, 1;
   robotPose1.translation() = Eigen::Vector3d(-0.2, -0.70, 0.7);
   robotPose1.linear() = rot;
   std::string pid1 = "p1";
-  std::shared_ptr<Agent> pRobot1 = std::make_shared<Agent>(robotPose1, pid1);
+  auto pRobot1 = std::make_shared<Robot>(robotPose1, pid1);
   Eigen::Isometry3d robotPose2 = Eigen::Isometry3d::Identity();
   robotPose2.translation() = Eigen::Vector3d(-0.2, 0.35, 0.7);
   robotPose2.linear() = rot;
   std::string pid2 = "p2";
-  std::shared_ptr<Agent> pRobot2 = std::make_shared<Agent>(robotPose2, pid2);
-  robots.emplace(std::pair<std::string, std::shared_ptr<Agent>>{"p1", pRobot1});
-  robots.emplace(std::pair<std::string, std::shared_ptr<Agent>>{"p2", pRobot2});
+  auto pRobot2 = std::make_shared<Robot>(robotPose2, pid2);
+  agents.emplace(std::pair<std::string, std::shared_ptr<Agent>>{"p1", pRobot1});
+  agents.emplace(std::pair<std::string, std::shared_ptr<Agent>>{"p2", pRobot2});
 
-  taskManager = new TaskManager(n, robots);
+  taskManager = new TaskManager(n, agents);
   taskManager->start();
 
   boost::thread t{boost::bind(&TaskManager::run, taskManager)};

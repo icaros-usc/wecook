@@ -6,6 +6,7 @@
 
 using namespace wecook;
 
-void PrimitivePlaceNode::execute() {
+void PrimitivePlaceNode::execute(std::map<std::string, std::shared_ptr<Agent>> &agents,
+                                 std::shared_ptr<ContainingMap> &containingMap) {
 
 }

@@ -21,7 +21,7 @@
 namespace wecook {
 class TaskManager {
  public:
-  TaskManager(const ros::NodeHandle &n, const std::map<std::string, std::shared_ptr<Agent>> &robots);
+  TaskManager(const ros::NodeHandle &n, const std::map<std::string, std::shared_ptr<Agent>> &agents);
 
   void start();
   void stop(int signum);

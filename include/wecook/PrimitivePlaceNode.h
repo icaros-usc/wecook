@@ -6,6 +6,7 @@
 #define WECOOK_PRIMITIVEPLACENODE_H
 
 #include "PrimitiveActionNode.h"
+#include "ContainingMap.h"
 
 namespace wecook {
 
@@ -13,28 +14,27 @@ class PrimitivePlaceNode : public PrimitiveActionNode {
  public:
   PrimitivePlaceNode(const aikido::constraint::dart::TSRPtr &targetPose,
                      const std::string &toPlace,
-                     dart::dynamics::BodyNode *refBodyNode,
-                     dart::dynamics::BodyNode *toPlaceBodyNode,
+                     const std::string &refObject,
                      const std::string &pid,
                      const std::string &grabbingObj,
                      const std::string &placingObj,
                      bool ifHead = false,
                      bool ifTail = false)
       : PrimitiveActionNode(pid, "place", grabbingObj, placingObj, ifHead, ifTail),
-        m_refBodyNode(refBodyNode),
-        m_toPlaceBodyNode(toPlaceBodyNode),
+        m_refObject(refObject),
         m_targetPose(targetPose),
         m_toPlace(toPlace) {
 
   }
 
-  void execute();
+  void execute(std::map<std::string, std::shared_ptr<Agent>> &agents,
+               std::shared_ptr<ObjectMgr> &objMgr,
+               std::shared_ptr<ContainingMap> &containingMap);
 
  private:
   std::string m_toPlace;
   aikido::constraint::dart::TSRPtr m_targetPose;
-  dart::dynamics::BodyNode *m_refBodyNode;
-  dart::dynamics::BodyNode *m_toPlaceBodyNode;
+  std::string m_refObject;
 };
 
 }

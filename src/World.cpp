@@ -13,9 +13,21 @@ int World::addTask(wecook::Task &task) {
   m_tasks.emplace_back(task);
 }
 
+void World::initialize() {
+  m_env = std::make_shared<aikido::planner::World>("wecook");
+
+  for (const auto &agent : m_agents) {
+    agent.second->init(m_env);
+  }
+
+  m_viewer = std::make_shared<aikido::rviz::WorldInteractiveMarkerViewer>(m_env, "wecook", "map");
+  m_viewer->setAutoUpdate(true);
+  ros::Duration(1.).sleep();
+}
+
 void World::stop() {
-  for (auto &robot : m_agents) {
-    robot.second->stop();
+  for (auto &agent : m_agents) {
+    agent.second->stop();
   }
   m_isEnd = true;
   m_thread.join();
@@ -26,7 +38,7 @@ void World::run() {
     if (!m_tasks.empty()) {
       m_isFree = false;
       Task task = m_tasks[0];
-      setup(task);
+      setupTask(task);
       std::vector<Action> subgoals = task.getSubgoals();
       auto taskGraph = std::make_shared<TaskGraph>(subgoals);
       auto primitiveTaskGraph = std::make_shared<PrimitiveTaskGraph>();
@@ -38,7 +50,7 @@ void World::run() {
         agent.second->addNewTask(taskGraph, boost::bind(&World::syncToActionNode, this, ::_1));
       }
 
-      // wait for robots to be free
+      // wait for agents to be free
       for (const auto &agent : m_agents) {
         while (!agent.second->isFree()) {
         }
@@ -50,22 +62,24 @@ void World::run() {
   }
 }
 
-void World::setup(const Task &task) {
+void World::setupTask(const Task &task) {
   std::vector<Object> objects = task.getObjects();
-  for (auto &object : objects) {
-    addBodyFromURDF(m_env.get(), object.getUrl(), object.getPose(), object.getName());
-  }
-  m_containingMap = std::make_shared<ContainingMap>(task, m_env);
+
+  m_objectMgr = std::make_shared<ObjectMgr>();
+
+  m_objectMgr->init(objects, m_ifSim, m_env);
+
+  m_containingMap = std::make_shared<ContainingMap>(task, m_objectMgr, m_env);
 }
 
 void World::clean(const Task &task) {
   std::vector<Object> objects = task.getObjects();
-  for (auto &object : objects) {
-    auto skeleton = m_env->getSkeleton(object.getName());
-    m_env->removeSkeleton(skeleton);
-  }
+
   m_containingMap->unconnectAll();
   m_containingMap.reset();
+
+  m_objectMgr->clear(objects, m_ifSim, m_env);
+  m_objectMgr.reset();
 }
 
 void World::syncToActionNode(ActionNode *actionNode) {

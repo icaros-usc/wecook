@@ -11,6 +11,19 @@ namespace wecook {
 
 class Human : public Agent {
 
+ public:
+  Human(const std::string &pid) : Agent(pid, false) {
+
+  }
+
+  std::string getType() {
+    return "human";
+  }
+
+  void init(std::shared_ptr<aikido::planner::World> &env);
+
+  Eigen::Vector3d getPosition();
+
 };
 
 }

@@ -17,23 +17,16 @@
 #include "utils.h"
 #include "ActionPlanner.h"
 #include "ContainingMap.h"
+#include "ObjectMgr.h"
 
 namespace wecook {
 class World {
  public:
-  World(const std::map<std::string, std::shared_ptr<Agent>> &robots) : m_thread(&World::run, this), m_agents(robots) {
-    m_env = std::make_shared<aikido::planner::World>("wecook");
-    // construct robot in the env
-    for (const auto &robot : m_agents) {
-      robot.second->createAda(m_env);
-      robot.second->moveToHome();
-      auto skeleton = robot.second->m_ada->getArm()->getMetaSkeleton();
-      ROS_INFO_STREAM("Agent initial position: " << skeleton->getPositions());
-    }
+  World(const std::map<std::string, std::shared_ptr<Agent>> &agents) : m_thread(&World::run, this), m_agents(agents) {
+    // ifSim of agents should be the same
+    m_ifSim = m_agents.begin()->second->ifSim();
 
-    m_viewer = std::make_shared<aikido::rviz::WorldInteractiveMarkerViewer>(m_env, "wecook", "map");
-    m_viewer->setAutoUpdate(true);
-    ros::Duration(1.).sleep();
+    initialize();
   }
 
   int addTask(Task &task);
@@ -47,9 +40,11 @@ class World {
   void syncToActionNode(ActionNode *actionNode);
 
  private:
+  void initialize();
+
   void run();
 
-  void setup(const Task &task);
+  void setupTask(const Task &task);
 
   void clean(const Task &task);
 
@@ -62,6 +57,8 @@ class World {
   std::vector<Task> m_tasks;
   ActionPlanner m_actionPlanner;
   std::shared_ptr<ContainingMap> m_containingMap = nullptr;
+  bool m_ifSim = true;
+  std::shared_ptr<ObjectMgr> m_objectMgr = nullptr;
 };
 }
 #endif //WECOOK_WORLD_H

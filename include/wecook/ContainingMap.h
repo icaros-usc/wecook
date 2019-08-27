@@ -8,12 +8,14 @@
 #include <aikido/planner/World.hpp>
 #include "Task.h"
 #include "Container.h"
+#include "ObjectMgr.h"
 
 namespace wecook {
 
 class ContainingMap {
  public:
   ContainingMap(const Task &task,
+                const std::shared_ptr<ObjectMgr> &objMgr,
                 const aikido::planner::WorldPtr &env);
 
   void unconnectAll();
@@ -57,6 +59,7 @@ class ContainingMap {
  private:
   std::vector<Container> m_containers;
   aikido::planner::WorldPtr m_env;
+  std::shared_ptr<ObjectMgr> m_objMgr;
 };
 
 }

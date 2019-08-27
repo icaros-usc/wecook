@@ -2,7 +2,7 @@
 
 using namespace wecook;
 
-TaskManager::TaskManager(const ros::NodeHandle &nh, const std::map<std::string, std::shared_ptr<Agent>> &robots) : m_nh(nh), m_isEnd(false), m_world(robots) {
+TaskManager::TaskManager(const ros::NodeHandle &nh, const std::map<std::string, std::shared_ptr<Agent>> &agents) : m_nh(nh), m_isEnd(false), m_world(agents) {
 
 }
 

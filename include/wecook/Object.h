@@ -7,8 +7,10 @@
 
 #include <string>
 #include <vector>
+#include <dart/dynamics/BodyNode.hpp>
 
 namespace wecook {
+
 class Object {
  public:
   Object(const std::string &name,
@@ -17,15 +19,15 @@ class Object {
 
   }
 
-  std::string getUrl() {
+  std::string getUrl() const {
     return m_url;
   }
 
-  std::vector<double> getPose() {
+  std::vector<double> getPose() const {
     return m_pose;
   }
 
-  std::string getName() {
+  std::string getName() const {
     return m_name;
   }
 
@@ -33,7 +35,10 @@ class Object {
   std::string m_name;
   std::string m_url;
   std::vector<double>  m_pose;
+
+  dart::dynamics::BodyNodePtr m_bodyNode = nullptr;
 };
+
 }
 
 #endif //WECOOK_OBJECT_H

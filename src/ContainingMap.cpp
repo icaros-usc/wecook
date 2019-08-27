@@ -7,14 +7,16 @@
 
 using namespace wecook;
 
-ContainingMap::ContainingMap(const wecook::Task &task, const aikido::planner::WorldPtr &env) : m_env(env) {
+ContainingMap::ContainingMap(const wecook::Task &task,
+                             const std::shared_ptr<ObjectMgr> &objMgr,
+                             const aikido::planner::WorldPtr &env) : m_env(env), m_objMgr(objMgr) {
   auto containingPairs = task.getContainingPairs();
   for (const auto &containingPair : containingPairs) {
     auto containerName = containingPair.first;
-    auto objectName = containingPair.second;
+    auto containedName = containingPair.second;
     auto containerSkeleton = m_env->getSkeleton(containerName);
-    auto objectSkeleton = m_env->getSkeleton(objectName);
-    Container container(containerName, objectName, containerSkeleton->getBodyNode(0));
+    auto objectSkeleton = m_env->getSkeleton(containedName);
+    Container container(containerName, containedName, containerSkeleton->getBodyNode(0));
     container.connect(objectSkeleton);
     m_containers.emplace_back(container);
   }

@@ -36,10 +36,10 @@ inline Eigen::Isometry3d vectorToIsometry(std::vector<double> &poseVector) {
   return pose;
 }
 
-inline std::shared_ptr<::dart::dynamics::Skeleton> addBodyFromURDF(aikido::planner::World *world,
-                                                                   const std::string &uri,
-                                                                   std::vector<double> objectPose,
-                                                                   const std::string &name) {
+std::shared_ptr<::dart::dynamics::Skeleton> addBodyFromURDF(aikido::planner::World *world,
+                                                            const std::string &uri,
+                                                            std::vector<double> objectPose,
+                                                            const std::string &name) {
   auto transform = vectorToIsometry(objectPose);
 
   dart::utils::DartLoader urdfLoader;

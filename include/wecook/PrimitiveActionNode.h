@@ -5,6 +5,7 @@
 #ifndef WECOOK_PRIMITIVEACTIONNODE_H
 #define WECOOK_PRIMITIVEACTIONNODE_H
 
+#include "Agent.h"
 #include "Action.h"
 #include "MotionNode.h"
 
@@ -87,13 +88,15 @@ class PrimitiveActionNode {
     return m_children;
   }
 
-  virtual void execute() = 0;
+  virtual void execute(std::map<std::string, std::shared_ptr<Agent>> &agents,
+                       std::shared_ptr<ObjectMgr> &objMgr,
+                       std::shared_ptr<ContainingMap> &containingMap) = 0;
 
   void removeChild(std::shared_ptr<PrimitiveActionNode> &child);
 
   void removeFather(std::shared_ptr<PrimitiveActionNode> &father);
 
- private:
+ protected:
   bool m_ifTail;
   bool m_ifHead;
   bool m_ifExecuted = false;
