@@ -56,6 +56,23 @@ class ContainingMap {
     return false;
   }
 
+  inline bool hasObject(const std::string &containedName) {
+    for (const auto &container : m_containers) {
+      if (container.getContainedNamed() == containedName) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  inlinie Container getContainer(const std::string &containedName) {
+    for (const auto &container : m_containers) {
+      if (container.getContainedNamed() == containedName) {
+        return container;
+      }
+    }
+  }
+
  private:
   std::vector<Container> m_containers;
   aikido::planner::WorldPtr m_env;

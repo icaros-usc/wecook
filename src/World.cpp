@@ -47,14 +47,22 @@ void World::run() {
 
       // now dispatch taskgraph to all agents
       for (const auto &agent : m_agents) {
-        agent.second->addNewTask(taskGraph, boost::bind(&World::syncToActionNode, this, ::_1));
+        auto taskExecutorThread = std::make_shared<TaskExecutorThread>(agent.second,
+                                                                       m_primitiveActionExecutor,
+                                                                       taskGraph,
+                                                                       boost::bind(&World::syncToActionNode,
+                                                                                   this,
+                                                                                   ::_1));
+        m_vecTaskExecutorThread.emplace_back(taskExecutorThread);
       }
 
       // wait for agents to be free
-      for (const auto &agent : m_agents) {
-        while (!agent.second->isFree()) {
+      for (const auto &taskExecutorThread : m_vecTaskExecutorThread) {
+        while (!taskExecutorThread->isEnd()) {
+          ros::Duration(0.5).sleep();
         }
       }
+
       clean(task);
       m_tasks.pop_back();
     }
@@ -70,16 +78,23 @@ void World::setupTask(const Task &task) {
   m_objectMgr->init(objects, m_ifSim, m_env);
 
   m_containingMap = std::make_shared<ContainingMap>(task, m_objectMgr, m_env);
+
+  // intialize primitive action executor
+  m_primitiveActionExecutor = std::make_shared<PrimitiveActionExecutor>(m_agents, m_objectMgr, m_containingMap);
 }
 
 void World::clean(const Task &task) {
   std::vector<Object> objects = task.getObjects();
+
+  m_primitiveActionExecutor.reset();
 
   m_containingMap->unconnectAll();
   m_containingMap.reset();
 
   m_objectMgr->clear(objects, m_ifSim, m_env);
   m_objectMgr.reset();
+
+  m_vecTaskExecutorThread.clear();
 }
 
 void World::syncToActionNode(ActionNode *actionNode) {

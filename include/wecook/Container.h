@@ -15,7 +15,7 @@ class Container {
   Container(const std::string &containerName,
             const std::string &containedName,
             dart::dynamics::BodyNodePtr containerBodyNode) :
-      m_name(containerName), m_containedName(containedName), m_containerBodyNode(containerBodyNode) {
+      m_containerName(containerName), m_containedName(containedName), m_containerBodyNode(containerBodyNode) {
 
   }
 
@@ -24,7 +24,7 @@ class Container {
   void unconnect();
 
   inline bool ifSame(const std::string &name, const std::string &objectName) {
-    if (name == m_name && objectName == m_containedName) {
+    if (name == m_containerName && objectName == m_containedName) {
       return true;
     } else {
       return false;
@@ -48,7 +48,7 @@ class Container {
   }
 
   inline std::string getContainerName() const {
-    return m_name;
+    return m_containerName;
   }
 
   inline std::string getContainedName() const {
@@ -56,7 +56,7 @@ class Container {
   }
 
  private:
-  std::string m_name;
+  std::string m_containerName;
   std::string m_containedName;
   std::shared_ptr<ConnMetadata> m_connMetadata = nullptr;
   dart::dynamics::BodyNodePtr m_containerBodyNode = nullptr;

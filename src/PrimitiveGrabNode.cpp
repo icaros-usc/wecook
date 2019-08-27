@@ -6,6 +6,7 @@
 #include "wecook/utils.h"
 #include "wecook/Agent.h"
 #include "wecook/Robot.h"
+#include "wecook/ConnMotionNode.h"
 
 using namespace wecook;
 
@@ -17,15 +18,66 @@ void PrimitiveGrabNode::execute(std::map<std::string, std::shared_ptr<Agent>> &a
   // since every primitive action node only involves one agent
   if (agent->getType() == "human") {
     // TODO human execute
+    waitForUser("Please grab " + m_toGrab + "...");
+
+    m_ifExecuted = true;
   } else if (agent->getType() == "robot") {
     auto robot = std::dynamic_pointer_cast<Robot, Agent>(agent);
     auto robotArm = robot->getArm();
     auto robotHand = robot->getHand();
     auto armSkeleton = robotArm->getMetaSkeleton();
     auto armSpace = std::make_shared<aikido::statespace::dart::MetaSkeletonStateSpace>(armSkeleton.get());
-    std::vector<std::shared_ptr<MotionNode>> motionSeq;
+    auto handSkeleton = robotHand->getMetaSkeleton();
+    auto handSpace = std::make_shared<aikido::statespace::dart::MetaSkeletonStateSpace>(handSkeleton.get());
+    auto world = robot->getWorld();
 
+    m_grabPose->mT0_w = objMgr->getObjTransform(m_toGrab);
+    auto motion1 = std::make_shared<TSRMotionNode>(m_grabPose,
+                                                   robotHand->getEndEffectorBodyNode(),
+                                                   nullptr,
+                                                   armSpace,
+                                                   armSkeleton,
+                                                   nullptr,
+                                                   false);
+    motion1->plan(robot->m_ada);
 
+    auto conf = Eigen::Vector2d();
+    conf << 0.75, 0.75;
+    auto motion2 = std::make_shared<ConfMotionNode>(conf, handSpace, handSkeleton);
+    motion2->plan(robot->m_ada);
 
+    // before do grab, we need to check if to grab object is connected with other object
+    if (objMgr->ifContained(m_toGrab)) {
+      if (containingMap->hasObject(m_toGrab)) {
+        auto container = containingMap->getContainer(m_toGrab);
+        auto containerSkeleton = world->getSkeleton(container.getContainerName());
+        auto containedSkeleton = world->getSkeleton(container.getContainedName());
+        // build an unconnect node
+        auto motion = std::make_shared<ConnMotionNode>(containedSkeleton,
+                                                       containerSkeleton,
+                                                       container.getContainerName(),
+                                                       container.getContainedName(),
+                                                       containingMap,
+                                                       false,
+                                                       armSpace,
+                                                       armSkeleton);
+        motion->plan(robot->m_ada);
+      } else {
+        for (auto &other : agents) {
+          if (other.first != m_pid && other.second->getType() == "robot") {
+            auto robot2 = std::dynamic_pointer_cast<Robot, Agent>(other.second);
+            if (robot2->getHand()->isGrabbing(m_toGrab) == 2) {
+              auto
+                  motion = std::make_shared<GrabMotionNode>(world->getSkeleton(m_toGrab), false, armSpace, armSkeleton);
+              motion->plan(robot2->m_ada);
+            }
+          }
+        }
+      }
+    }
+    auto motion3 = std::make_shared<GrabMotionNode>(world->getSkeleton(m_toGrab), true, armSpace, armSkeleton);
+    motion3->plan(robot->m_ada);
+
+    m_ifExecuted = true;
   }
 }

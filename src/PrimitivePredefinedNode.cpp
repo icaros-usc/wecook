@@ -15,13 +15,15 @@ void PrimitivePredefinedNode::execute(std::map<std::string, std::shared_ptr<Agen
 
   if (agent->getType() == "human") {
     // TODO human execute
+    waitForUser("Please do " + m_motionType + "...");
+
+    m_ifExecuted = true;
   } else if (agent->getType() == "robot") {
     auto robot = std::dynamic_pointer_cast<Robot, Agent>(agent);
     auto robotArm = robot->getArm();
     auto robotHand = robot->getHand();
     auto armSkeleton = robotArm->getMetaSkeleton();
     auto armSpace = std::make_shared<aikido::statespace::dart::MetaSkeletonStateSpace>(armSkeleton.get());
-    std::vector<std::shared_ptr<MotionNode>> motionSeq;
     dart::dynamics::BodyNode *bn = nullptr;
     if (m_manipulatedObj == "end-effector") {
       bn = robotHand->getEndEffectorBodyNode();
@@ -39,7 +41,7 @@ void PrimitivePredefinedNode::execute(std::map<std::string, std::shared_ptr<Agen
                                                     30,
                                                     armSpace,
                                                     armSkeleton);
-        motionSeq.emplace_back(motion4);
+        motion4->plan(robot->m_ada);
 
         delta_x << 0., 0., 0.001;
         auto motion5 =
@@ -49,9 +51,8 @@ void PrimitivePredefinedNode::execute(std::map<std::string, std::shared_ptr<Agen
                                                     30,
                                                     armSpace,
                                                     armSkeleton);
-        motionSeq.emplace_back(motion5);
+        motion5->plan(robot->m_ada);
       }
-      setMotionSeq(motionSeq);
     } else if (m_motionType == "stir") {
       for (int j = 0; j < 3; j++) {
         Eigen::Vector3d delta_x(-0.001, 0., -0.);
@@ -62,7 +63,7 @@ void PrimitivePredefinedNode::execute(std::map<std::string, std::shared_ptr<Agen
                                                     30,
                                                     armSpace,
                                                     armSkeleton);
-        motionSeq.emplace_back(motion5);
+        motion5->plan(robot->m_ada);
 
         delta_x << +0.001, 0., 0.00;
         auto motion6 =
@@ -72,9 +73,8 @@ void PrimitivePredefinedNode::execute(std::map<std::string, std::shared_ptr<Agen
                                                     30,
                                                     armSpace,
                                                     armSkeleton);
-        motionSeq.emplace_back(motion6);
+        motion6->plan(robot->m_ada);
       }
-      setMotionSeq(motionSeq);
     } else if (m_motionType == "transfer1") {
       auto rotatePose = Eigen::Isometry3d::Identity();
       rotatePose.linear() << 0.5000, 0.500000, 0.7071, 0.5000, 0.5000, -0.7071, -0.7071, 0.7071, 0.0000;
@@ -83,8 +83,7 @@ void PrimitivePredefinedNode::execute(std::map<std::string, std::shared_ptr<Agen
                                                            dart::dynamics::Frame::World(),
                                                            armSpace,
                                                            armSkeleton);
-      motionSeq.emplace_back(motion);
-      setMotionSeq(motionSeq);
+      motion->plan(robot->m_ada);
     } else if (m_motionType == "transfer2") {
       auto rotatePose = Eigen::Isometry3d::Identity();
       rotatePose.linear()
@@ -97,6 +96,7 @@ void PrimitivePredefinedNode::execute(std::map<std::string, std::shared_ptr<Agen
                                                            dart::dynamics::Frame::World(),
                                                            armSpace,
                                                            armSkeleton);
+      motion->plan(robot->m_ada);
       Eigen::Vector3d delta_x(0., 0., 0.001);
       auto motion2 = std::make_shared<LinearDeltaMotionNode>(bn,
                                                              delta_x,
@@ -104,9 +104,7 @@ void PrimitivePredefinedNode::execute(std::map<std::string, std::shared_ptr<Agen
                                                              200,
                                                              armSpace,
                                                              armSkeleton);
-      motionSeq.emplace_back(motion);
-      motionSeq.emplace_back(motion2);
-      setMotionSeq(motionSeq);
+      motion2->plan(robot->m_ada);
     } else if (m_motionType == "transfer3") {
       auto rotatePose = Eigen::Isometry3d::Identity();
       rotatePose.linear() <<
@@ -118,9 +116,9 @@ void PrimitivePredefinedNode::execute(std::map<std::string, std::shared_ptr<Agen
                                                             dart::dynamics::Frame::World(),
                                                             armSpace,
                                                             armSkeleton);
-      motionSeq.emplace_back(motion);
-      setMotionSeq(motionSeq);
+      motion->plan(robot->m_ada);
     }
+    m_ifExecuted = true;
   }
 
 }

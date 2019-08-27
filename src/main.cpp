@@ -16,23 +16,30 @@ int main(int argc, char **argv) {
   ros::init(argc, argv, "wecook", ros::init_options::NoSigintHandler);
   ros::NodeHandle n;
 
-  std::map<std::string, std::shared_ptr<Agent>> agents{};
+  // first construct world
+  std::shared_ptr<World> world = std::make_shared<World>(true);
+  // create one robot
   Eigen::Isometry3d robotPose1 = Eigen::Isometry3d::Identity();
   Eigen::Matrix3d rot;
   rot << 0, -1, 0, 1, 0, 0, 0, 0, 1;
   robotPose1.translation() = Eigen::Vector3d(-0.2, -0.70, 0.7);
   robotPose1.linear() = rot;
   std::string pid1 = "p1";
-  auto pRobot1 = std::make_shared<Robot>(robotPose1, pid1);
+  auto pRobot1 = std::make_shared<Robot>(robotPose1, pid1, world);
+  world->addAgent(pid1, pRobot1);
+  // create another robot
   Eigen::Isometry3d robotPose2 = Eigen::Isometry3d::Identity();
   robotPose2.translation() = Eigen::Vector3d(-0.2, 0.35, 0.7);
   robotPose2.linear() = rot;
   std::string pid2 = "p2";
-  auto pRobot2 = std::make_shared<Robot>(robotPose2, pid2);
-  agents.emplace(std::pair<std::string, std::shared_ptr<Agent>>{"p1", pRobot1});
-  agents.emplace(std::pair<std::string, std::shared_ptr<Agent>>{"p2", pRobot2});
+  auto pRobot2 = std::make_shared<Robot>(robotPose2, pid2, world);
+  world->addAgent(pid2, pRobot2);
 
-  taskManager = new TaskManager(n, agents);
+  // initialize world
+  world->init();
+
+  taskManager = new TaskManager(n);
+  taskManager->setWorld(world);
   taskManager->start();
 
   boost::thread t{boost::bind(&TaskManager::run, taskManager)};

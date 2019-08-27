@@ -18,14 +18,20 @@
 #include "ActionPlanner.h"
 #include "ContainingMap.h"
 #include "ObjectMgr.h"
+#include "TaskExecutorThread.h"
 
 namespace wecook {
 class World {
  public:
-  World(const std::map<std::string, std::shared_ptr<Agent>> &agents) : m_thread(&World::run, this), m_agents(agents) {
-    // ifSim of agents should be the same
-    m_ifSim = m_agents.begin()->second->ifSim();
+  World(bool ifSim) : m_ifSim(ifSim), m_thread(&World::run, this) {
 
+  }
+
+  void addAgent(const std::string &pid, const std::shared_ptr<Agent> &agent) {
+    m_agents.emplace(std::pair<std::string, std::shared_ptr<Agent>>(pid, agent));
+  }
+
+  void init() {
     initialize();
   }
 
@@ -59,6 +65,8 @@ class World {
   std::shared_ptr<ContainingMap> m_containingMap = nullptr;
   bool m_ifSim = true;
   std::shared_ptr<ObjectMgr> m_objectMgr = nullptr;
+  std::shared_ptr<PrimitiveActionExecutor> m_primitiveActionExecutor = nullptr;
+  std::vector<std::shared_ptr<TaskExecutorThread>> m_vecTaskExecutorThread;
 };
 }
 #endif //WECOOK_WORLD_H

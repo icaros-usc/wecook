@@ -34,19 +34,6 @@ class Agent {
 
   void stop();
 
-  inline bool isFree() {
-    return m_isFree;
-  }
-
-  inline bool isEnd() {
-    return m_isEnd;
-  }
-
-  inline void addNewTask(std::shared_ptr<TaskGraph> &taskGraph, syncCallback callback) {
-    m_syncCallback = callback;
-    m_currentTask = taskGraph;
-  }
-
   inline ActionNode *getCurrentActionNode() {
     return m_currentActionNode;
   }
@@ -61,18 +48,15 @@ class Agent {
 
   virtual Eigen::Vector3d getPosition() = 0;
 
- protected:
-  void run();
+  inline std::string getPid() {
+    return m_pid;
+  }
 
+ protected:
   std::string m_pid;
 
-  boost::thread m_thread;
   bool m_isFree = true;
   bool m_isEnd = false;
-  ActionNode *m_currentActionNode;
-  std::shared_ptr<TaskGraph> m_currentTask = nullptr;
-  syncCallback m_syncCallback;
-  PrimitiveActionExecutor m_pap;
   bool m_ifSim;
 };
 }

@@ -15,7 +15,8 @@ class ObjectMgr {
    public:
     InternalObject(bool ifSim, const Object &object, aikido::planner::WorldPtr &env) : m_ifSim(ifSim) {
       if (m_ifSim) {
-        m_bn = env->getSkeleton(object.getName())->getBodyNode(0);
+        m_skeleton = env->getSkeleton(object.getName());
+        m_bn = m_skeleton->getBodyNode(0);
       } else {
         // TODO store another handle which could achieve transform of the object
       }
@@ -33,9 +34,15 @@ class ObjectMgr {
       return m_bn;
     }
 
+    bool ifContained() {
+      return m_skeleton->getNumBodyNodes() == 0
+    }
+
    private:
     bool m_ifSim;
     dart::dynamics::BodyNodePtr m_bn = nullptr;
+    dart::dynamics::SkeletonPtr m_skeleton = nullptr;
+
   };
 
  public:
@@ -47,6 +54,15 @@ class ObjectMgr {
 
   inline dart::dynamics::BodyNode *getObjBodyNode(const std::string &obj) const {
     return m_objects[obj].getBodyNode();
+  }
+
+  inline Eigen::Isometry3d getObjTransform(const std::string &obj) const {
+    return m_objects[obj].getTransform();
+  }
+
+  inline bool ifContained(const std::string &obj) const {
+    // could be grabbed by hands or connected with other objects
+    return m_objects[obj].ifContained();
   }
 
  private:

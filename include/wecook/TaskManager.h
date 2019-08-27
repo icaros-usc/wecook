@@ -21,7 +21,11 @@
 namespace wecook {
 class TaskManager {
  public:
-  TaskManager(const ros::NodeHandle &n, const std::map<std::string, std::shared_ptr<Agent>> &agents);
+  TaskManager(const ros::NodeHandle &n);
+
+  void setWorld(const std::shared_ptr<World> &world) {
+    m_world = world;
+  }
 
   void start();
   void stop(int signum);
@@ -31,7 +35,7 @@ class TaskManager {
   bool m_isEnd;
   ros::Subscriber m_Listener;
   ros::NodeHandle m_nh;
-  World m_world;
+  std::shared_ptr<World> m_world;
 
   void addNewTask(const TaskMsg::ConstPtr &msg);
 };
