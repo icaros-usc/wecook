@@ -10,7 +10,7 @@ def talker():
 
     scene_msg = SceneMsg([ObjectMsg('table0',
                                     'package://wecook_assets/data/furniture/table.urdf',
-                                    [0.5, 0.0, 0.0, 0., 0., 0.7071063, 0.7071063]),
+                                    [0.5, 0.0, 0.0, 0., 0., 0., 1.]),
                           ObjectMsg('pot0',
                                     'package://wecook_assets/data/objects/pot.urdf',
                                     [0.3, -0.45, 0.70, 0., 0., 0., 1.]),

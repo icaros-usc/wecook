@@ -27,11 +27,21 @@ void PrimitiveMoveToNode::execute(std::map<std::string, std::shared_ptr<Agent>> 
     auto handSpace = std::make_shared<aikido::statespace::dart::MetaSkeletonStateSpace>(handSkeleton.get());
     auto world = robot->getWorld();
 
-    m_targetPose->mT0_w = objMgr->getObjTransform(m_refObject);
+    // setup collisionDetector
     auto moveBn = objMgr->getObjBodyNode(m_toMove);
+    auto collisionDetector = dart::collision::FCLCollisionDetector::create();
+    std::shared_ptr<dart::collision::CollisionGroup>
+        armCollisionGroup = collisionDetector->createCollisionGroup(armSkeleton.get(), moveBn);
+    auto envCollisionGroup = objMgr->createCollisionGroupExceptFoodAndMovingObj(m_toMove, collisionDetector);
+    std::shared_ptr<aikido::constraint::dart::CollisionFree> collisionFreeConstraint =
+        std::make_shared<aikido::constraint::dart::CollisionFree>(armSpace, armSkeleton, collisionDetector);
+    collisionFreeConstraint->addPairwiseCheck(armCollisionGroup, envCollisionGroup);
+
+    m_targetPose->mT0_w = objMgr->getObjTransform(m_refObject);
+
     auto motion1 = std::make_shared<TSRMotionNode>(m_targetPose,
                                                    moveBn,
-                                                   nullptr,
+                                                   collisionFreeConstraint,
                                                    armSpace,
                                                    armSkeleton,
                                                    nullptr,

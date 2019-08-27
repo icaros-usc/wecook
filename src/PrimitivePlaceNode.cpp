@@ -28,16 +28,24 @@ void PrimitivePlaceNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
 
     m_targetPose->mT0_w = objMgr->getObjTransform(m_refObject);
     auto placeBn = objMgr->getObjBodyNode(m_toPlace);
+    auto collisionDetector = dart::collision::FCLCollisionDetector::create();
+    std::shared_ptr<dart::collision::CollisionGroup>
+        armCollisionGroup = collisionDetector->createCollisionGroup(armSkeleton.get(), placeBn);
+    auto envCollisionGroup = objMgr->createCollisionGroupExceptFoodAndMovingObj(m_toPlace, collisionDetector);
+    std::shared_ptr<aikido::constraint::dart::CollisionFree> collisionFreeConstraint =
+        std::make_shared<aikido::constraint::dart::CollisionFree>(armSpace, armSkeleton, collisionDetector);
+    collisionFreeConstraint->addPairwiseCheck(armCollisionGroup, envCollisionGroup);
+
     auto motion1 = std::make_shared<TSRMotionNode>(m_targetPose,
                                                    placeBn,
-                                                   nullptr,
+                                                   collisionFreeConstraint,
                                                    armSpace,
                                                    armSkeleton,
                                                    nullptr,
                                                    false);
     motion1->plan(robot->m_ada);
 
-    if (robot->getHand()->isGrabbing(m_toPlace) == 2) {
+    if (robot->getHand()->isGrabbing(m_toPlace) == 0) {
       auto motion2 = std::make_shared<GrabMotionNode>(world->getSkeleton(m_toPlace), false, armSpace, armSkeleton);
       motion2->plan(robot->m_ada);
     }
