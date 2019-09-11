@@ -1,6 +1,6 @@
 # WeCook
 
-WeCook is targeting at becoming a benchmark platform for robotic manipulation 
+WeCook is a platform for robotic manipulation 
 and human-robot collaboration research.
 
 ## Setup Instructions
