@@ -26,6 +26,7 @@ void PrimitiveTaskGraph::removeTailNode(const std::string &pid) {
   while (itr != m_tails.end()) {
     if (*itr == tailNode) {
       itr = m_tails.erase(itr);
+      break;
     } else {
       ++itr;
     }
@@ -35,6 +36,7 @@ void PrimitiveTaskGraph::removeTailNode(const std::string &pid) {
   while (itr != m_nodes.end()) {
     if (*itr == tailNode) {
       itr = m_nodes.erase(itr);
+      break;
     } else {
       ++itr;
     }
@@ -61,6 +63,7 @@ void PrimitiveTaskGraph::removeHeadNode(const std::string &pid) {
   while (itr != m_heads.end()) {
     if (*itr == headNode) {
       itr = m_heads.erase(itr);
+      break;
     } else {
       ++itr;
     }
@@ -70,6 +73,7 @@ void PrimitiveTaskGraph::removeHeadNode(const std::string &pid) {
   while (itr != m_nodes.end()) {
     if (*itr == headNode) {
       itr = m_nodes.erase(itr);
+      break;
     } else {
       ++itr;
     }

@@ -28,8 +28,7 @@ dart::collision::CollisionGroupPtr ObjectMgr::createCollisionGroupExceptFoodAndM
   auto envCollisionGroup = collisionDetector->createCollisionGroup();
   for (auto &object : m_objects) {
     if (object.first == toMove || object.first.find("food") != std::string::npos
-        || object.first.find("knife") != std::string::npos || object.first.find("spoon") != std::string::npos
-        || object.first.find("plate") != std::string::npos)
+        || object.first.find("knife") != std::string::npos || object.first.find("spoon") != std::string::npos)
       continue;
     ROS_INFO_STREAM("Adding object for collision detect " << object.first);
     envCollisionGroup->addShapeFramesOf(object.second.getBodyNode());

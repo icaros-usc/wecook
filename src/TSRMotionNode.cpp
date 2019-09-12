@@ -75,6 +75,19 @@ void TSRMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
                                                  configurations[0],
                                                  m_collisionFree,
                                                  10);
+      ROS_INFO("Return");
+      int curr_conf = 1;
+      while (not trajectory && curr_conf < configurations.size()) {
+        // TODO replan
+        ROS_INFO("Try new goal");
+        trajectory = ada->planToConfiguration(m_stateSpace,
+                                              m_skeleton,
+                                              configurations[curr_conf],
+                                              m_collisionFree,
+                                              10);
+        curr_conf++;
+      }
+
       if (trajectory) {
         ROS_INFO("Found the trajectory!");
         ROS_INFO_STREAM("[TSRMotionNode::plan]: The trajectory has "

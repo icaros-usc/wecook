@@ -36,11 +36,12 @@ void World::run() {
       m_isFree = false;
       Task task = m_tasks[0];
       setupTask(task);
+
       std::vector<Action> subgoals = task.getSubgoals();
       auto taskGraph = std::make_shared<TaskGraph>(subgoals);
 
       // transfer taskGraph to primitive taskGraph
-      m_actionPlanner.compile(taskGraph, m_agents, m_containingMap);
+      m_actionPlanner.compile(taskGraph, m_agents, m_containingMap, m_objectMgr);
 
       // now dispatch taskgraph to all agents
       for (const auto &agent : m_agents) {

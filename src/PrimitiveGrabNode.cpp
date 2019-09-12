@@ -43,7 +43,7 @@ void PrimitiveGrabNode::execute(std::map<std::string, std::shared_ptr<Agent>> &a
     motion1->plan(robot->m_ada);
 
     auto conf = Eigen::Vector2d();
-    conf << 0.75, 0.75;
+    conf << 1., 1.;
     auto motion2 = std::make_shared<ConfMotionNode>(conf, handSpace, handSkeleton);
     ROS_INFO("Grabbing...Closing gripper");
     motion2->plan(robot->m_ada);
