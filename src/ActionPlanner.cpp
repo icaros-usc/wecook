@@ -59,14 +59,19 @@ void ActionPlanner::planRoll(ActionNode *actionNode,
   // 1) create grab node
   // create grab node
   auto grabPose = std::make_shared<aikido::constraint::dart::TSR>();
-  grabPose->mTw_e.translation() = Eigen::Vector3d(0., 0., 0.08);
+  grabPose->mTw_e.translation() = Eigen::Vector3d(0., 0.01, 0.08);
   Eigen::Matrix3d rot;
   rot <<
       1., 0., 0.,
       0., -1., 0.,
       0., 0., -1;
-  grabPose->mTw_e.linear() = rot;
-  auto epsilon = 0.02;
+  Eigen::Matrix3d rot2;
+  rot2 <<
+       0., 0., -1.,
+       0., 1., 0.,
+       1., 0., 0.;
+  grabPose->mTw_e.linear() = rot2 * rot;
+  auto epsilon = 0.01;
   grabPose->mBw
       << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
   auto toolName = actionNode->getAction().get_tool();
@@ -78,7 +83,7 @@ void ActionPlanner::planRoll(ActionNode *actionNode,
   // 2) create move to node
   // create start pose
   auto targetPose = std::make_shared<aikido::constraint::dart::TSR>();
-  targetPose->mTw_e.translation() = Eigen::Vector3d(0., 0., 0.08);
+  targetPose->mTw_e.translation() = Eigen::Vector3d(0., 0., 0.03);
   targetPose->mBw
       << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
   auto toRollName = actionNode->getAction().get_ingredients()[0];
@@ -86,7 +91,8 @@ void ActionPlanner::planRoll(ActionNode *actionNode,
       std::make_shared<PrimitiveMoveToNode>(targetPose, toolName, toRollName, pid, toolName, "", false, false);
 
   // 3) create predefined rolling node
-  auto predefinedNode = std::make_shared<PrimitivePredefinedNode>(pid, "end-effector", "roll", toolName, "", false, false);
+  auto predefinedNode =
+      std::make_shared<PrimitivePredefinedNode>(pid, "end-effector", "roll", toolName, "", false, false);
 
   // 4) create place back node
   auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
@@ -159,7 +165,8 @@ void ActionPlanner::planHeat(ActionNode *actionNode,
       std::make_shared<PrimitiveMoveToNode>(targetPose, toolName, toHeatName, pid, toolName, "", false, false);
 
   // 3) create predefined heating node
-  auto predefinedNode = std::make_shared<PrimitivePredefinedNode>(pid, "end-effector", "heat", toolName, "", false, false);
+  auto predefinedNode =
+      std::make_shared<PrimitivePredefinedNode>(pid, "end-effector", "heat", toolName, "", false, false);
 
   // 4) create place back node
   auto placePose = std::make_shared<aikido::constraint::dart::TSR>();

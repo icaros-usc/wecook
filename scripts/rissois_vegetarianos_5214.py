@@ -19,7 +19,7 @@ def talker():
                                     [0.4, -0.45, 0.73, 0., 0., 0., 1.]),
                           ObjectMsg('food_item0',
                                     'package://wecook_assets/data/food/food_item1.urdf',
-                                    [0.3, 0.4, 0.75, 0., 0., 0., 1.]),
+                                    [0.3, 0.4, 0.72, 0., 0., 0., 1.]),
                           ObjectMsg('roller0',
                                     'package://wecook_assets/data/objects/roller.urdf',
                                     [0.3, 0.5, 0.83, 0., 0., 0., 1.])],
