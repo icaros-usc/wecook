@@ -55,8 +55,11 @@ def talker():
     #                                ActionMsg(['p1'], 'stir', ['pot0'], 'spoon0', ['food_item0', 'food_item1']),
     #                                ActionMsg(['p2', 'p1'], 'holding_plate0_transfer', ['pot0', 'plate0'], 'spoon0', ['food_item0', 'food_item1'])])
 
-    task_msg = TaskMsg(scene_msg, [ActionMsg(['p2'], 'stir', ['pot0'], 'spoon1', ['food_item1']),
-                                   ActionMsg(['p1'], 'cut', ['chopping_board0'], 'knife0', ['food_item0'])])
+    # task_msg = TaskMsg(scene_msg, [ActionMsg(['p2'], 'stir', ['pot0'], 'spoon1', ['food_item1']),
+    #                                ActionMsg(['p1'], 'cut', ['chopping_board0'], 'knife0', ['food_item0'])])
+
+    # task_msg = TaskMsg(scene_msg, [ActionMsg(['p2'], 'stir', ['pot0'], 'spoon1', ['food_item1']),
+    #                                ActionMsg(['p1'], 'cut', ['chopping_board0'], 'knife0', ['food_item0'])])
 
 
     # sleeping 10 seconds to publish

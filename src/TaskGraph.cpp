@@ -55,30 +55,27 @@ void TaskGraph::visualize() {
 
 ActionNode *TaskGraph::findFatherNode(const std::string &pid) {
   ActionNode *fatherNode = nullptr;
-  // for each pid there will be only one father node
-  for (const auto &head : m_heads) {
-    auto pids = head->getAction().get_pids();
-    if (std::find(pids.begin(), pids.end(), pid) != pids.end()) {
-      // traverse graph to reach the tail consisting the pid
-      auto start = head;
-      while (!start->getChildren().empty()) {
-        auto children = start->getChildren();
-        ActionNode *next = nullptr;
-        for (const auto &child : children) {
-          auto childPids = child->getAction().get_pids();
-          if (std::find(childPids.begin(), childPids.end(), pid) != childPids.end()) {
-            next = child;
-            break;
-          }
-        }
-        if (!next) {
+  if ( m_headMap.find(pid) == m_headMap.end()) {
+    return fatherNode;
+  } else {
+    auto start = m_headMap[pid];
+    // traverse the graph to reach the tail node consisting the pid
+    while (!start->getChildren().empty()) {
+      auto children = start->getChildren();
+      ActionNode *next = nullptr;
+      for (const auto &child : children) {
+        auto childPids = child->getAction().get_pids();
+        if (std::find(childPids.begin(), childPids.end(), pid) != childPids.end()) {
+          next = child;
           break;
         }
-        start = next;
       }
-      fatherNode = start;
-      break;
+      if (!next) {
+        break;
+      }
+      start = next;
     }
+    fatherNode = start;
   }
   return fatherNode;
 }

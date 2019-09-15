@@ -2,16 +2,16 @@
 // Created by hejia on 8/26/19.
 //
 
-#include "wecook/PrimitivePredefinedNode.h"
+#include "wecook/PrimitiveActuateNode.h"
 #include "wecook/Robot.h"
 #include "wecook/RelativeIKMotionNode.h"
 #include "wecook/ConnMotionNode.h"
 
 using namespace wecook;
 
-void PrimitivePredefinedNode::execute(std::map<std::string, std::shared_ptr<Agent>> &agents,
-                                      std::shared_ptr<ObjectMgr> &objMgr,
-                                      std::shared_ptr<ContainingMap> &containingMap) {
+void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>> &agents,
+                                   std::shared_ptr<ObjectMgr> &objMgr,
+                                   std::shared_ptr<ContainingMap> &containingMap) {
   auto agent = agents[m_pid];
 
   if (agent->getType() == "human") {
@@ -89,17 +89,17 @@ void PrimitivePredefinedNode::execute(std::map<std::string, std::shared_ptr<Agen
       motion->plan(robot->m_ada);
     } else if (m_motionType == "transfer2") {
       // hacking
-      auto world = robot->getWorld();
-      auto ingredientNode = world->getSkeleton("food_item0");
-      auto chopping_board = world->getSkeleton("chopping_board0");
-      auto toolNode = world->getSkeleton("spoon1");
-      robotHand->ungrab();
-      auto motionunconnect = std::make_shared<ConnMotionNode>(ingredientNode, chopping_board, "chopping_board0", "food_item0", containingMap, false, armSpace, armSkeleton);
-      motionunconnect->plan(robot->m_ada);
-
-      auto motionConnect = std::make_shared<ConnMotionNode>(ingredientNode, toolNode, "spoon1", "food_item0", containingMap, true, armSpace, armSkeleton);
-      motionConnect->plan(robot->m_ada);
-      robotHand->grab(toolNode);
+//      auto world = robot->getWorld();
+//      auto ingredientNode = world->getSkeleton("food_item0");
+//      auto chopping_board = world->getSkeleton("chopping_board0");
+//      auto toolNode = world->getSkeleton("spoon1");
+//      robotHand->ungrab();
+//      auto motionunconnect = std::make_shared<ConnMotionNode>(ingredientNode, chopping_board, "chopping_board0", "food_item0", containingMap, false, armSpace, armSkeleton);
+//      motionunconnect->plan(robot->m_ada);
+//
+//      auto motionConnect = std::make_shared<ConnMotionNode>(ingredientNode, toolNode, "spoon1", "food_item0", containingMap, true, armSpace, armSkeleton);
+//      motionConnect->plan(robot->m_ada);
+//      robotHand->grab(toolNode);
       auto rotatePose = Eigen::Isometry3d::Identity();
       rotatePose.linear()
           <<
@@ -116,16 +116,16 @@ void PrimitivePredefinedNode::execute(std::map<std::string, std::shared_ptr<Agen
       auto motion2 = std::make_shared<LinearDeltaMotionNode>(bn,
                                                              delta_x,
                                                              dart::dynamics::Frame::World(),
-                                                             200,
+                                                             50,
                                                              armSpace,
                                                              armSkeleton);
       motion2->plan(robot->m_ada);
     } else if (m_motionType == "transfer3") {
       auto rotatePose = Eigen::Isometry3d::Identity();
       rotatePose.linear() <<
-                          0., -1., 0.,
                           1., 0., 0.,
-                          0., 0, 1.;
+                          0., 0.7071055, 0.7071081,
+                          0., -0.7071081, 0.7071055;
       auto motion = std::make_shared<RelativeIKMotionNode>(bn,
                                                             rotatePose,
                                                             dart::dynamics::Frame::World(),

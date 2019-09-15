@@ -121,7 +121,7 @@ add_executable(wecook
         src/TSRIKNode.cpp
         include/wecook/TaskGraph.h
         src/TaskGraph.cpp
-        include/wecook/ActionNode.h include/wecook/PrimitiveTaskGraph.h include/wecook/PrimitiveActionNode.h include/wecook/PrimitiveGrabNode.h include/wecook/Human.h include/wecook/Robot.h include/wecook/PrimitiveMoveToNode.h include/wecook/PrimitivePredefinedNode.h include/wecook/PrimitivePlaceNode.h include/wecook/RelativeIKMotionNode.h src/RelativeIKMotionNode.cpp src/PrimitiveTaskGraph.cpp src/PrimitiveActionNode.cpp include/wecook/PrimitiveActionExecutor.h src/PrimitiveActionExecutor.cpp src/PrimitiveGrabNode.cpp src/PrimitiveMoveToNode.cpp src/PrimitivePlaceNode.cpp src/PrimitivePredefinedNode.cpp src/Robot.cpp src/Human.cpp include/wecook/ObjectMgr.h src/ObjectMgr.cpp include/wecook/TaskExecutorThread.h src/TaskExecutorThread.cpp)
+        include/wecook/ActionNode.h include/wecook/PrimitiveTaskGraph.h include/wecook/PrimitiveActionNode.h include/wecook/PrimitiveGraspNode.h include/wecook/Human.h include/wecook/Robot.h include/wecook/PrimitiveEngageNode.h include/wecook/PrimitiveActuateNode.h include/wecook/PrimitivePlaceNode.h include/wecook/RelativeIKMotionNode.h src/RelativeIKMotionNode.cpp src/PrimitiveTaskGraph.cpp src/PrimitiveActionNode.cpp include/wecook/PrimitiveActionExecutor.h src/PrimitiveActionExecutor.cpp src/PrimitiveGraspNode.cpp src/PrimitiveEngageNode.cpp src/PrimitivePlaceNode.cpp src/PrimitiveActuateNode.cpp src/Robot.cpp src/Human.cpp include/wecook/ObjectMgr.h src/ObjectMgr.cpp include/wecook/TaskExecutorThread.h src/TaskExecutorThread.cpp)
 add_dependencies(wecook wecook_generate_messages_cpp)
 target_link_libraries(wecook
         ${DART_LIBRARIES}

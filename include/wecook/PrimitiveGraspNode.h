@@ -2,8 +2,8 @@
 // Created by hejia on 8/24/19.
 //
 
-#ifndef WECOOK_PRIMITIVEGRABNODE_H
-#define WECOOK_PRIMITIVEGRABNODE_H
+#ifndef WECOOK_PRIMITIVEGRASPNODE_H
+#define WECOOK_PRIMITIVEGRASPNODE_H
 
 #include <aikido/constraint/dart/TSR.hpp>
 
@@ -12,16 +12,16 @@
 
 namespace wecook {
 
-class PrimitiveGrabNode : public PrimitiveActionNode {
+class PrimitiveGraspNode : public PrimitiveActionNode {
  public:
-  PrimitiveGrabNode(const aikido::constraint::dart::TSRPtr &grabPose,
-                    const std::string &toGrab,
-                    const std::string &refObject,
-                    const std::string &pid,
-                    const std::string &grabbingObj,
-                    const std::string &placingObj,
-                    bool ifHead = false,
-                    bool ifTail = false) : PrimitiveActionNode(pid,
+  PrimitiveGraspNode(const aikido::constraint::dart::TSRPtr &grabPose,
+                     const std::string &toGrab,
+                     const std::string &refObject,
+                     const std::string &pid,
+                     const std::string &grabbingObj,
+                     const std::string &placingObj,
+                     bool ifHead = false,
+                     bool ifTail = false) : PrimitiveActionNode(pid,
                                                                "grab",
                                                                grabbingObj,
                                                                placingObj,
@@ -45,4 +45,4 @@ class PrimitiveGrabNode : public PrimitiveActionNode {
 
 }
 
-#endif //WECOOK_PRIMITIVEGRABNODE_H
+#endif //WECOOK_PRIMITIVEGRASPNODE_H

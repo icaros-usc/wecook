@@ -2,8 +2,8 @@
 // Created by hejia on 8/24/19.
 //
 
-#ifndef WECOOK_PRIMITIVEMOVETONODE_H
-#define WECOOK_PRIMITIVEMOVETONODE_H
+#ifndef WECOOK_PRIMITIVEENGAGENODE_H
+#define WECOOK_PRIMITIVEENGAGENODE_H
 
 #include <aikido/constraint/dart/TSR.hpp>
 
@@ -12,9 +12,9 @@
 
 namespace wecook {
 
-class PrimitiveMoveToNode : public PrimitiveActionNode {
+class PrimitiveEngageNode : public PrimitiveActionNode {
  public:
-  PrimitiveMoveToNode(const aikido::constraint::dart::TSRPtr &targetPose,
+  PrimitiveEngageNode(const aikido::constraint::dart::TSRPtr &targetPose,
                       const std::string &toMove,
                       const std::string &refObject,
                       const std::string &pid,
@@ -44,4 +44,4 @@ class PrimitiveMoveToNode : public PrimitiveActionNode {
 
 }
 
-#endif //WECOOK_PRIMITIVEMOVETONODE_H
+#endif //WECOOK_PRIMITIVEENGAGENODE_H

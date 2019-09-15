@@ -2,7 +2,7 @@
 // Created by hejia on 8/26/19.
 //
 
-#include "wecook/PrimitiveGrabNode.h"
+#include "wecook/PrimitiveGraspNode.h"
 #include "wecook/utils.h"
 #include "wecook/Agent.h"
 #include "wecook/Robot.h"
@@ -10,9 +10,9 @@
 
 using namespace wecook;
 
-void PrimitiveGrabNode::execute(std::map<std::string, std::shared_ptr<Agent>> &agents,
-                                std::shared_ptr<ObjectMgr> &objMgr,
-                                std::shared_ptr<ContainingMap> &containingMap) {
+void PrimitiveGraspNode::execute(std::map<std::string, std::shared_ptr<Agent>> &agents,
+                                 std::shared_ptr<ObjectMgr> &objMgr,
+                                 std::shared_ptr<ContainingMap> &containingMap) {
   auto agent = agents[m_pid];
 
   // since every primitive action node only involves one agent
@@ -43,7 +43,7 @@ void PrimitiveGrabNode::execute(std::map<std::string, std::shared_ptr<Agent>> &a
     motion1->plan(robot->m_ada);
 
     auto conf = Eigen::Vector2d();
-    conf << 1.2, 1.2;
+    conf << 1.1, 1.1;
     auto motion2 = std::make_shared<ConfMotionNode>(conf, handSpace, handSkeleton);
     ROS_INFO("Grabbing...Closing gripper");
     motion2->plan(robot->m_ada);

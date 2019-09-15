@@ -2,8 +2,8 @@
 // Created by hejia on 8/24/19.
 //
 
-#ifndef WECOOK_PRIMITIVEPREDEFINEDNODE_H
-#define WECOOK_PRIMITIVEPREDEFINEDNODE_H
+#ifndef WECOOK_PRIMITIVEACTUATENODE_H
+#define WECOOK_PRIMITIVEACTUATENODE_H
 
 #include <aikido/constraint/dart/TSR.hpp>
 #include <dart/dynamics/BodyNode.hpp>
@@ -13,15 +13,15 @@
 
 namespace wecook {
 
-class PrimitivePredefinedNode : public PrimitiveActionNode {
+class PrimitiveActuateNode : public PrimitiveActionNode {
  public:
-  PrimitivePredefinedNode(const std::string &pid,
-                          const std::string &manipulatedObj,
-                          const std::string &motionType,
-                          const std::string &grabbingObj,
-                          const std::string &placingObj,
-                          bool ifHead = false,
-                          bool ifTail = false)
+  PrimitiveActuateNode(const std::string &pid,
+                       const std::string &manipulatedObj,
+                       const std::string &motionType,
+                       const std::string &grabbingObj,
+                       const std::string &placingObj,
+                       bool ifHead = false,
+                       bool ifTail = false)
       : PrimitiveActionNode(pid,
                             "predefined",
                             grabbingObj,
@@ -42,4 +42,4 @@ class PrimitivePredefinedNode : public PrimitiveActionNode {
 
 }
 
-#endif //WECOOK_PRIMITIVEPREDEFINEDNODE_H
+#endif //WECOOK_PRIMITIVEACTUATENODE_H

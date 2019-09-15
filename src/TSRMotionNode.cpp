@@ -74,7 +74,7 @@ void TSRMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
                                                  m_skeleton,
                                                  configurations[0],
                                                  m_collisionFree,
-                                                 10);
+                                                 1);
       ROS_INFO("Return");
       int curr_conf = 1;
       while (not trajectory && curr_conf < configurations.size()) {
@@ -84,7 +84,7 @@ void TSRMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
                                               m_skeleton,
                                               configurations[curr_conf],
                                               m_collisionFree,
-                                              10);
+                                              1);
         curr_conf++;
       }
 
@@ -93,19 +93,20 @@ void TSRMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
         ROS_INFO_STREAM("[TSRMotionNode::plan]: The trajectory has "
                             << dynamic_cast<aikido::trajectory::Interpolated *>(trajectory.get())->getNumWaypoints()
                             << " waypoints");
-        std::vector<aikido::constraint::ConstTestablePtr> constraints;
-        if (m_collisionFree)
-          constraints.push_back(m_collisionFree);
-        auto testable = std::make_shared<aikido::constraint::TestableIntersection>(m_stateSpace, constraints);
-        std::unique_lock<std::mutex> lock(m_skeleton->getBodyNode(0)->getSkeleton()->getMutex());
-        aikido::trajectory::TrajectoryPtr timedTrajectory = ada->smoothPath(m_skeleton,
-                                                                            trajectory.get(),
-                                                                            testable);
-        m_stateSpace->setState(m_skeleton.get(), startState.getState());
-        lock.unlock();
-        ROS_INFO_STREAM("[TSRMotionNode::plan]: The smoothed trajectory has "
-                            << dynamic_cast<aikido::trajectory::Spline *>(timedTrajectory.get())->getNumWaypoints()
-                            << " waypoints");
+//        std::vector<aikido::constraint::ConstTestablePtr> constraints;
+//        if (m_collisionFree)
+//          constraints.push_back(m_collisionFree);
+//        auto testable = std::make_shared<aikido::constraint::TestableIntersection>(m_stateSpace, constraints);
+//        std::unique_lock<std::mutex> lock(m_skeleton->getBodyNode(0)->getSkeleton()->getMutex());
+//        aikido::trajectory::TrajectoryPtr timedTrajectory = ada->smoothPath(m_skeleton,
+//                                                                            trajectory.get(),
+//                                                                            testable);
+//        m_stateSpace->setState(m_skeleton.get(), startState.getState());
+//        lock.unlock();
+//        ROS_INFO_STREAM("[TSRMotionNode::plan]: The smoothed trajectory has "
+//                            << dynamic_cast<aikido::trajectory::Spline *>(timedTrajectory.get())->getNumWaypoints()
+//                            << " waypoints");
+        aikido::trajectory::TrajectoryPtr timedTrajectory = ada->retimePath(m_skeleton, trajectory.get());
         auto future = ada->executeTrajectory(timedTrajectory);
         future.wait();
       } else {

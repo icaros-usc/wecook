@@ -10,6 +10,7 @@ void TaskExecutorThread::run() {
   auto pid = m_agent->getPid();
   auto curr = m_currentTask->getHeadNode(pid);
   while (curr) {
+    std::cout << pid << " " << curr->getAction().get_verb() << std::endl;
     m_currentActionNode = curr;
     // wait until all agents involved in this action are ready
     m_syncCallback(m_currentActionNode);
@@ -48,6 +49,7 @@ void TaskExecutorThread::run() {
     }
     curr = next;
   }
+  std::cout << pid << " has finished all tasks" << std::endl;
 
   m_isEnd = true;
 }

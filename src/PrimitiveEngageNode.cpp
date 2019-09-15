@@ -3,11 +3,11 @@
 //
 
 #include "wecook/Robot.h"
-#include "wecook/PrimitiveMoveToNode.h"
+#include "wecook/PrimitiveEngageNode.h"
 
 using namespace wecook;
 
-void PrimitiveMoveToNode::execute(std::map<std::string, std::shared_ptr<Agent>> &agents,
+void PrimitiveEngageNode::execute(std::map<std::string, std::shared_ptr<Agent>> &agents,
                                   std::shared_ptr<ObjectMgr> &objMgr,
                                   std::shared_ptr<ContainingMap> &containingMap) {
   auto agent = agents[m_pid];
