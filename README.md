@@ -4,7 +4,7 @@ WeCook is a platform for robotic manipulation
 and human-robot collaboration research.
 
 ## Setup Instructions
-**WeCook depends on [AIKIDO](https://github.com/personalrobotics/aikido), developed by the [Personal Robotics Lab](https://personalrobotics.cs.washington.edu/) at the University of Washington. ** 
+**WeCook depends on [AIKIDO](https://github.com/personalrobotics/aikido), developed by the [Personal Robotics Lab](https://personalrobotics.cs.washington.edu/) at the University of Washington.** 
 
 **WeCook is supported on the following systems:**
 - Ubuntu 18.04 / ROS Melodic
