@@ -8,7 +8,7 @@
 #include <aikido/distance/NominalConfigurationRanker.hpp>
 
 #include "wecook/TSRMotionNode.h"
-#include "wecook/planner/SmootherHelpers.h"
+#include "ai/planner/smoother/SmootherHelpers.h"
 
 using namespace wecook;
 
@@ -108,11 +108,11 @@ void TSRMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
         } else {
           std::unique_lock<std::mutex> lock(m_skeleton->getBodyNode(0)->getSkeleton()->getMutex());
 //          aikido::trajectory::TrajectoryPtr unTimedTrajectory =
-//              planner::simpleSmoothPath(ada, m_stateSpace, m_skeleton, trajectory.get(), testable);
+//              smoother::simpleSmoothPath(ada, m_stateSpace, m_skeleton, trajectory.get(), testable);
 //          aikido::trajectory::TrajectoryPtr timedTrajectory = ada->retimePathWithKunz(m_skeleton, unTimedTrajectory.get(), 1e-2, m_retimeTimeStep);
 //          m_stateSpace->setState(m_skeleton.get(), startState.getState());
 //          aikido::trajectory::TrajectoryPtr unTimedTrajectory =
-//              planner::hauserSmoothPathInterpolated(ada, m_stateSpace, m_skeleton, trajectory.get(), testable);
+//              smoother::hauserSmoothPathInterpolated(ada, m_stateSpace, m_skeleton, trajectory.get(), testable);
 //          aikido::trajectory::TrajectoryPtr
 //              timedTrajectory = ada->retimePathWithKunz(m_skeleton, unTimedTrajectory.get(), 1e-3, 5e-3);
           aikido::trajectory::TrajectoryPtr timedTrajectory = planner::hauserSmoothPath(ada, m_stateSpace, m_skeleton, trajectory.get(), testable);

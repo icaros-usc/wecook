@@ -2,7 +2,7 @@
 // Created by hejia on 9/16/19.
 //
 #include "SmootherUtil.h"
-#include "wecook/planner/SmootherHelpers.h"
+#include "ai/planner/smoother/SmootherHelpers.h"
 
 namespace wecook {
 namespace planner {

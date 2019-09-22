@@ -57,7 +57,7 @@ void TSRMotionwithConstraintNode::plan(const std::shared_ptr<ada::Ada> &ada) {
   auto collisionConstraint
       = ada->getFullCollisionConstraint(m_stateSpace, m_skeleton, m_collisionFree);
 
-  // we will do our own planner
+  // we will do our own smoother
   auto interpolator = std::make_shared<aikido::statespace::GeodesicInterpolator>(m_stateSpace);
   auto distanceMetric = aikido::distance::createDistanceMetric(m_stateSpace);
   auto boundsConstraint = aikido::constraint::dart::createTestableBounds(m_stateSpace);

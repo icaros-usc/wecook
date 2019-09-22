@@ -69,7 +69,7 @@ void TSRIKNode::plan(const std::shared_ptr<ada::Ada> &ada) {
 
       std::unique_lock<std::mutex> lock(m_skeleton->getBodyNode(0)->getSkeleton()->getMutex());
 
-      // run snap planner
+      // run snap smoother
       auto snapPlanner = std::make_shared<aikido::planner::SnapConfigurationToConfigurationPlanner>(m_stateSpace,
                                                                                                     std::make_shared<
                                                                                                         aikido::statespace::GeodesicInterpolator>(
