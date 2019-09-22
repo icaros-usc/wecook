@@ -52,14 +52,14 @@ find_package(aikido 0.3.0 REQUIRED
 include_directories(${aikido_INCLUDE_DIRS})
 find_package(libada REQUIRED)
 include_directories(${libada_INCLUDE_DIRS})
-find_package(pr_assets REQUIRED)
-include_directories(${pr_assets_INCLUDE_DIRS})
 find_package(pr_tsr REQUIRED)
 include_directories(${pr_tsr_INCLUDE_DIRS})
 find_package(Boost COMPONENTS program_options REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
 include_directories(include)
+
+add_subdirectory("src/external/hauser_parabolic_smoother")
 
 add_executable(wecook
         src/main.cpp
@@ -121,17 +121,41 @@ add_executable(wecook
         src/TSRIKNode.cpp
         include/wecook/TaskGraph.h
         src/TaskGraph.cpp
-        include/wecook/ActionNode.h include/wecook/PrimitiveTaskGraph.h include/wecook/PrimitiveActionNode.h include/wecook/PrimitiveGraspNode.h include/wecook/Human.h include/wecook/Robot.h include/wecook/PrimitiveEngageNode.h include/wecook/PrimitiveActuateNode.h include/wecook/PrimitivePlaceNode.h include/wecook/RelativeIKMotionNode.h src/RelativeIKMotionNode.cpp src/PrimitiveTaskGraph.cpp src/PrimitiveActionNode.cpp include/wecook/PrimitiveActionExecutor.h src/PrimitiveActionExecutor.cpp src/PrimitiveGraspNode.cpp src/PrimitiveEngageNode.cpp src/PrimitivePlaceNode.cpp src/PrimitiveActuateNode.cpp src/Robot.cpp src/Human.cpp include/wecook/ObjectMgr.h src/ObjectMgr.cpp include/wecook/TaskExecutorThread.h src/TaskExecutorThread.cpp)
+        include/wecook/ActionNode.h
+        include/wecook/PrimitiveTaskGraph.h
+        include/wecook/PrimitiveActionNode.h
+        include/wecook/PrimitiveGraspNode.h
+        include/wecook/Human.h
+        include/wecook/Robot.h
+        include/wecook/PrimitiveEngageNode.h
+        include/wecook/PrimitiveActuateNode.h
+        include/wecook/PrimitivePlaceNode.h
+        include/wecook/RelativeIKMotionNode.h
+        src/RelativeIKMotionNode.cpp
+        src/PrimitiveTaskGraph.cpp
+        src/PrimitiveActionNode.cpp
+        include/wecook/PrimitiveActionExecutor.h
+        src/PrimitiveActionExecutor.cpp
+        src/PrimitiveGraspNode.cpp
+        src/PrimitiveEngageNode.cpp
+        src/PrimitivePlaceNode.cpp
+        src/PrimitiveActuateNode.cpp
+        src/Robot.cpp src/Human.cpp
+        include/wecook/ObjectMgr.h
+        src/ObjectMgr.cpp
+        include/wecook/TaskExecutorThread.h
+        src/TaskExecutorThread.cpp
+        include/wecook/planner/SmootherHelpers.h
+        src/planner/SmootherHelpers.cpp src/planner/SmootherUtil.h src/planner/SmootherUtil.cpp src/planner/SimpleDynamicPath.h src/planner/SimpleDynamicPath.cpp include/wecook/MetaActuateInfo.h)
 add_dependencies(wecook wecook_generate_messages_cpp)
 target_link_libraries(wecook
         ${DART_LIBRARIES}
         ${aikido_LIBRARIES}
         ${Boost_LIBRARIES}
-        libada)
+        libada
+        ${PROJECT_NAME}_external_hauserparabolicsmoother)
 
 install(TARGETS wecook RUNTIME DESTINATION bin)
-
-#catkin_install_python(PROGRAMS scripts/ex_task1.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 #include(ClangFormat)
 #clang_format_setup(VERSION 3.8)

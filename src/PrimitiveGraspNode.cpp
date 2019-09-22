@@ -14,6 +14,13 @@ void PrimitiveGraspNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
                                  std::shared_ptr<ObjectMgr> &objMgr,
                                  std::shared_ptr<ContainingMap> &containingMap) {
   auto agent = agents[m_pid];
+  auto theOtherPid = m_pid;
+  if (theOtherPid == "p1") {
+    theOtherPid = "p2";
+  } else {
+    theOtherPid = "p1";
+  }
+  auto theOther = agents[theOtherPid];
 
   // since every primitive action node only involves one agent
   if (agent->getType() == "human") {
@@ -22,6 +29,7 @@ void PrimitiveGraspNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
 
     m_ifExecuted = true;
   } else if (agent->getType() == "robot") {
+    auto theOtherRobot = std::dynamic_pointer_cast<Robot, Agent>(theOther);
     auto robot = std::dynamic_pointer_cast<Robot, Agent>(agent);
     auto robotArm = robot->getArm();
     auto robotHand = robot->getHand();
@@ -33,9 +41,20 @@ void PrimitiveGraspNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
 
     m_grabPose->mT0_w = objMgr->getObjTransform(m_toGrab);
 
+    // setup collisionDetector
+    auto grabbedBodyNode = theOtherRobot->getHand()->getGrabbedBodyNode();
+    auto collisionDetector = dart::collision::FCLCollisionDetector::create();
+    std::shared_ptr<dart::collision::CollisionGroup>
+        armCollisionGroup = collisionDetector->createCollisionGroup(armSkeleton.get(), handSkeleton.get());
+    std::cout << "Hand has " << handSkeleton->getNumBodyNodes() << " body nodes: " << handSkeleton->getBodyNode(0)->getName() << " " << handSkeleton->getBodyNode(1)->getName() << std::endl;
+    auto envCollisionGroup = objMgr->createCollisionGroupExceptFoodAndMovingObj("hand", collisionDetector, grabbedBodyNode);
+    std::shared_ptr<aikido::constraint::dart::CollisionFree> collisionFreeConstraint =
+        std::make_shared<aikido::constraint::dart::CollisionFree>(armSpace, armSkeleton, collisionDetector);
+    collisionFreeConstraint->addPairwiseCheck(armCollisionGroup, envCollisionGroup);
+
     auto motion1 = std::make_shared<TSRMotionNode>(m_grabPose,
                                                    robotHand->getEndEffectorBodyNode(),
-                                                   nullptr,
+                                                   collisionFreeConstraint,
                                                    armSpace,
                                                    armSkeleton,
                                                    nullptr,

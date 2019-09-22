@@ -10,6 +10,7 @@
 
 #include "PrimitiveActionNode.h"
 #include "ContainingMap.h"
+#include "MetaActuateInfo.h"
 
 namespace wecook {
 
@@ -20,6 +21,7 @@ class PrimitiveActuateNode : public PrimitiveActionNode {
                        const std::string &motionType,
                        const std::string &grabbingObj,
                        const std::string &placingObj,
+                       const MetaActuateInfo &metaActuateInfo,
                        bool ifHead = false,
                        bool ifTail = false)
       : PrimitiveActionNode(pid,
@@ -27,7 +29,10 @@ class PrimitiveActuateNode : public PrimitiveActionNode {
                             grabbingObj,
                             placingObj,
                             ifHead,
-                            ifTail), m_motionType(motionType), m_manipulatedObj(manipulatedObj) {
+                            ifTail),
+        m_motionType(motionType),
+        m_manipulatedObj(manipulatedObj),
+        m_metaActuateInfo(metaActuateInfo) {
 
   }
 
@@ -36,6 +41,7 @@ class PrimitiveActuateNode : public PrimitiveActionNode {
                std::shared_ptr<ContainingMap> &containingMap);
 
  private:
+  MetaActuateInfo m_metaActuateInfo;
   std::string m_motionType;
   std::string m_manipulatedObj;
 };

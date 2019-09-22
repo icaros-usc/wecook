@@ -36,48 +36,67 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
 
     if (m_motionType == "cut") {
       for (int j = 0; j < 3; j++) {
-        Eigen::Vector3d delta_x(0., 0., -0.001);
+        Eigen::Vector3d delta_x(0., 0., -0.003);
         auto motion4 =
             std::make_shared<LinearDeltaMotionNode>(bn,
                                                     delta_x,
                                                     dart::dynamics::Frame::World(),
-                                                    30,
+                                                    10,
                                                     armSpace,
                                                     armSkeleton);
         motion4->plan(robot->m_ada);
 
-        delta_x << 0., 0., 0.001;
+        delta_x << 0., 0., 0.003;
         auto motion5 =
             std::make_shared<LinearDeltaMotionNode>(bn,
                                                     delta_x,
                                                     dart::dynamics::Frame::World(),
-                                                    30,
+                                                    10,
                                                     armSpace,
                                                     armSkeleton);
         motion5->plan(robot->m_ada);
       }
     } else if (m_motionType == "stir") {
+      Eigen::Vector3d delta_x(-0.003, 0., -0.);
+      delta_x << +0.003, 0., 0.00;
+      auto motion6 =
+          std::make_shared<LinearDeltaMotionNode>(bn,
+                                                  delta_x,
+                                                  dart::dynamics::Frame::World(),
+                                                  10,
+                                                  armSpace,
+                                                  armSkeleton);
+      motion6->plan(robot->m_ada);
       for (int j = 0; j < 3; j++) {
-        Eigen::Vector3d delta_x(-0.001, 0., -0.);
+        Eigen::Vector3d delta_x(-0.003, 0., -0.);
         auto motion5 =
             std::make_shared<LinearDeltaMotionNode>(bn,
                                                     delta_x,
                                                     dart::dynamics::Frame::World(),
-                                                    30,
+                                                    20,
                                                     armSpace,
                                                     armSkeleton);
         motion5->plan(robot->m_ada);
 
-        delta_x << +0.001, 0., 0.00;
+        delta_x << +0.003, 0., 0.00;
         auto motion6 =
             std::make_shared<LinearDeltaMotionNode>(bn,
                                                     delta_x,
                                                     dart::dynamics::Frame::World(),
-                                                    30,
+                                                    20,
                                                     armSpace,
                                                     armSkeleton);
         motion6->plan(robot->m_ada);
       }
+      delta_x << -0.003, 0., 0.00;
+      motion6 =
+          std::make_shared<LinearDeltaMotionNode>(bn,
+                                                  delta_x,
+                                                  dart::dynamics::Frame::World(),
+                                                  10,
+                                                  armSpace,
+                                                  armSkeleton);
+      motion6->plan(robot->m_ada);
     } else if (m_motionType == "transfer1") {
       auto rotatePose = Eigen::Isometry3d::Identity();
       rotatePose.linear() << 0.5000, 0.500000, 0.7071, 0.5000, 0.5000, -0.7071, -0.7071, 0.7071, 0.0000;
@@ -89,34 +108,42 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
       motion->plan(robot->m_ada);
     } else if (m_motionType == "transfer2") {
       // hacking
-//      auto world = robot->getWorld();
-//      auto ingredientNode = world->getSkeleton("food_item0");
-//      auto chopping_board = world->getSkeleton("chopping_board0");
-//      auto toolNode = world->getSkeleton("spoon1");
-//      robotHand->ungrab();
-//      auto motionunconnect = std::make_shared<ConnMotionNode>(ingredientNode, chopping_board, "chopping_board0", "food_item0", containingMap, false, armSpace, armSkeleton);
-//      motionunconnect->plan(robot->m_ada);
-//
-//      auto motionConnect = std::make_shared<ConnMotionNode>(ingredientNode, toolNode, "spoon1", "food_item0", containingMap, true, armSpace, armSkeleton);
-//      motionConnect->plan(robot->m_ada);
-//      robotHand->grab(toolNode);
+      // this action is used to grasp some food with the tool
+      auto action = m_metaActuateInfo.getAction();
+      auto ingredientName = action.get_ingredients()[0];
+      auto oldLocationName = action.get_locations()[0];
+      auto toolName = action.get_tool();
+
+      auto world = robot->getWorld();
+      auto ingredientNode = world->getSkeleton(ingredientName);
+      auto oldLocation = world->getSkeleton(oldLocationName);
+      auto toolNode = world->getSkeleton(toolName);
+      // ungrab for connect
+      robotHand->ungrab();
+      auto motionunconnect = std::make_shared<ConnMotionNode>(ingredientNode, oldLocation, oldLocationName, ingredientName, containingMap, false, armSpace, armSkeleton);
+      motionunconnect->plan(robot->m_ada);
+
+      auto motionConnect = std::make_shared<ConnMotionNode>(ingredientNode, toolNode, toolName, ingredientName, containingMap, true, armSpace, armSkeleton);
+      motionConnect->plan(robot->m_ada);
+      // grab again
+      robotHand->grab(toolNode);
       auto rotatePose = Eigen::Isometry3d::Identity();
       rotatePose.linear()
           <<
           1., 0., 0.,
-          0., 0.7071068, -0.7071068,
-          0., 0.7071068, 0.7071068;
+          0., 0.50000, -0.866,
+          0., 0.8666, 0.5;
       auto motion = std::make_shared<RelativeIKMotionNode>(bn,
                                                            rotatePose,
                                                            dart::dynamics::Frame::World(),
                                                            armSpace,
                                                            armSkeleton);
       motion->plan(robot->m_ada);
-      Eigen::Vector3d delta_x(0., 0., 0.001);
+      Eigen::Vector3d delta_x(0., 0., 0.005);
       auto motion2 = std::make_shared<LinearDeltaMotionNode>(bn,
                                                              delta_x,
                                                              dart::dynamics::Frame::World(),
-                                                             50,
+                                                             10,
                                                              armSpace,
                                                              armSkeleton);
       motion2->plan(robot->m_ada);
@@ -124,14 +151,34 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
       auto rotatePose = Eigen::Isometry3d::Identity();
       rotatePose.linear() <<
                           1., 0., 0.,
-                          0., 0.7071055, 0.7071081,
-                          0., -0.7071081, 0.7071055;
+          0., 0.7071055, 0.7071081,
+          0., -0.7071081, 0.7071055;
       auto motion = std::make_shared<RelativeIKMotionNode>(bn,
-                                                            rotatePose,
-                                                            dart::dynamics::Frame::World(),
-                                                            armSpace,
-                                                            armSkeleton);
+                                                           rotatePose,
+                                                           dart::dynamics::Frame::World(),
+                                                           armSpace,
+                                                           armSkeleton);
       motion->plan(robot->m_ada);
+
+      // this action is used to release some food from the tool
+      auto action = m_metaActuateInfo.getAction();
+      auto ingredientName = action.get_ingredients()[0];
+      auto newLocationName = action.get_locations()[1];
+      auto toolName = action.get_tool();
+
+      auto world = robot->getWorld();
+      auto ingredientNode = world->getSkeleton(ingredientName);
+      auto newLocation = world->getSkeleton(newLocationName);
+      auto toolNode = world->getSkeleton(toolName);
+      // ungrab for connect
+      robotHand->ungrab();
+      auto motionunconnect = std::make_shared<ConnMotionNode>(ingredientNode, toolNode, toolName, ingredientName, containingMap, false, armSpace, armSkeleton);
+      motionunconnect->plan(robot->m_ada);
+
+      auto motionConnect = std::make_shared<ConnMotionNode>(ingredientNode, newLocation, newLocationName, ingredientName, containingMap, true, armSpace, armSkeleton);
+      motionConnect->plan(robot->m_ada);
+      // grab again
+      robotHand->grab(toolNode);
     } else if (m_motionType == "close") {
       auto conf = Eigen::Vector2d();
       conf << 1., 1.;
@@ -140,44 +187,44 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
       motion->plan(robot->m_ada);
     } else if (m_motionType == "roll") {
       for (int j = 0; j < 3; j++) {
-        Eigen::Vector3d delta_x(-0.001, 0., -0.);
+        Eigen::Vector3d delta_x(-0.003, 0., -0.);
         auto motion5 =
             std::make_shared<LinearDeltaMotionNode>(bn,
                                                     delta_x,
                                                     dart::dynamics::Frame::World(),
-                                                    30,
+                                                    10,
                                                     armSpace,
                                                     armSkeleton);
         motion5->plan(robot->m_ada);
 
-        delta_x << +0.001, 0., 0.00;
+        delta_x << +0.003, 0., 0.00;
         auto motion6 =
             std::make_shared<LinearDeltaMotionNode>(bn,
                                                     delta_x,
                                                     dart::dynamics::Frame::World(),
-                                                    30,
+                                                    10,
                                                     armSpace,
                                                     armSkeleton);
         motion6->plan(robot->m_ada);
       }
     } else if (m_motionType == "heat") {
       for (int j = 0; j < 3; j++) {
-        Eigen::Vector3d delta_x(-0.001, 0., -0.);
+        Eigen::Vector3d delta_x(-0.003, 0., -0.);
         auto motion5 =
             std::make_shared<LinearDeltaMotionNode>(bn,
                                                     delta_x,
                                                     dart::dynamics::Frame::World(),
-                                                    30,
+                                                    10,
                                                     armSpace,
                                                     armSkeleton);
         motion5->plan(robot->m_ada);
 
-        delta_x << +0.001, 0., 0.00;
+        delta_x << +0.003, 0., 0.00;
         auto motion6 =
             std::make_shared<LinearDeltaMotionNode>(bn,
                                                     delta_x,
                                                     dart::dynamics::Frame::World(),
-                                                    30,
+                                                    10,
                                                     armSpace,
                                                     armSkeleton);
         motion6->plan(robot->m_ada);

@@ -13,8 +13,15 @@ namespace wecook {
 class TaskGraph {
  public:
   TaskGraph(const std::vector<Action> &actionSeq) {
+    int i = 0;
     for (auto &action : actionSeq) {
-      addNode(action);
+      i += 1;
+      if (i == 6) {
+        addNode(action, true);
+      } else {
+        addNode(action);
+      }
+
     }
   }
 
@@ -24,7 +31,7 @@ class TaskGraph {
     }
   }
 
-  void addNode(const Action& action);
+  void addNode(const Action& action, bool ifEnd=false);
 
   void addArc();
 

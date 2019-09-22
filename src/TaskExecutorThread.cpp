@@ -13,7 +13,13 @@ void TaskExecutorThread::run() {
     std::cout << pid << " " << curr->getAction().get_verb() << std::endl;
     m_currentActionNode = curr;
     // wait until all agents involved in this action are ready
-    m_syncCallback(m_currentActionNode);
+//    m_syncCallback(m_currentActionNode);
+    auto fatherNodes = curr->getFathers();
+    for (auto &father : fatherNodes) {
+      while (!father->m_ifExecuted) {
+        ros::Duration(0.5).sleep();
+      }
+    }
     // execute primitive task graph
     auto ptg = m_currentActionNode->m_primitiveTaskGraph;
     // get the first primitive action node to execute
@@ -37,7 +43,7 @@ void TaskExecutorThread::run() {
         }
       }
     }
-
+    curr->m_ifExecuted = true;
     // find next action
     ActionNode *next = nullptr;
     for (auto &child : curr->getChildren()) {

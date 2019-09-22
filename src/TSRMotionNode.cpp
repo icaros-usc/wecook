@@ -6,7 +6,9 @@
 #include <aikido/constraint/dart/JointStateSpaceHelpers.hpp>
 #include <aikido/constraint/TestableIntersection.hpp>
 #include <aikido/distance/NominalConfigurationRanker.hpp>
+
 #include "wecook/TSRMotionNode.h"
+#include "wecook/planner/SmootherHelpers.h"
 
 using namespace wecook;
 
@@ -78,6 +80,7 @@ void TSRMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
       ROS_INFO("Return");
       int curr_conf = 1;
       while (not trajectory && curr_conf < configurations.size()) {
+        std::cout << "Failed " << m_goalTSR->mT0_w.translation() << std::endl;
         // TODO replan
         ROS_INFO("Try new goal");
         trajectory = ada->planToConfiguration(m_stateSpace,
@@ -85,30 +88,40 @@ void TSRMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
                                               configurations[curr_conf],
                                               m_collisionFree,
                                               1);
+        m_stateSpace->setState(m_skeleton.get(), startState.getState());
         curr_conf++;
       }
 
       if (trajectory) {
         ROS_INFO("Found the trajectory!");
+        auto num_waypoints = dynamic_cast<aikido::trajectory::Interpolated *>(trajectory.get())->getNumWaypoints();
         ROS_INFO_STREAM("[TSRMotionNode::plan]: The trajectory has "
-                            << dynamic_cast<aikido::trajectory::Interpolated *>(trajectory.get())->getNumWaypoints()
+                            << num_waypoints
                             << " waypoints");
-//        std::vector<aikido::constraint::ConstTestablePtr> constraints;
-//        if (m_collisionFree)
-//          constraints.push_back(m_collisionFree);
-//        auto testable = std::make_shared<aikido::constraint::TestableIntersection>(m_stateSpace, constraints);
-//        std::unique_lock<std::mutex> lock(m_skeleton->getBodyNode(0)->getSkeleton()->getMutex());
-//        aikido::trajectory::TrajectoryPtr timedTrajectory = ada->smoothPath(m_skeleton,
-//                                                                            trajectory.get(),
-//                                                                            testable);
-//        m_stateSpace->setState(m_skeleton.get(), startState.getState());
-//        lock.unlock();
-//        ROS_INFO_STREAM("[TSRMotionNode::plan]: The smoothed trajectory has "
-//                            << dynamic_cast<aikido::trajectory::Spline *>(timedTrajectory.get())->getNumWaypoints()
-//                            << " waypoints");
-        aikido::trajectory::TrajectoryPtr timedTrajectory = ada->retimePath(m_skeleton, trajectory.get());
-        auto future = ada->executeTrajectory(timedTrajectory);
-        future.wait();
+        std::vector<aikido::constraint::ConstTestablePtr> constraints;
+        if (m_collisionFree)
+          constraints.push_back(m_collisionFree);
+        auto testable = std::make_shared<aikido::constraint::TestableIntersection>(m_stateSpace, constraints);
+        if (num_waypoints == 2) {
+          auto future = ada->executeTrajectory(trajectory);
+          future.wait();
+        } else {
+          std::unique_lock<std::mutex> lock(m_skeleton->getBodyNode(0)->getSkeleton()->getMutex());
+//          aikido::trajectory::TrajectoryPtr unTimedTrajectory =
+//              planner::simpleSmoothPath(ada, m_stateSpace, m_skeleton, trajectory.get(), testable);
+//          aikido::trajectory::TrajectoryPtr timedTrajectory = ada->retimePathWithKunz(m_skeleton, unTimedTrajectory.get(), 1e-2, m_retimeTimeStep);
+//          m_stateSpace->setState(m_skeleton.get(), startState.getState());
+//          aikido::trajectory::TrajectoryPtr unTimedTrajectory =
+//              planner::hauserSmoothPathInterpolated(ada, m_stateSpace, m_skeleton, trajectory.get(), testable);
+//          aikido::trajectory::TrajectoryPtr
+//              timedTrajectory = ada->retimePathWithKunz(m_skeleton, unTimedTrajectory.get(), 1e-3, 5e-3);
+          aikido::trajectory::TrajectoryPtr timedTrajectory = planner::hauserSmoothPath(ada, m_stateSpace, m_skeleton, trajectory.get(), testable);
+          m_stateSpace->setState(m_skeleton.get(), startState.getState());
+          lock.unlock();
+          auto future = ada->executeTrajectory(timedTrajectory);
+          future.wait();
+        }
+
       } else {
         ROS_INFO("[TSRMotionNode::plan]: Didn't find a valid trajectory!");
       }

@@ -47,6 +47,16 @@ class ContainingMap {
     return nullptr;
   }
 
+  inline std::vector<dart::dynamics::BodyNode *> getContainedBodyNodes(const std::string &containerName) {
+    std::vector<dart::dynamics::BodyNode *> ret;
+    for (const auto &container : m_containers) {
+      if (container.getContainerName() == containerName) {
+        ret.emplace_back(container.getContainedBodyNode());
+      }
+    }
+    return ret;
+  }
+
   inline bool hasTuple(const std::string &containerName, const std::string &containedName) {
     for (const auto &container : m_containers) {
       if (container.getContainerName() == containerName && container.getContainedName() == containedName) {

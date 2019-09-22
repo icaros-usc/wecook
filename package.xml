@@ -12,7 +12,6 @@
     <depend>libada</depend>
     <depend>tf_conversions</depend>
     <depend>ada_description</depend>
-    <depend>pr_assets</depend>
     <depend>pr_tsr</depend>
     <depend>cv_bridge</depend>
     <depend>image_transport</depend>

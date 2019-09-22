@@ -18,12 +18,14 @@ class PrimitivePlaceNode : public PrimitiveActionNode {
                      const std::string &pid,
                      const std::string &grabbingObj,
                      const std::string &placingObj,
-                     bool ifHead = false,
-                     bool ifTail = false)
+                     bool ifHead,
+                     bool ifTail,
+                     bool ifDebug = false)
       : PrimitiveActionNode(pid, "place", grabbingObj, placingObj, ifHead, ifTail),
         m_refObject(refObject),
         m_targetPose(targetPose),
-        m_toPlace(toPlace) {
+        m_toPlace(toPlace),
+        m_ifDebug(ifDebug) {
 
   }
 
@@ -32,6 +34,7 @@ class PrimitivePlaceNode : public PrimitiveActionNode {
                std::shared_ptr<ContainingMap> &containingMap);
 
  private:
+  bool m_ifDebug;
   std::string m_toPlace;
   aikido::constraint::dart::TSRPtr m_targetPose;
   std::string m_refObject;

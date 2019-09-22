@@ -98,6 +98,12 @@ class PrimitiveActionNode {
 
   void removeFather(std::shared_ptr<PrimitiveActionNode> &father);
 
+  double m_timeStep = 0.02;
+
+  void setTimeStep(double timeStep) {
+    m_timeStep = timeStep;
+  }
+
  protected:
   bool m_ifTail;
   bool m_ifHead;

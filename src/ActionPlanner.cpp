@@ -96,7 +96,7 @@ void ActionPlanner::planRoll(ActionNode *actionNode,
 
   // 3) create predefined rolling node
   auto predefinedNode =
-      std::make_shared<PrimitiveActuateNode>(pid, "end-effector", "roll", toolName, "", false, false);
+      std::make_shared<PrimitiveActuateNode>(pid, "end-effector", "roll", toolName, "", MetaActuateInfo(Action(actionNode->getAction())),false, false);
 
   // 4) create place back node
   auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
@@ -170,7 +170,7 @@ void ActionPlanner::planHeat(ActionNode *actionNode,
 
   // 3) create predefined heating node
   auto predefinedNode =
-      std::make_shared<PrimitiveActuateNode>(pid, "end-effector", "heat", toolName, "", false, false);
+      std::make_shared<PrimitiveActuateNode>(pid, "end-effector", "heat", toolName, "", MetaActuateInfo(Action(actionNode->getAction())), false, false);
 
   // 4) create place back node
   auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
@@ -224,7 +224,7 @@ void ActionPlanner::planCut(ActionNode *actionNode,
       0., -1., 0.,
       0., 0., -1;
   grabPose->mTw_e.linear() = rot;
-  auto epsilon = 0.02;
+  auto epsilon = 0.005;
   grabPose->mBw
       << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
   auto toolName = actionNode->getAction().get_tool();
@@ -237,7 +237,7 @@ void ActionPlanner::planCut(ActionNode *actionNode,
   // 2) create move to node
   // create start pose
   auto targetPose = std::make_shared<aikido::constraint::dart::TSR>();
-  targetPose->mTw_e.translation() = Eigen::Vector3d(-0.12, 0., 0.06);
+  targetPose->mTw_e.translation() = Eigen::Vector3d(-0.08, 0., 0.06);
   targetPose->mBw
       << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
   auto toCutName = actionNode->getAction().get_ingredients()[0];
@@ -253,13 +253,13 @@ void ActionPlanner::planCut(ActionNode *actionNode,
 
   // 3) create predefined cutting node
   auto predefinedNode =
-      std::make_shared<PrimitiveActuateNode>(pid, "end-effector", "cut", toolName, "", false, false);
+      std::make_shared<PrimitiveActuateNode>(pid, "end-effector", "cut", toolName, "", MetaActuateInfo(Action(actionNode->getAction())),false, false);
 
   // 4) create place back node
   auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
   // get the original place of the tool
   auto translation = objectMgr->getObjTransform(toolName).translation();
-  epsilon = 0.01;
+  epsilon = 0.005;
   placePose->mTw_e.translation() = translation - Eigen::Vector3d(0.5, 0.0, 0.);
   placePose->mBw
       << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
@@ -301,7 +301,7 @@ void ActionPlanner::planStir(ActionNode *actionNode,
   // 1) create grab node
   // create grab pose
   auto grabPose = std::make_shared<aikido::constraint::dart::TSR>();
-  grabPose->mTw_e.translation() = Eigen::Vector3d(0.0, 0., 0.15);
+  grabPose->mTw_e.translation() = Eigen::Vector3d(0.0, 0., 0.12);
   Eigen::Matrix3d rot;
   rot <<
       1., 0., 0.,
@@ -322,7 +322,7 @@ void ActionPlanner::planStir(ActionNode *actionNode,
   targetPose->mTw_e.translation() = Eigen::Vector3d(0., 0., 0.06);
   targetPose->mBw
       << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -M_PI, M_PI;
-  auto toStirName = actionNode->getAction().get_location()[0];
+  auto toStirName = actionNode->getAction().get_locations()[0];
   auto moveToNode =
       std::make_shared<PrimitiveEngageNode>(targetPose,
                                             toolName,
@@ -335,7 +335,7 @@ void ActionPlanner::planStir(ActionNode *actionNode,
 
   // 3) create predefined stirring node
   auto predefinedNode =
-      std::make_shared<PrimitiveActuateNode>(pid, "end-effector", "stir", toolName, "", false, false);
+      std::make_shared<PrimitiveActuateNode>(pid, "end-effector", "stir", toolName, "", MetaActuateInfo(Action(actionNode->getAction())),false, false);
 
   // 4) create place back node
   auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
@@ -400,7 +400,7 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
 
     // 2) create place node
     auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
-    auto newLocationName = actionNode->getAction().get_location()[1];
+    auto newLocationName = actionNode->getAction().get_locations()[1];
     placePose->mTw_e.translation() = Eigen::Vector3d(0, 0, 0.05);
     placePose->mBw
         << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -M_PI / 8, M_PI / 8, -M_PI / 8, M_PI
@@ -427,7 +427,7 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
     actionNode->setPrimitiveTaskGraph(ptg);
 
     return;
-  } else if (actionNode->getAction().get_tool() == actionNode->getAction().get_location()[0]) {
+  } else if (actionNode->getAction().get_tool() == actionNode->getAction().get_locations()[0]) {
     // To do transfer object by old container, we have 2 steps: grab old container, move container to start position,
     // do predefined motion
     // 1) create grab node
@@ -446,7 +446,7 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
     grabPose->mTw_e.linear() = rot2 * rot;
     grabPose->mTw_e.translation() = Eigen::Vector3d(0.0, 0.06, 0.08);
     grabPose->mBw << -0.01, 0.01, 0., 0., -0.01, 0.01, -M_PI / 8, M_PI / 8, -M_PI / 8, M_PI / 8, -0.02, 0.02;
-    auto objectName = actionNode->getAction().get_location()[0];
+    auto objectName = actionNode->getAction().get_locations()[0];
     auto pid = actionNode->getAction().get_pids()[0];
     auto grabNode =
         std::make_shared<PrimitiveGraspNode>(grabPose, objectName, objectName, pid, objectName, "", true, false);
@@ -457,7 +457,7 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
     auto epsilon = 0.02;
     targetPose->mBw << -epsilon / 2, epsilon / 2, -epsilon / 2, epsilon
         / 2, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
-    auto newLocationName = actionNode->getAction().get_location()[1];
+    auto newLocationName = actionNode->getAction().get_locations()[1];
     auto moveToNode =
         std::make_shared<PrimitiveEngageNode>(targetPose,
                                               objectName,
@@ -470,7 +470,7 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
 
     // 3) create predefined pouring node
     auto predefinedNode =
-        std::make_shared<PrimitiveActuateNode>(pid, objectName, "transfer1", objectName, "", false, false);
+        std::make_shared<PrimitiveActuateNode>(pid, objectName, "transfer1", objectName, "", MetaActuateInfo(Action(actionNode->getAction())),false, false);
 
     // 4) create place back node
     auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
@@ -533,7 +533,7 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
     targetPose->mTw_e.translation() = Eigen::Vector3d(0., 0., 0.03);
     targetPose->mBw
         << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
-    auto oldLocationName = actionNode->getAction().get_location()[0];
+    auto oldLocationName = actionNode->getAction().get_locations()[0];
     auto ingredientName = actionNode->getAction().get_ingredients()[0];
     auto moveToNode =
         std::make_shared<PrimitiveEngageNode>(targetPose,
@@ -547,20 +547,20 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
 
     // 3) create predefined motion node
     auto predefinedNode =
-        std::make_shared<PrimitiveActuateNode>(pid, toolName, "transfer2", toolName, "", false, false);
+        std::make_shared<PrimitiveActuateNode>(pid, toolName, "transfer2", toolName, "", MetaActuateInfo(Action(actionNode->getAction())),false, false);
 
     // 4) move food to new location
     auto targetPose2 = std::make_shared<aikido::constraint::dart::TSR>();
     Eigen::Matrix3d rot2;
     rot2 <<
-        1., 0., 0.,
+         1., 0., 0.,
         0., 0.7071055, -0.7071081,
         0., 0.7071081, 0.7071055;
     targetPose2->mTw_e.linear() = rot2;
     targetPose2->mTw_e.translation() = Eigen::Vector3d(0, 0, 0.06);
     targetPose2->mBw << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -M_PI / 8, M_PI / 8, -M_PI / 8, M_PI
         / 8, -M_PI / 8, M_PI / 8;
-    auto newLocationName = actionNode->getAction().get_location()[1];
+    auto newLocationName = actionNode->getAction().get_locations()[1];
     auto moveToNode2 =
         std::make_shared<PrimitiveEngageNode>(targetPose2,
                                               toolName,
@@ -570,11 +570,12 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
                                               "",
                                               false,
                                               false);
+    moveToNode2->setTimeStep(0.02);
 
 
     // 5) create predefined pouring node
     auto predefinedNode2 =
-        std::make_shared<PrimitiveActuateNode>(pid, toolName, "transfer3", toolName, "", false, false);
+        std::make_shared<PrimitiveActuateNode>(pid, toolName, "transfer3", toolName, "", MetaActuateInfo(Action(actionNode->getAction())),false, false);
 
     // 6) create place back node
     auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
@@ -727,7 +728,7 @@ void ActionPlanner::planHolding(wecook::ActionNode *actionNode,
   std::cout << collaborativeAction << std::endl;
   auto holdedObjectName = actionName.substr(occurances[0] + 1, occurances.back() - occurances[0] - 1);
   if (collaborativeAction == "transfer") {
-    if (holdedObjectName == actionNode->getAction().get_location()[1]) {
+    if (holdedObjectName == actionNode->getAction().get_locations()[1]) {
       // To do collaborative transferring, we have 9 steps
       // 1) create robotM grab node
       auto grabPoseM = std::make_shared<aikido::constraint::dart::TSR>();
@@ -738,7 +739,7 @@ void ActionPlanner::planHolding(wecook::ActionNode *actionNode,
           0, 0, -1;
       Eigen::Matrix3d rot2;
       rot2 <<
-          1., 0., 0.,
+           1., 0., 0.,
           0., 0.8678, 0.4969,
           0., -0.4969, 0.86781;
 
@@ -793,7 +794,7 @@ void ActionPlanner::planHolding(wecook::ActionNode *actionNode,
                                                              true);
 
       // build an new action node and plan it to get the other sub primitiveTaskGraph
-      Action action{std::vector<std::string>{pidS}, actionNode->getAction().get_location(),
+      Action action{std::vector<std::string>{pidS}, actionNode->getAction().get_locations(),
                     actionNode->getAction().get_ingredients(), "transfer", actionNode->getAction().get_tool()};
       auto collaborativeActionNode = new ActionNode(action, std::vector<std::string>{pidS});
       planTransfer(collaborativeActionNode, agents, containingMap, objectMgr);
@@ -833,7 +834,7 @@ void ActionPlanner::planHolding(wecook::ActionNode *actionNode,
       delete (collaborativeActionNode);
 
       return;
-    } else if (holdedObjectName == actionNode->getAction().get_location()[0]) {
+    } else if (holdedObjectName == actionNode->getAction().get_locations()[0]) {
       // If the holder is holding the coontainer which is the source of transfer
       // 1) create robotM grab node
       auto grabPoseM = std::make_shared<aikido::constraint::dart::TSR>();
@@ -886,7 +887,7 @@ void ActionPlanner::planHolding(wecook::ActionNode *actionNode,
       // now we will place it back to its original place
       auto translation = objectMgr->getObjTransform(holdedObjectName).translation();
       placePoseM->mTw_e.translation() = translation - Eigen::Vector3d(0.5, 0.0, 0.);
-      auto epsilon = 0.02;
+      auto epsilon = 0.005;
       placePoseM->mBw
           << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
       auto placeNodeM = std::make_shared<PrimitivePlaceNode>(placePoseM,
@@ -899,7 +900,7 @@ void ActionPlanner::planHolding(wecook::ActionNode *actionNode,
                                                              true);
 
       // build an new action node and plan it to get the other sub primitiveTaskGraph
-      Action action{std::vector<std::string>{pidS}, actionNode->getAction().get_location(),
+      Action action{std::vector<std::string>{pidS}, actionNode->getAction().get_locations(),
                     actionNode->getAction().get_ingredients(), "transfer", actionNode->getAction().get_tool()};
       auto collaborativeActionNode = new ActionNode(action, std::vector<std::string>{pidS});
       planTransfer(collaborativeActionNode, agents, containingMap, objectMgr);
@@ -917,10 +918,15 @@ void ActionPlanner::planHolding(wecook::ActionNode *actionNode,
       moveToNodeM->addFather(grabNodeM);
       moveToNodeM->addChild(placeNodeM);
       placeNodeM->addFather(moveToNodeM);
+//      grabNodeM->addChild(grabNodeS);
+//      grabNodeS->addFather(grabNodeM);
+      moveToNodeM->addChild(grabNodeS);
+      grabNodeS->addFather(moveToNodeM);
+      // TODO inherit;
       moveToNodeM->addChild(moveToNodeS);
       moveToNodeS->addFather(moveToNodeM);
-      predefinedNodeS2->addChild(placeNodeM);
-      placeNodeM->addFather(predefinedNodeS2);
+      moveToNodeS2->addChild(placeNodeM);
+      placeNodeM->addFather(moveToNodeS2);
 
       // build sub primitive task graph for this action node
       PrimitiveTaskGraph ptg{};
@@ -989,7 +995,7 @@ void ActionPlanner::planHolding(wecook::ActionNode *actionNode,
 
     // 3) for the other agent, build a new action node
     auto pidS = actionNode->getAction().get_pids()[1];
-    Action action{std::vector<std::string>{pidS}, actionNode->getAction().get_location(),
+    Action action{std::vector<std::string>{pidS}, actionNode->getAction().get_locations(),
                   actionNode->getAction().get_ingredients(), "cut", actionNode->getAction().get_tool()};
     auto collaborativeActionNode = new ActionNode(action, std::vector<std::string>{pidS});
     planCut(collaborativeActionNode, agents, containingMap, objectMgr);
@@ -1254,7 +1260,7 @@ void ActionPlanner::planSqueeze(ActionNode *actionNode,
 //    ROS_INFO("Collaborative transferring!");
 //    ROS_INFO_STREAM(holdedObjectName << " " << collaborativeAction);
 //
-//    if (holdedObjectName != actionNode->getAction().get_location()[0]) {
+//    if (holdedObjectName != actionNode->getAction().get_locations()[0]) {
 //      // we need robot to move holded object to collaborative point
 //      auto collaborativePoint = Eigen::Isometry3d::Identity();
 //      collaborativePoint.translation() = Eigen::Vector3d(0.3, -0.175, 0.85);
@@ -1378,7 +1384,7 @@ void ActionPlanner::planSqueeze(ActionNode *actionNode,
 //
 //      for (auto foodName : actionNode->getAction().get_ingredients()) {
 //        // Move spoon to be inside pot
-//        auto oldLocationName = actionNode->getAction().get_location()[0];
+//        auto oldLocationName = actionNode->getAction().get_locations()[0];
 //        auto oldLocationSkeleton = worldS->getSkeleton(oldLocationName);
 //        auto oldLocationPose = getObjectPose(oldLocationSkeleton, containingMap);
 //        auto oldLocationTSR = std::make_shared<aikido::constraint::dart::TSR>();
@@ -1622,7 +1628,7 @@ void ActionPlanner::planSqueeze(ActionNode *actionNode,
 //  motionSeq.emplace_back(motion3);
 //
 //  // Move spoon to be above pot
-//  auto locationName = actionNode->getAction().get_location()[0];
+//  auto locationName = actionNode->getAction().get_locations()[0];
 //  auto locationSkeleton = world->getSkeleton(locationName);
 //  auto locationPose = getObjectPose(locationSkeleton, containingMap);
 //  auto locationTSR = std::make_shared<aikido::constraint::dart::TSR>();
@@ -1865,7 +1871,7 @@ void ActionPlanner::planSqueeze(ActionNode *actionNode,
 //    motionSeq.emplace_back(motion1);
 //
 //    // unconnect food with old container
-//    auto oldLocationName = actionNode->getAction().get_location()[0];
+//    auto oldLocationName = actionNode->getAction().get_locations()[0];
 //    auto oldLocationSkeleton = world->getSkeleton(oldLocationName);
 //    auto motion8 = std::make_shared<ConnMotionNode>(foodSkeleton,
 //                                                    oldLocationSkeleton,
@@ -1900,7 +1906,7 @@ void ActionPlanner::planSqueeze(ActionNode *actionNode,
 //    }
 //
 //    // move food to new position
-//    auto locationName = actionNode->getAction().get_location()[1];
+//    auto locationName = actionNode->getAction().get_locations()[1];
 //    auto locationSkeleton = world->getSkeleton(locationName);
 //    auto locationPose = getObjectPose(locationSkeleton, containingMap);
 //    auto locationTSR = std::make_shared<aikido::constraint::dart::TSR>();
@@ -1945,13 +1951,13 @@ void ActionPlanner::planSqueeze(ActionNode *actionNode,
 //                                                    armSpace,
 //                                                    armSkeleton);
 //    motionSeq.emplace_back(motion9);
-//  } else if (actionNode->getAction().get_tool() == actionNode->getAction().get_location()[0]) {
+//  } else if (actionNode->getAction().get_tool() == actionNode->getAction().get_locations()[0]) {
 //    ROS_INFO_STREAM(
 //        "Transferring " << actionNode->getAction().get_ingredients()[0] << " from "
-//                        << actionNode->getAction().get_location()[0] << "  to "
-//                        << actionNode->getAction().get_location()[1]);
+//                        << actionNode->getAction().get_locations()[0] << "  to "
+//                        << actionNode->getAction().get_locations()[1]);
 //    // transfer food by doing pouring
-//    auto oldLocationName = actionNode->getAction().get_location()[0];
+//    auto oldLocationName = actionNode->getAction().get_locations()[0];
 //    auto oldLocationSkeleton = world->getSkeleton(oldLocationName);
 //    auto oldLocationPose = Eigen::Isometry3d::Identity(); // need to find it out later
 //    dart::dynamics::BodyNode *oldLocationBodyNodePtr = nullptr; // need to find it out later
@@ -1971,7 +1977,7 @@ void ActionPlanner::planSqueeze(ActionNode *actionNode,
 //    auto epsilon = 0.02;
 //    // now move the old location object to the new location,
 //    // to easily pour food from old container to new container.
-//    auto newLocationName = actionNode->getAction().get_location()[1];
+//    auto newLocationName = actionNode->getAction().get_locations()[1];
 //    auto newLocationSkeleton = world->getSkeleton(newLocationName);
 //    auto newLocationPose = getObjectPose(newLocationSkeleton, containingMap);
 //    auto newLocationTSR = std::make_shared<aikido::constraint::dart::TSR>();

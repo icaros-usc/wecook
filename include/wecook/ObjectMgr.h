@@ -70,7 +70,8 @@ class ObjectMgr {
   }
 
   dart::collision::CollisionGroupPtr createCollisionGroupExceptFoodAndMovingObj(const std::string &toMove,
-                                                                                dart::collision::FCLCollisionDetectorPtr &collisionDetector);
+                                                                                dart::collision::FCLCollisionDetectorPtr &collisionDetector,
+                                                                                dart::dynamics::BodyNode *blackNode);
 
  private:
   std::map<std::string, InternalObject> m_objects;

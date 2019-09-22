@@ -16,16 +16,29 @@ class Action {
          const std::vector<std::string> &location,
          const std::vector<std::string> &ingredients,
          const std::string &verb,
-         const std::string &tool) : m_pids(pids), m_ingredients(ingredients), m_location(location), m_tool(tool), m_verb(verb) {
+         const std::string &tool)
+      : m_pids(pids), m_ingredients(ingredients), m_locations(location), m_tool(tool), m_verb(verb) {
 
+  }
+
+  Action() {
+
+  }
+
+  Action(const Action &other) {
+    m_pids = other.get_pids();
+    m_ingredients = other.get_ingredients();
+    m_locations = other.get_locations();
+    m_tool = other.get_tool();
+    m_verb = other.get_verb();
   }
 
   std::string get_verb() const {
     return m_verb;
   }
 
-  std::vector<std::string> get_location() const {
-    return m_location;
+  std::vector<std::string> get_locations() const {
+    return m_locations;
   }
 
   std::string get_tool() const {
@@ -42,7 +55,7 @@ class Action {
 
  private:
   std::vector<std::string> m_pids;
-  std::vector<std::string> m_location;
+  std::vector<std::string> m_locations;
   std::string m_tool;
   std::vector<std::string> m_ingredients;
   std::string m_verb;

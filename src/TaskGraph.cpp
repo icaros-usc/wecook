@@ -8,8 +8,15 @@
 
 using namespace wecook;
 
-void TaskGraph::addNode(const wecook::Action &action) {
+void TaskGraph::addNode(const wecook::Action &action, bool ifEnd) {
   auto pids = action.get_pids();
+
+  ActionNode *newFatherNode = nullptr;
+
+  if (ifEnd) {
+    std::cout << "Is end!" << std::endl;
+    newFatherNode = m_nodes.back();
+  }
 
   // we need to find father node for each pid
   auto fatherNodes = std::vector<ActionNode *>{};
@@ -29,6 +36,10 @@ void TaskGraph::addNode(const wecook::Action &action) {
     for (const auto &pid : pids) {
       m_headMap.emplace(std::pair<std::string, ActionNode *>{pid, newNode});
     }
+    if (newFatherNode) {
+      newFatherNode->addChild(newNode);
+      newNode->addFather(newFatherNode);
+    }
   } else {
     auto newNode = new ActionNode(action, pids, false);
     for (auto &fatherNode : fatherNodes) {
@@ -41,6 +52,11 @@ void TaskGraph::addNode(const wecook::Action &action) {
       if (m_headMap.find(pid) == m_headMap.end()) {
         m_headMap.emplace(std::pair<std::string, ActionNode *>{pid, newNode});
       }
+    }
+
+    if (newFatherNode) {
+      newFatherNode->addChild(newNode);
+      newNode->addFather(newFatherNode);
     }
   }
 }

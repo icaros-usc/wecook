@@ -27,11 +27,16 @@ class TSRMotionNode : public MotionNode {
 
   void plan(const std::shared_ptr<ada::Ada> &ada);
 
+  void setTimeStep(double timeStep) {
+    m_retimeTimeStep = timeStep;
+  }
+
  private:
   aikido::constraint::dart::CollisionFreePtr m_collisionFree = nullptr;
   dart::dynamics::BodyNode *m_bn = nullptr;
   aikido::constraint::dart::TSRPtr m_goalTSR;
   bool m_debug;
+  double m_retimeTimeStep = 0.02;
 };
 
 }

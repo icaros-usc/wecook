@@ -24,6 +24,10 @@ class ActionNode {
     return m_children;
   }
 
+  inline std::vector<ActionNode *> getFathers() {
+    return m_fathers;
+  }
+
   inline void addChild(ActionNode *actionNode) {
     m_children.emplace_back(actionNode);
   }
@@ -52,12 +56,14 @@ class ActionNode {
   std::map<std::string, std::vector<std::shared_ptr<MotionNode>>> m_motionSeqMap;
 
   PrimitiveTaskGraph m_primitiveTaskGraph;
+  bool m_ifExecuted = false;
  private:
   Action m_action;
   bool m_ifHead;
   std::vector<ActionNode *> m_children;
   std::vector<ActionNode *> m_fathers;
   std::vector<std::string> m_pids;
+
 };
 
 }
