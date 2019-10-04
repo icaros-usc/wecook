@@ -12,6 +12,14 @@
 
 using namespace wecook;
 
+//void compareTrajectory(aikido::trajectory::TrajectoryPtr traj1, aikido::trajectory::TrajectoryPtr traj2) {
+//  for (double i = 0; i <= 1; i+=0.02) {
+//    std::cout << "time: " << i << std::endl;
+//    std::cout << "traj1: " << traj1->evaluate(i) << std::endl;
+//    std::cout << "traj2: " << traj2->evaluate(i) <<std::endl;
+//  }
+//}
+
 void TSRMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
   if (m_condition) {
     ROS_INFO("Waiting for condition to be verified!");
@@ -116,6 +124,8 @@ void TSRMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
 //          aikido::trajectory::TrajectoryPtr
 //              timedTrajectory = ada->retimePathWithKunz(m_skeleton, unTimedTrajectory.get(), 1e-3, 5e-3);
           aikido::trajectory::TrajectoryPtr timedTrajectory = planner::hauserSmoothPath(ada, m_stateSpace, m_skeleton, trajectory.get(), testable);
+//          aikido::trajectory::TrajectoryPtr timedTrajectory2 = planner::hauserSmoothPathHauserPath(ada, m_stateSpace, m_skeleton, trajectory.get(), testable);
+//          compareTrajectory(timedTrajectory, timedTrajectory2);
           m_stateSpace->setState(m_skeleton.get(), startState.getState());
           lock.unlock();
           auto future = ada->executeTrajectory(timedTrajectory);

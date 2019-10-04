@@ -11,6 +11,7 @@
 #include "dart/dynamics/MetaSkeleton.hpp"
 
 #include "SmootherUtil.h"
+#include "ai/external/hauser_parabolic_smoother/HauserUtil.h"
 
 using CubicSplineProblem = aikido::common::SplineProblem<double, int, 4, Eigen::Dynamic, 2>;
 using SegmentSplineProblem = aikido::common::SplineProblem<double, int, 2, Eigen::Dynamic, Eigen::Dynamic>;
@@ -99,15 +100,15 @@ class HauserSmootherFeasibilityCheckerBase
   }
 
   bool ConfigFeasible(const ParabolicRamp::Vector& x) override {
-    Eigen::VectorXd eigX = toEigen(x);
+    Eigen::VectorXd eigX = ::wecook::ai::external::hauser_parabolic_smoother::toEigen(x);
     auto state = mStateSpace->createState();
     mStateSpace->expMap(eigX, state);
     return mTestable->isSatisfied(state);
   }
 
   bool SegmentFeasible(const ParabolicRamp::Vector& a, const ParabolicRamp::Vector& b) override {
-    Eigen::VectorXd eigA = toEigen(a);
-    Eigen::VectorXd eigB = toEigen(b);
+    Eigen::VectorXd eigA = ::wecook::ai::external::hauser_parabolic_smoother::toEigen(a);
+    Eigen::VectorXd eigB = ::wecook::ai::external::hauser_parabolic_smoother::toEigen(b);
 
     auto testState = mStateSpace->createState();
     auto startState = mStateSpace->createState();
@@ -116,7 +117,7 @@ class HauserSmootherFeasibilityCheckerBase
     mStateSpace->expMap(eigB, goalState);
 
     auto dist = (eigA - eigB).norm();
-    auto checkRes = 0.01 / dist;
+    auto checkRes = 0.05 / dist;
 
     // both ends of the segment have already been checked by calling
     // ConfigFeasible(),
@@ -144,41 +145,6 @@ class HauserSmootherFeasibilityCheckerBase
 /*
  * Utility functions
  */
-
-//==============================================================================
-ParabolicRamp::Vector toVector(const Eigen::VectorXd &_x) {
-  ParabolicRamp::Vector output(_x.size());
-
-  for (int i = 0; i < _x.size(); ++i)
-    output[i] = _x[i];
-
-  return output;
-}
-
-//==============================================================================
-Eigen::VectorXd toEigen(const ParabolicRamp::Vector &_x) {
-  Eigen::VectorXd output(_x.size());
-
-  for (std::size_t i = 0; i < _x.size(); ++i)
-    output[i] = _x[i];
-
-  return output;
-}
-
-//==============================================================================
-void evaluateAtTime(
-    const ParabolicRamp::DynamicPath &_path,
-    double _t,
-    Eigen::VectorXd &_position,
-    Eigen::VectorXd &_velocity) {
-  ParabolicRamp::Vector positionVector;
-  _path.Evaluate(_t, positionVector);
-  _position = toEigen(positionVector);
-
-  ParabolicRamp::Vector velocityVector;
-  _path.Derivative(_t, velocityVector);
-  _velocity = toEigen(velocityVector);
-}
 
 std::unique_ptr<SimpleDynamicPath> InterpolatedToSimpleDynamicPath(const aikido::trajectory::Interpolated &inputInterpolated,
                                                                    const Eigen::VectorXd &maxVelocity,
@@ -241,14 +207,14 @@ std::unique_ptr<ParabolicRamp::DynamicPath> InterpolatedToHauserDynamicPath(cons
     auto currentState = inputInterpolated.getWaypoint(iwaypoint);
 
     stateSpace->logMap(currentState, currVec);
-    milestones.emplace_back(toVector(currVec));
+    milestones.emplace_back(::wecook::ai::external::hauser_parabolic_smoother::toVector(currVec));
 
 //    inputInterpolated.getWaypointDerivative(iwaypoint, 1, tangentVector);
 //    velocities.emplace_back(tangentVector);
   }
 
   auto outputPath = std::make_unique<ParabolicRamp::DynamicPath>();
-  outputPath->Init(toVector(maxVelocity), toVector(maxAcceleration));
+  outputPath->Init(::wecook::ai::external::hauser_parabolic_smoother::toVector(maxVelocity), ::wecook::ai::external::hauser_parabolic_smoother::toVector(maxAcceleration));
   if (preserveWaypointVelocity) {
     outputPath->SetMilestones(milestones, velocities);
   } else {
@@ -279,6 +245,10 @@ std::unique_ptr<aikido::trajectory::Spline> HauserDynamicPathToSpline(const Para
     transitionTimes.insert(t);
   }
 
+  std::cout << "Good times: " << std::endl;
+  for (auto i = transitionTimes.begin(); i != transitionTimes.end(); ++i)
+    std::cout << *i << ' ';
+
   // Convert the output to a spline with a knot at each transition time.
   assert(!transitionTimes.empty());
   const auto startIt = std::begin(transitionTimes);
@@ -286,14 +256,14 @@ std::unique_ptr<aikido::trajectory::Spline> HauserDynamicPathToSpline(const Para
   transitionTimes.erase(startIt);
 
   Eigen::VectorXd positionPrev, velocityPrev;
-  evaluateAtTime(_inputPath, timePrev, positionPrev, velocityPrev);
+  ::wecook::ai::external::hauser_parabolic_smoother::evaluateAtTime(_inputPath, timePrev, positionPrev, velocityPrev);
 
   auto _outputTrajectory = std::make_unique<aikido::trajectory::Spline>(_stateSpace, timePrev + _startTime);
   auto segmentStartState = _stateSpace->createState();
 
   for (const auto timeCurr : transitionTimes) {
     Eigen::VectorXd positionCurr, velocityCurr;
-    evaluateAtTime(_inputPath, timeCurr, positionCurr, velocityCurr);
+    ::wecook::ai::external::hauser_parabolic_smoother::evaluateAtTime(_inputPath, timeCurr, positionCurr, velocityCurr);
 
     SegmentSplineProblem problem(Eigen::Vector2d(0, timeCurr - timePrev), 2, dimension);
 //    CubicSplineProblem problem(Eigen::Vector2d(0, timeCurr - timePrev), 4, dimension);
@@ -348,7 +318,7 @@ aikido::trajectory::InterpolatedPtr HauserDynamicPathToInterpolated(const Parabo
 
   for (const auto timeCurr : transitionTimes) {
     Eigen::VectorXd positionCurr, velocityCurr;
-    evaluateAtTime(_inputPath, timeCurr, positionCurr, velocityCurr);
+    ::wecook::ai::external::hauser_parabolic_smoother::evaluateAtTime(_inputPath, timeCurr, positionCurr, velocityCurr);
     auto currState = _stateSpace->createState();
     _stateSpace->expMap(positionCurr, currState);
     traj->addWaypoint(timeCurr, currState);

@@ -9,34 +9,13 @@
 #include <aikido/trajectory/Interpolated.hpp>
 #include <aikido/trajectory/Spline.hpp>
 #include <aikido/constraint/Testable.hpp>
-#include <DynamicPath.h>
+#include <ai/external/hauser_parabolic_smoother/DynamicPath.h>
 
 #include "SimpleDynamicPath.h"
 
 namespace wecook {
 namespace planner {
 namespace detail {
-/*
- * Utility functions
- */
-/// Convert a Eigen vector to a ParabolicRamp vector
-/// \param _x an Eigen vector
-/// \return a ParabolicRamp vector
-ParabolicRamp::Vector toVector(const Eigen::VectorXd &_x);
-
-/// Convert a ParabolicRamp vector to a Eigen vector
-/// \param _x a ParabolicRamp vector
-/// \return an Eigen vector
-Eigen::VectorXd toEigen(const ParabolicRamp::Vector &_x);
-
-/// Evaluate the position and the velocity of a dynamic path
-/// given time t
-/// \param _path a dynamic path
-/// \param _t time
-/// \param[out] position at time \c _t
-/// \param[out] velocity at time \c _t
-void evaluateAtTime(ParabolicRamp::DynamicPath &_path, double _t,
-                    Eigen::VectorXd &_position, Eigen::VectorXd &_velocity);
 
 std::unique_ptr<SimpleDynamicPath> InterpolatedToSimpleDynamicPath(const aikido::trajectory::Interpolated &inputInterpolated,
                                                                    const Eigen::VectorXd &maxVelocity,

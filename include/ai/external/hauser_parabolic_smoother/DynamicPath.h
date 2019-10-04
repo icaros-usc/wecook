@@ -119,9 +119,12 @@ class DynamicPath
   inline void Clear() { ramps.clear(); }
   inline bool Empty() const { return ramps.empty(); }
   Real GetTotalTime() const;
+  Real GetStartTime() const;
+  Real GetEndTime() const;
   int GetSegment(Real t,Real& u,bool& outOfBounds) const;
   void Evaluate(Real t,Vector& x) const;
   void Derivative(Real t,Vector& dx) const;
+  Real GetNumDerivatives() const;
   void SetMilestones(const std::vector<Vector>& x);
   void SetMilestones(const std::vector<Vector>& x,const std::vector<Vector>& dx);
   void GetMilestones(std::vector<Vector>& x,std::vector<Vector>& dx) const;

@@ -170,5 +170,55 @@ aikido::trajectory::InterpolatedPtr hauserDoShortcutInterpolated(const aikido::s
 
   return outputTraj;
 }
+
+std::unique_ptr<ai::trajectory::HauserPath> hauserSmoothPathHauserPath(const std::shared_ptr<ada::Ada> &ada,
+                                                                       const aikido::statespace::dart::MetaSkeletonStateSpacePtr &metaStateSpace,
+                                                                       const dart::dynamics::MetaSkeletonPtr &metaSkeletonPtr,
+                                                                       const aikido::trajectory::Trajectory *path,
+                                                                       const aikido::constraint::TestablePtr &constraint) {
+  Eigen::VectorXd velocityLimits = ada->getVelocityLimits(metaSkeletonPtr);
+  Eigen::VectorXd accelerationLimits = ada->getAccelerationLimits(metaSkeletonPtr);
+  auto interpolated = dynamic_cast<const aikido::trajectory::Interpolated *>(path);
+  if (!interpolated) {
+    auto spline = dynamic_cast<const aikido::trajectory::Spline *>(path);
+    if (!spline) {
+      throw std::invalid_argument("Path should be either spline or Interpolated.");
+    }
+    interpolated = detail::SplineToInterpolated(*spline);
+  }
+  return hauserDoShortcutHauserPath(metaStateSpace,
+                                    metaSkeletonPtr,
+                                    *interpolated,
+                                    *(ada->cloneRNG().get()),
+                                    constraint,
+                                    velocityLimits,
+                                    accelerationLimits);
+}
+
+std::unique_ptr<ai::trajectory::HauserPath> hauserDoShortcutHauserPath(const aikido::statespace::dart::MetaSkeletonStateSpacePtr &metaStateSpace,
+                                                                       const dart::dynamics::MetaSkeletonPtr &metaSkeletonPtr,
+                                                                       const aikido::trajectory::Interpolated &inputInterpolated,
+                                                                       aikido::common::RNG &rng,
+                                                                       const aikido::constraint::TestablePtr &collisionTestable,
+                                                                       const Eigen::VectorXd &maxVelocity,
+                                                                       const Eigen::VectorXd &maxAcceleration,
+                                                                       double timeLimit,
+                                                                       double checkResolution,
+                                                                       double tolerance) {
+  auto stateSpace = inputInterpolated.getStateSpace();
+
+  auto dynamicPath =
+      detail::InterpolatedToHauserDynamicPath(inputInterpolated,
+                                              maxVelocity,
+                                              maxAcceleration,
+                                              metaStateSpace,
+                                              metaSkeletonPtr);
+
+  detail::hauserDoShortcut(*dynamicPath, collisionTestable, timeLimit, checkResolution, tolerance, rng);
+
+  auto outputTraj = std::make_unique<ai::trajectory::HauserPath>(dynamicPath.get(), stateSpace);
+
+  return outputTraj;
+}
 }
 }

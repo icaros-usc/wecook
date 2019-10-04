@@ -12,6 +12,7 @@
 #include <aikido/trajectory/Spline.hpp>
 #include <aikido/trajectory/Interpolated.hpp>
 #include <aikido/planner/parabolic/ParabolicTimer.hpp>
+#include <ai/trajectory/HauserPath.h>
 
 namespace wecook {
 namespace planner {
@@ -38,6 +39,23 @@ aikido::trajectory::InterpolatedPtr simpleDoShortcut(const aikido::statespace::d
 /*
  * Smoothing with Kris Hauser's parabolic smoother
  */
+std::unique_ptr<ai::trajectory::HauserPath> hauserSmoothPathHauserPath(const std::shared_ptr<ada::Ada> &ada,
+                                                                       const aikido::statespace::dart::MetaSkeletonStateSpacePtr &metaStateSpace,
+                                                                       const dart::dynamics::MetaSkeletonPtr &metaSkeletonPtr,
+                                                                       const aikido::trajectory::Trajectory *path,
+                                                                       const aikido::constraint::TestablePtr &constraint);
+
+std::unique_ptr<ai::trajectory::HauserPath> hauserDoShortcutHauserPath(const aikido::statespace::dart::MetaSkeletonStateSpacePtr &metaStateSpace,
+                                                                       const dart::dynamics::MetaSkeletonPtr &metaSkeletonPtr,
+                                                                       const aikido::trajectory::Interpolated &inputInterpolated,
+                                                                       aikido::common::RNG &rng,
+                                                                       const aikido::constraint::TestablePtr &collisionTestable,
+                                                                       const Eigen::VectorXd &maxVelocity,
+                                                                       const Eigen::VectorXd &maxAcceleration,
+                                                                       double timeLimit = 6.0,
+                                                                       double checkResolution = 5e-4,
+                                                                       double tolerance = 1e-3);
+
 aikido::trajectory::UniqueSplinePtr hauserSmoothPath(const std::shared_ptr<ada::Ada> &ada,
                                                      const aikido::statespace::dart::MetaSkeletonStateSpacePtr &metaStateSpace,
                                                      const dart::dynamics::MetaSkeletonPtr &metaSkeletonPtr,
@@ -51,7 +69,7 @@ aikido::trajectory::UniqueSplinePtr hauserDoShortcut(const aikido::statespace::d
                                                      const aikido::constraint::TestablePtr &collisionTestable,
                                                      const Eigen::VectorXd &maxVelocity,
                                                      const Eigen::VectorXd &maxAcceleration,
-                                                     double timeLimit = 6.0,
+                                                     double timeLimit = 3.0,
                                                      double checkResolution = 5e-4,
                                                      double tolerance = 1e-3);
 

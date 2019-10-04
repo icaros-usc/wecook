@@ -1,4 +1,4 @@
-#include "Timer.h"
+#include "ai/external/hauser_parabolic_smoother/Timer.h"
 #include <stdlib.h>
 using namespace ParabolicRamp;
 

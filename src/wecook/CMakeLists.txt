@@ -8,6 +8,7 @@ target_link_libraries(wecook
         ${aikido_LIBRARIES}
         ${Boost_LIBRARIES}
         libada
-        ${PROJECT_NAME}_ai_planner_smoother)
+        ${PROJECT_NAME}_ai_planner_smoother
+        ${PROJECT_NAME}_ai_trajectory)
 
 install(TARGETS wecook RUNTIME DESTINATION bin)

@@ -28,7 +28,7 @@
  * 
  ***************************************************************************/
 
-#include "ParabolicRamp.h"
+#include "ai/external/hauser_parabolic_smoother/ParabolicRamp.h"
 #include "Config.h"
 #include <iostream>
 #include <cstdio>

@@ -1,5 +1,8 @@
 # WeCook
 
+> :warning: **Warning:** AIKIDO is under heavy development. These instructions are
+> primarily for reference by the developers.
+
 WeCook is a platform for robotic manipulation 
 and human-robot collaboration research.
 

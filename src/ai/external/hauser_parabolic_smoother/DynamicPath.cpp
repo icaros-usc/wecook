@@ -28,10 +28,10 @@
  * 
  ***************************************************************************/
 
-#include "DynamicPath.h"
-#include "Timer.h"
+#include "ai/external/hauser_parabolic_smoother/DynamicPath.h"
+#include "ai/external/hauser_parabolic_smoother/Timer.h"
 #include "Config.h"
-#include "HauserMath.h"
+#include "ai/external/hauser_parabolic_smoother/HauserMath.h"
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -118,6 +118,17 @@ Real DynamicPath::GetTotalTime() const {
   return t;
 }
 
+Real DynamicPath::GetStartTime() const {
+  Real t = 0;
+  return t;
+}
+
+Real DynamicPath::GetEndTime() const {
+  Real t = 0;
+  for (std::size_t i = 0; i < ramps.size(); i++) t += ramps[i].endTime;
+  return t;
+}
+
 int DynamicPath::GetSegment(Real t, Real &u, bool &outOfBounds) const {
   if (t < 0) {
     u = 0;
@@ -167,6 +178,10 @@ void DynamicPath::Derivative(Real t, Vector &dx) const {
     }
     dx = ramps.back().dx1;
   }
+}
+
+Real DynamicPath::GetNumDerivatives() const {
+  return 1;
 }
 
 void DynamicPath::SetMilestones(const vector<Vector> &x) {

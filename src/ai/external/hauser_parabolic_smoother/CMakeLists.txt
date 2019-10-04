@@ -2,6 +2,7 @@ add_library("${PROJECT_NAME}_ai_external_hauserparabolicsmoother" STATIC
         DynamicPath.cpp
         ParabolicRamp.cpp
         Timer.cpp
+        HauserUtil.cpp
 )
 target_include_directories("${PROJECT_NAME}_ai_external_hauserparabolicsmoother"
   PUBLIC "."
