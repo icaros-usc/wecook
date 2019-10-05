@@ -16,9 +16,9 @@ and human-robot collaboration research.
 ### [Setup Instructions](docs/instructions.md)
 
 ## [Demo](#demo)
-### Broccoli Beef
+### Fruit Jelly
 <p align="center">
-<img src="https://github.com/icaros-usc/wecook/blob/master/docs/demo0.png" width="300">
+<img src="https://github.com/icaros-usc/wecook/blob/master/docs/fruit_jelly.png" width="300">
 </p>
 
 **To run the demo, type in following commands in your terminal**
@@ -31,7 +31,7 @@ $ rviz
 # Open another terminal
 $ rosrun wecook wecook
 # Open another terminal
-$ rosrun wecook demo1.py
+$ rosrun wecook fruit_jelly.py
 ```
 
 

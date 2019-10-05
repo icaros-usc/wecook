@@ -18,7 +18,6 @@ void TaskManager::stop(int signum) {
 }
 
 void TaskManager::addNewTask(const TaskMsg::ConstPtr &msg) {
-  ROS_INFO("Receive Msg");
   Task task = Task();
   for (const auto &objectMsg : msg->scene.objects) {
     Object object(objectMsg.name, objectMsg.url, objectMsg.pose);
