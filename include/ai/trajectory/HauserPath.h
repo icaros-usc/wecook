@@ -15,7 +15,7 @@ namespace trajectory {
 /// Wrapper for hauser's dynamic path
 class HauserPath : public aikido::trajectory::Trajectory {
  public:
-  HauserPath(ParabolicRamp::DynamicPath *dynamicPath, aikido::statespace::ConstStateSpacePtr stateSpace);
+  HauserPath(std::shared_ptr<ParabolicRamp::DynamicPath> dynamicPath, aikido::statespace::ConstStateSpacePtr stateSpace);
   virtual ~HauserPath();
 
   // Documentation inherited
@@ -40,7 +40,7 @@ class HauserPath : public aikido::trajectory::Trajectory {
   void evaluateDerivative(double t, int derivative, Eigen::VectorXd &tangentVector) const override;
 
  private:
-  std::unique_ptr<ParabolicRamp::DynamicPath> m_dynamicPath;
+  std::shared_ptr<ParabolicRamp::DynamicPath> m_dynamicPath;
   aikido::statespace::ConstStateSpacePtr m_stateSpace;
 
 };

@@ -24,7 +24,7 @@ std::unique_ptr<SimpleDynamicPath> InterpolatedToSimpleDynamicPath(const aikido:
                                                                    const dart::dynamics::MetaSkeletonPtr &metaSkeletonPtr,
                                                                    bool preserveWaypointVelocity = false);
 
-std::unique_ptr<ParabolicRamp::DynamicPath> InterpolatedToHauserDynamicPath(const aikido::trajectory::Interpolated &inputInterpolated,
+std::shared_ptr<ParabolicRamp::DynamicPath> InterpolatedToHauserDynamicPath(const aikido::trajectory::Interpolated &inputInterpolated,
                                                                             const Eigen::VectorXd &maxVelocity,
                                                                             const Eigen::VectorXd &maxAcceleration,
                                                                             const aikido::statespace::dart::MetaSkeletonStateSpacePtr &metaStateSpace,

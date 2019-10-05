@@ -186,7 +186,7 @@ std::unique_ptr<SimpleDynamicPath> InterpolatedToSimpleDynamicPath(const aikido:
   return outputPath;
 }
 
-std::unique_ptr<ParabolicRamp::DynamicPath> InterpolatedToHauserDynamicPath(const aikido::trajectory::Interpolated &inputInterpolated,
+std::shared_ptr<ParabolicRamp::DynamicPath> InterpolatedToHauserDynamicPath(const aikido::trajectory::Interpolated &inputInterpolated,
                                                                             const Eigen::VectorXd &maxVelocity,
                                                                             const Eigen::VectorXd &maxAcceleration,
                                                                             const aikido::statespace::dart::MetaSkeletonStateSpacePtr &metaStateSpace,
@@ -213,7 +213,7 @@ std::unique_ptr<ParabolicRamp::DynamicPath> InterpolatedToHauserDynamicPath(cons
 //    velocities.emplace_back(tangentVector);
   }
 
-  auto outputPath = std::make_unique<ParabolicRamp::DynamicPath>();
+  auto outputPath = std::make_shared<ParabolicRamp::DynamicPath>();
   outputPath->Init(::wecook::ai::external::hauser_parabolic_smoother::toVector(maxVelocity), ::wecook::ai::external::hauser_parabolic_smoother::toVector(maxAcceleration));
   if (preserveWaypointVelocity) {
     outputPath->SetMilestones(milestones, velocities);
@@ -228,6 +228,7 @@ std::unique_ptr<ParabolicRamp::DynamicPath> InterpolatedToHauserDynamicPath(cons
 std::unique_ptr<aikido::trajectory::Spline> HauserDynamicPathToSpline(const ParabolicRamp::DynamicPath &_inputPath,
                                                                       double _startTime,
                                                                       const aikido::statespace::ConstStateSpacePtr &_stateSpace) {
+  std::cout << "HauserDynamicPathToSpline: " << std::endl;
   const auto dimension = _stateSpace->getDimension();
 
   // Construct a list of all ramp transition points.
@@ -244,10 +245,6 @@ std::unique_ptr<aikido::trajectory::Spline> HauserDynamicPathToSpline(const Para
     t += rampNd.endTime;
     transitionTimes.insert(t);
   }
-
-  std::cout << "Good times: " << std::endl;
-  for (auto i = transitionTimes.begin(); i != transitionTimes.end(); ++i)
-    std::cout << *i << ' ';
 
   // Convert the output to a spline with a knot at each transition time.
   assert(!transitionTimes.empty());

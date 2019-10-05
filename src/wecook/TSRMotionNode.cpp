@@ -15,8 +15,12 @@ using namespace wecook;
 //void compareTrajectory(aikido::trajectory::TrajectoryPtr traj1, aikido::trajectory::TrajectoryPtr traj2) {
 //  for (double i = 0; i <= 1; i+=0.02) {
 //    std::cout << "time: " << i << std::endl;
-//    std::cout << "traj1: " << traj1->evaluate(i) << std::endl;
-//    std::cout << "traj2: " << traj2->evaluate(i) <<std::endl;
+//    Eigen::VectorXd state1;
+//    Eigen::VectorXd state2;
+//    traj1->evaluate(i, state1);
+//    traj2->evaluate(i, state2);
+//    std::cout << "traj1: " << state1 << std::endl;
+//    std::cout << "traj2: " << state2 <<std::endl;
 //  }
 //}
 
@@ -115,17 +119,7 @@ void TSRMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
           future.wait();
         } else {
           std::unique_lock<std::mutex> lock(m_skeleton->getBodyNode(0)->getSkeleton()->getMutex());
-//          aikido::trajectory::TrajectoryPtr unTimedTrajectory =
-//              smoother::simpleSmoothPath(ada, m_stateSpace, m_skeleton, trajectory.get(), testable);
-//          aikido::trajectory::TrajectoryPtr timedTrajectory = ada->retimePathWithKunz(m_skeleton, unTimedTrajectory.get(), 1e-2, m_retimeTimeStep);
-//          m_stateSpace->setState(m_skeleton.get(), startState.getState());
-//          aikido::trajectory::TrajectoryPtr unTimedTrajectory =
-//              smoother::hauserSmoothPathInterpolated(ada, m_stateSpace, m_skeleton, trajectory.get(), testable);
-//          aikido::trajectory::TrajectoryPtr
-//              timedTrajectory = ada->retimePathWithKunz(m_skeleton, unTimedTrajectory.get(), 1e-3, 5e-3);
-          aikido::trajectory::TrajectoryPtr timedTrajectory = planner::hauserSmoothPath(ada, m_stateSpace, m_skeleton, trajectory.get(), testable);
-//          aikido::trajectory::TrajectoryPtr timedTrajectory2 = planner::hauserSmoothPathHauserPath(ada, m_stateSpace, m_skeleton, trajectory.get(), testable);
-//          compareTrajectory(timedTrajectory, timedTrajectory2);
+          aikido::trajectory::TrajectoryPtr timedTrajectory = planner::hauserSmoothPathHauserPath(ada, m_stateSpace, m_skeleton, trajectory.get(), testable);
           m_stateSpace->setState(m_skeleton.get(), startState.getState());
           lock.unlock();
           auto future = ada->executeTrajectory(timedTrajectory);

@@ -8,7 +8,7 @@
 
 using namespace wecook::ai::trajectory;
 
-HauserPath::HauserPath(ParabolicRamp::DynamicPath *dynamicPath, aikido::statespace::ConstStateSpacePtr stateSpace)
+HauserPath::HauserPath(std::shared_ptr<ParabolicRamp::DynamicPath> dynamicPath, aikido::statespace::ConstStateSpacePtr stateSpace)
     : m_dynamicPath(dynamicPath), m_stateSpace(stateSpace) {
 
 }

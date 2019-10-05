@@ -216,7 +216,7 @@ std::unique_ptr<ai::trajectory::HauserPath> hauserDoShortcutHauserPath(const aik
 
   detail::hauserDoShortcut(*dynamicPath, collisionTestable, timeLimit, checkResolution, tolerance, rng);
 
-  auto outputTraj = std::make_unique<ai::trajectory::HauserPath>(dynamicPath.get(), stateSpace);
+  auto outputTraj = std::make_unique<ai::trajectory::HauserPath>(dynamicPath, stateSpace);
 
   return outputTraj;
 }
