@@ -228,7 +228,6 @@ std::shared_ptr<ParabolicRamp::DynamicPath> InterpolatedToHauserDynamicPath(cons
 std::unique_ptr<aikido::trajectory::Spline> HauserDynamicPathToSpline(const ParabolicRamp::DynamicPath &_inputPath,
                                                                       double _startTime,
                                                                       const aikido::statespace::ConstStateSpacePtr &_stateSpace) {
-  std::cout << "HauserDynamicPathToSpline: " << std::endl;
   const auto dimension = _stateSpace->getDimension();
 
   // Construct a list of all ramp transition points.

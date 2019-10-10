@@ -51,8 +51,6 @@ void PrimitiveEngageNode::execute(std::map<std::string, std::shared_ptr<Agent>> 
     collisionFreeConstraint->addPairwiseCheck(armCollisionGroup, envCollisionGroup);
 
     m_targetPose->mT0_w = objMgr->getObjTransform(m_refObject);
-    std::cout << m_targetPose->mT0_w.translation() << std::endl;
-    std::cout << m_refObject << std::endl;
 
     auto motion1 = std::make_shared<TSRMotionNode>(m_targetPose,
                                                    moveBn,

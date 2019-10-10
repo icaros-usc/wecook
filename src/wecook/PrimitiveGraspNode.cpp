@@ -46,7 +46,6 @@ void PrimitiveGraspNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
     auto collisionDetector = dart::collision::FCLCollisionDetector::create();
     std::shared_ptr<dart::collision::CollisionGroup>
         armCollisionGroup = collisionDetector->createCollisionGroup(armSkeleton.get(), handSkeleton.get());
-    std::cout << "Hand has " << handSkeleton->getNumBodyNodes() << " body nodes: " << handSkeleton->getBodyNode(0)->getName() << " " << handSkeleton->getBodyNode(1)->getName() << std::endl;
     auto envCollisionGroup = objMgr->createCollisionGroupExceptFoodAndMovingObj("hand", collisionDetector, grabbedBodyNode);
     std::shared_ptr<aikido::constraint::dart::CollisionFree> collisionFreeConstraint =
         std::make_shared<aikido::constraint::dart::CollisionFree>(armSpace, armSkeleton, collisionDetector);

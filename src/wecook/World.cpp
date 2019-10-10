@@ -39,7 +39,6 @@ void World::run() {
 
       std::vector<Action> subgoals = task.getSubgoals();
       auto taskGraph = std::make_shared<TaskGraph>(subgoals);
-      std::cout << "Number of head nodes " << taskGraph->getHeads().size() << std::endl;
 
       // transfer taskGraph to primitive taskGraph
       m_actionPlanner.compile(taskGraph, m_agents, m_containingMap, m_objectMgr);

@@ -725,7 +725,6 @@ void ActionPlanner::planHolding(wecook::ActionNode *actionNode,
   auto actionName = actionNode->getAction().get_verb();
   auto occurances = findAllOccurances(actionName, '_');
   auto collaborativeAction = actionName.substr(occurances.back() + 1);
-  std::cout << collaborativeAction << std::endl;
   auto holdedObjectName = actionName.substr(occurances[0] + 1, occurances.back() - occurances[0] - 1);
   if (collaborativeAction == "transfer") {
     if (holdedObjectName == actionNode->getAction().get_locations()[1]) {
@@ -939,8 +938,6 @@ void ActionPlanner::planHolding(wecook::ActionNode *actionNode,
       ptg.addNode(moveToNodeS2);
       ptg.addNode(predefinedNodeS2);
       ptg.addNode(placeNodeS);
-
-      std::cout << ptg.getTailNode(pidS)->getType() << std::endl;
 
       actionNode->setPrimitiveTaskGraph(ptg);
 

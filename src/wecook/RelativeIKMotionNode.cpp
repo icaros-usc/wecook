@@ -18,7 +18,6 @@ void RelativeIKMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
   auto targetSpatialVector = TransformMatrix2SpatialVector(targetPose);
 
   while ((targetSpatialVector - currentSpatialVector).norm() > 0.35) {
-    std::cout << (targetSpatialVector - currentSpatialVector).norm() << std::endl;
     auto jac = m_skeleton->getJacobian(m_bn, m_incoordinatesOf);
     delta_q << aikido::common::pseudoinverse(jac) * (targetSpatialVector - currentSpatialVector) * 0.03;
     Eigen::VectorXd currPos = m_skeleton->getPositions();

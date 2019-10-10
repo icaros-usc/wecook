@@ -92,7 +92,6 @@ void TSRMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
       ROS_INFO("Return");
       int curr_conf = 1;
       while (not trajectory && curr_conf < configurations.size()) {
-        std::cout << "Failed " << m_goalTSR->mT0_w.translation() << std::endl;
         // TODO replan
         ROS_INFO("Try new goal");
         trajectory = ada->planToConfiguration(m_stateSpace,

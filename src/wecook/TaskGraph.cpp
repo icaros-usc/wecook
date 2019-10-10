@@ -119,7 +119,6 @@ void TaskGraph::merge() {
       auto currPHN = curr->m_primitiveTaskGraph.getHeadNode(pid);
       auto lastPTN = last->m_primitiveTaskGraph.getTailNode(pid);
 
-      std::cout << currPHN->getGrabbingObj() << " " << lastPTN->getPlacingObj() << std::endl;
       if (currPHN->getType() == "grab" && lastPTN->getType() == "place"
           && currPHN->getGrabbingObj() == lastPTN->getPlacingObj()) {
         ROS_INFO_STREAM("Remove placing and grabbing nodes" << " " << pid);

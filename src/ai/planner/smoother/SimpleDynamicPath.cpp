@@ -28,13 +28,11 @@ void SimpleDynamicPath::SetMilestones(const std::vector<Eigen::VectorXd> &milest
 }
 
 void SimpleDynamicPath::Shortcut(int i1, int i2) {
-  std::cout << "Shortcutting!!! " << i1 + 1 << " " << i2 + 1 << " " << m_milestones.size() << std::endl;
   m_milestones.erase(m_milestones.begin() + i1 + 1, m_milestones.begin() + i2);
 
   if (!m_velocities.empty()) {
     m_velocities.erase(m_velocities.begin() + i1 + 1, m_velocities.begin() + i2);
   }
-  std::cout << "Finished!!! " << m_milestones.size() << std::endl;
 }
 
 

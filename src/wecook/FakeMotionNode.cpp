@@ -8,7 +8,6 @@ using namespace wecook;
 
 void FakeMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
   auto translation = m_objSkeleton->getBodyNode(0)->getTransform().translation();
-  std::cout << "Object's current translation: " << translation << "Target translation: " << m_targetTranslation << std::endl;
   while (translation != m_targetTranslation) {
     auto transform = m_objSkeleton->getBodyNode(0)->getTransform();
     transform.translation() = translation + (m_targetTranslation - translation);
