@@ -1,7 +1,7 @@
 # WeCook
-
-<img src="docs/logo.png" width=200/>
-
+<p align="center">
+<img src="docs/logo.png" width=100/>
+</p>
 > :warning: **Warning:** WeCook is under heavy development. These instructions are
 > primarily for reference by the developers.
 
