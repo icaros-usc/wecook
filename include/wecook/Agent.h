@@ -10,6 +10,10 @@
 
 namespace wecook {
 
+//! Agent class
+/*!
+ * Agent class, super class of Robot and Human.
+ */
 class Agent {
 
  public:

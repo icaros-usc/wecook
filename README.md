@@ -1,9 +1,11 @@
 # WeCook
 
+<img src="docs/logo.png" width=200/>
+
 > :warning: **Warning:** WeCook is under heavy development. These instructions are
 > primarily for reference by the developers.
 
-WeCook is a platform for robotic manipulation 
+WeCook is a platform for long horizontal robotic manipulation 
 and human-robot collaboration research.
 
 ## Setup Instructions

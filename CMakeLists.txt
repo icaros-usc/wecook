@@ -20,6 +20,7 @@ add_message_files(
         SceneMsg.msg
         ObjectMsg.msg
         ContainingMsg.msg
+        AgentMsg.msg
 )
 
 generate_messages(DEPENDENCIES std_msgs)

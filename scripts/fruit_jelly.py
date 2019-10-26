@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import rospy
-from wecook.msg import ActionMsg, TaskMsg, SceneMsg, ObjectMsg, ContainingMsg
+from wecook.msg import ActionMsg, TaskMsg, SceneMsg, ObjectMsg, ContainingMsg, AgentMsg
 
 
 def talker():
@@ -65,13 +65,17 @@ def talker():
                          [ContainingMsg(['plate1', 'food_item1']),
                           ContainingMsg(['plate0', 'food_item0'])])
 
-    task_msg = TaskMsg(scene_msg, [
-        ActionMsg(['p2'], 'cut', ['plate1'], 'knife1', ['food_item1']),
-        ActionMsg(['p1', 'p2'], 'holding_plate0_transfer', ['plate0', 'bowl0'], 'spoon1', ['food_item0']),
-        ActionMsg(['p2'], 'stir', ['bowl0'], 'spoon1', ['food_item0']),
-        ActionMsg(['p1', 'p2'], 'holding_plate1_transfer', ['plate1', 'bowl0'], 'spoon1', ['food_item1']),
-        ActionMsg(['p2'], 'stir', ['bowl0'], 'spoon1', ['food_item0', 'food_item1']),
-        ActionMsg(['p1'], 'stir', ['bowl0'], 'spoon0', ['food_item0', 'food_item1'])])
+    task_msg = TaskMsg(scene_msg,
+                       [ActionMsg(['p2'], 'cut', ['plate1'], 'knife1', ['food_item1']),
+                        ActionMsg(['p1', 'p2'], 'holding_plate0_transfer', ['plate0', 'bowl0'], 'spoon1',
+                                  ['food_item0']),
+                        ActionMsg(['p2'], 'stir', ['bowl0'], 'spoon1', ['food_item0']),
+                        ActionMsg(['p1', 'p2'], 'holding_plate1_transfer', ['plate1', 'bowl0'], 'spoon1',
+                                  ['food_item1']),
+                        ActionMsg(['p2'], 'stir', ['bowl0'], 'spoon1', ['food_item0', 'food_item1']),
+                        ActionMsg(['p1'], 'stir', ['bowl0'], 'spoon0', ['food_item0', 'food_item1'])],
+                       [AgentMsg('p1', 'r', [-0.2, 0.15, 0.7, 0., 0., 0.7071068, 0.7071068]),
+                        AgentMsg('p2', 'r', [-0.2, -0.2, 0.7, 0., 0., 0.7071068, 0.7071068])])
 
     # task_msg = TaskMsg(scene_msg, [ActionMsg(['p1', 'p2'], 'holding_plate0_transfer', ['plate0', 'bowl0'], 'spoon1', ['food_item0'])])
 

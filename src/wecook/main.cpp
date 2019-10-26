@@ -18,6 +18,7 @@ int main(int argc, char **argv) {
 
   // first construct world
   std::shared_ptr<World> world = std::make_shared<World>(true);
+
   // create one robot
   Eigen::Isometry3d robotPose1 = Eigen::Isometry3d::Identity();
   Eigen::Matrix3d rot;
