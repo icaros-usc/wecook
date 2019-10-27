@@ -12,7 +12,7 @@ namespace wecook {
 namespace ai {
 namespace trajectory {
 
-/// Wrapper for hauser's dynamic path
+/*! Wrapper for hauser's dynamic path */
 class HauserPath : public aikido::trajectory::Trajectory {
  public:
   HauserPath(std::shared_ptr<ParabolicRamp::DynamicPath> dynamicPath, aikido::statespace::ConstStateSpacePtr stateSpace);

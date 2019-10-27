@@ -1,2 +1,2 @@
 add_subdirectory(smoother)
-add_subdirectory(taskPlanners)
+add_subdirectory(taskPlanner)
