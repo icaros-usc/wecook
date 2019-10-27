@@ -11,6 +11,9 @@
 #include "Object.h"
 
 namespace wecook {
+/*!
+ * Task is a general class for task description, it matches with the taskMsg.
+ */
 class Task {
  public:
   Task() = default;
@@ -25,6 +28,14 @@ class Task {
 
   void addContainingPair(const std::string &containerName, const std::string &objectName) {
     m_containingPairs.emplace_back(std::pair<std::string, std::string>(containerName, objectName));
+  }
+
+  void addPDDLDomain(const std::string &PDDLDomain) {
+    m_PDDLDomain = PDDLDomain;
+  }
+
+  void addPDDLProblem(const std::string &PDDLProblem) {
+    m_PDDLProblem = PDDLProblem;
   }
 
   std::vector<Action> getSubgoals() const {
@@ -43,6 +54,8 @@ class Task {
   std::vector<Action> m_subgoals;
   std::vector<Object> m_objects;
   std::vector<std::pair<std::string, std::string>> m_containingPairs;
+  std::string m_PDDLDomain;
+  std::string m_PDDLProblem;
 };
 }
 

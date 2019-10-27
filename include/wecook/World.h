@@ -52,8 +52,20 @@ class World {
  private:
   void initialize();
 
+  /**
+   * Main thread runs, where world keeps execute the task in the m_tasks
+   */
   void run();
 
+  /**
+   * This function sets up the world based on the task description.
+   * It will do following things:
+   * 1. Parse the pddl files (Task).
+   * 2. Parse the urdf files (Scene Graph).
+   * 3. Construct the task-motion domain based on Task and Scene Graph.
+   * ref: http://www.roboticsproceedings.org/rss12/p02.pdf
+   * @param task
+   */
   void setupTask(const Task &task);
 
   void clean(const Task &task);

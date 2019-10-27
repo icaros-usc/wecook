@@ -16,9 +16,9 @@ int World::addTask(wecook::Task &task) {
 void World::initialize() {
   m_env = std::make_shared<aikido::planner::World>("wecook");
 
-  for (const auto &agent : m_agents) {
-    agent.second->init(m_env);
-  }
+//  for (const auto &agent : m_agents) {
+//    agent.second->init(m_env);
+//  }
 
   m_viewer = std::make_shared<aikido::rviz::WorldInteractiveMarkerViewer>(m_env, "wecook", "map");
   m_viewer->setAutoUpdate(true);
@@ -34,7 +34,7 @@ void World::run() {
   while (!m_isEnd) {
     if (!m_tasks.empty()) {
       m_isFree = false;
-      Task task = m_tasks[0];
+      Task task = m_tasks[0]; // get the first element in task queue
       setupTask(task);
 
       std::vector<Action> subgoals = task.getSubgoals();
@@ -69,6 +69,9 @@ void World::run() {
 }
 
 void World::setupTask(const Task &task) {
+  // 1. Parse PDDL files
+  
+
   std::vector<Object> objects = task.getObjects();
 
   m_objectMgr = std::make_shared<ObjectMgr>();

@@ -30,6 +30,9 @@ void TaskManager::addNewTask(const TaskMsg::ConstPtr &msg) {
   for (const auto &containingMsg : msg->scene.containingMap) {
     task.addContainingPair(containingMsg.pair[0], containingMsg.pair[1]);
   }
+
+  task.addPDDLDomain(msg->PDDLDomain);
+  task.addPDDLProblem(msg->PDDLProblem);
   m_taskQueue.push(task);
 }
 

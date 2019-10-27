@@ -19,9 +19,11 @@
 #include "wecook/ObjectMsg.h"
 
 namespace wecook {
+/*! A TaskManager class, which is used to listen to tasks sent by users and dispatch them. */
 class TaskManager {
  public:
   TaskManager(const ros::NodeHandle &n);
+
 
   void setWorld(const std::shared_ptr<World> &world) {
     m_world = world;
@@ -35,6 +37,9 @@ class TaskManager {
   bool m_isEnd;
   ros::Subscriber m_Listener;
   ros::NodeHandle m_nh;
+  /**
+   * World is where everything happens.
+   */
   std::shared_ptr<World> m_world;
 
   void addNewTask(const TaskMsg::ConstPtr &msg);
