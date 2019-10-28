@@ -70,7 +70,10 @@ void World::run() {
 
 void World::setupTask(const Task &task) {
   // 1. Parse PDDL files
-  
+  auto pddlDomain = task.getPDDLDomain();
+  auto pddlProblem = task.getPDDLProblem();
+
+
 
   std::vector<Object> objects = task.getObjects();
 

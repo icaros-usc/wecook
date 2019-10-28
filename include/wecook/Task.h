@@ -50,6 +50,14 @@ class Task {
     return m_containingPairs;
   }
 
+  std::string getPDDLDomain() const {
+    return m_PDDLDomain;
+  }
+
+  std::string getPDDLProblem() const {
+    return m_PDDLProblem;
+  }
+
  private:
   std::vector<Action> m_subgoals;
   std::vector<Object> m_objects;

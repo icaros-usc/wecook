@@ -1,6 +1,6 @@
-﻿(define (domain feeding)
-    (:requirements :strips)
-    
+(define (domain feeding)
+    (:requirements :strips :disjunctive-preconditions :negative-preconditions)
+
     (:predicates (SPOON ?x) (GRIPPER ?x) (POTATO ?x) (MOUTH ?x) (INIT ?x)
                  (in-spoon ?x ?y)
                  (engaged ?x ?y)

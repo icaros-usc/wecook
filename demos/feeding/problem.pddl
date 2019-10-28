@@ -1,4 +1,4 @@
-﻿(define (problem feeding_pb)
+(define (problem feeding_pb)
     (:domain feeding)
     
     (:objects spoon1 potato1 gripper1 mouth1 init1)
