@@ -58,7 +58,19 @@ class World {
   void run();
 
   /**
-   * This function sets up the world based on the task description.
+   * This function sets up the world for a following task based on the task description.
+   * @param task
+   */
+  void setupFollowingTask(const Task &task);
+
+  /**
+   * This function cleans up the world for a following task based on the task description.
+   * @param task
+   */
+  void cleanFollowingTask(const Task &task);
+
+  /**
+   * This function sets up the world for a planning task based on the task description.
    * It will do following things:
    * 1. Parse the pddl files (Task).
    * 2. Parse the urdf files (Scene Graph).
@@ -66,9 +78,13 @@ class World {
    * ref: http://www.roboticsproceedings.org/rss12/p02.pdf
    * @param task
    */
-  void setupTask(const Task &task);
+  void setupPlanningTask(const Task &task);
 
-  void clean(const Task &task);
+  /**
+   * This function cleans up the world for a planning task based on the task description.
+   * @param task
+   */
+  void cleanPlanningTask(const Task &task);
 
   aikido::rviz::WorldInteractiveMarkerViewerPtr m_viewer = nullptr;
   aikido::planner::WorldPtr m_env = nullptr;

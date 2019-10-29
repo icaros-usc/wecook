@@ -19,3 +19,9 @@ void Robot::init(std::shared_ptr<aikido::planner::World> &env) {
 Eigen::Vector3d Robot::getPosition() {
   return m_transform.translation();
 }
+
+void Robot::end() {
+  // release robot
+  m_ada.reset();
+}
+

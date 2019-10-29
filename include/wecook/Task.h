@@ -6,6 +6,7 @@
 #define WECOOK_TASK_H
 
 #include <iostream>
+#include <vector>
 
 #include "Action.h"
 #include "Object.h"
@@ -16,6 +17,23 @@ namespace wecook {
  */
 class Task {
  public:
+  /*! Type is an enum */
+  enum Type {
+    Planning, /*! planning task, currently only supports single agent \todo #9 */
+    Following, /*! following task */
+  };
+
+  struct Agent {
+    Agent(const std::string& pid, const std::string &agentType, const std::vector<double> &pose) {
+      m_pid = pid;
+      m_type = agentType;
+      m_pose = pose;
+    }
+    std::string m_pid;
+    std::string m_type;
+    std::vector<double> m_pose;
+  };
+
   Task() = default;
 
   void addSubgoal(const Action &action) {
@@ -36,6 +54,22 @@ class Task {
 
   void addPDDLProblem(const std::string &PDDLProblem) {
     m_PDDLProblem = PDDLProblem;
+  }
+
+  void addTaskType(const std::string &taskType) {
+    m_type = taskType == "plan" ? Planning : Following;
+  }
+
+  void addAgent(const std::string &pid, const std::string &agentType, const std::vector<double> &pose) {
+    m_agents.emplace_back(Agent(pid, agentType, pose));
+  }
+
+  std::vector<Agent> getAgents() const {
+    return m_agents;
+  }
+
+  Type getTaskType() const {
+    return m_type;
   }
 
   std::vector<Action> getSubgoals() const {
@@ -64,6 +98,8 @@ class Task {
   std::vector<std::pair<std::string, std::string>> m_containingPairs;
   std::string m_PDDLDomain;
   std::string m_PDDLProblem;
+  Type m_type; /*! indicate the task type */
+  std::vector<Agent> m_agents; /*! array of agents */
 };
 }
 

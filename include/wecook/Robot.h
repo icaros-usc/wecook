@@ -22,6 +22,8 @@ class Robot : public Agent {
 
   void init(std::shared_ptr<aikido::planner::World> &env);
 
+  void end();
+
   Eigen::Vector3d getPosition();
 
   std::string getType() {

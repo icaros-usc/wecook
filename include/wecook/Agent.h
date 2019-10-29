@@ -31,6 +31,8 @@ class Agent {
 
   virtual void init(std::shared_ptr<aikido::planner::World> &env) = 0;
 
+  virtual void end() = 0;
+
   virtual Eigen::Vector3d getPosition() = 0;
 
   inline std::string getPid() {

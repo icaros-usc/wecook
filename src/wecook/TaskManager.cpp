@@ -17,6 +17,11 @@ void TaskManager::stop(int signum) {
   ros::shutdown();
 }
 
+/*!
+ * addNewTask
+ * accepts msg and construct a correcponding task data object
+ * @param msg
+ */
 void TaskManager::addNewTask(const TaskMsg::ConstPtr &msg) {
   Task task = Task();
   for (const auto &objectMsg : msg->scene.objects) {
@@ -30,9 +35,12 @@ void TaskManager::addNewTask(const TaskMsg::ConstPtr &msg) {
   for (const auto &containingMsg : msg->scene.containingMap) {
     task.addContainingPair(containingMsg.pair[0], containingMsg.pair[1]);
   }
-
   task.addPDDLDomain(msg->PDDLDomain);
   task.addPDDLProblem(msg->PDDLProblem);
+  for (const auto &agentMsg : msg->agents) {
+    task.addAgent(agentMsg.pid, agentMsg.type, agentMsg.pose);
+  }
+  task.addTaskType(msg->type);
   m_taskQueue.push(task);
 }
 

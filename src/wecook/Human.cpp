@@ -13,3 +13,7 @@ void Human::init(std::shared_ptr<aikido::planner::World> &env) {
 Eigen::Vector3d Human::getPosition() {
   // TODO get position of human
 }
+
+void Human::end() {
+  // TODO release human
+}
