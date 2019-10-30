@@ -12,6 +12,10 @@
 
 namespace wecook {
 
+/*!
+ * TaskExecutorThread is a class for executing tasks for each agent.
+ * We need it mostly because of the need for task-level communication between agents.
+ */
 class TaskExecutorThread {
   typedef boost::function<void(ActionNode *)> syncCallback;
 
@@ -36,6 +40,10 @@ class TaskExecutorThread {
     return m_currentActionNode;
   }
 
+  void setMotionMutex(boost::mutex *motionMutex) {
+    m_motionMutex = motionMutex;
+  }
+
  private:
   void run();
 
@@ -45,8 +53,8 @@ class TaskExecutorThread {
   std::shared_ptr<PrimitiveActionExecutor> m_pae;
   boost::thread m_thread;
   ActionNode *m_currentActionNode = nullptr;
-
   bool m_isEnd = false;
+  boost::mutex *m_motionMutex = nullptr;
 };
 
 }

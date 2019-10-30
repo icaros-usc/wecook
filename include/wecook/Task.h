@@ -23,8 +23,13 @@ class Task {
     Following, /*! following task */
   };
 
+  /*! motionPlannerType is an enum */
+  enum MotionPlannerType {
+    RRTConnect, /*! http://www.kuffner.org/james/papers/kuffner_icra2000.pdf */
+  };
+
   struct Agent {
-    Agent(const std::string& pid, const std::string &agentType, const std::vector<double> &pose) {
+    Agent(const std::string &pid, const std::string &agentType, const std::vector<double> &pose) {
       m_pid = pid;
       m_type = agentType;
       m_pose = pose;
@@ -64,6 +69,16 @@ class Task {
     m_agents.emplace_back(Agent(pid, agentType, pose));
   }
 
+  void addMotionPlannerType(const std::string &type) {
+    if (type == "RRTConnect") {
+      m_motionPlannerType = RRTConnect;
+    }
+  }
+
+  MotionPlannerType getMotionPlannerType() {
+    return m_motionPlannerType;
+  }
+
   std::vector<Agent> getAgents() const {
     return m_agents;
   }
@@ -100,6 +115,8 @@ class Task {
   std::string m_PDDLProblem;
   Type m_type; /*! indicate the task type */
   std::vector<Agent> m_agents; /*! array of agents */
+  MotionPlannerType
+      m_motionPlannerType = RRTConnect; /*! use it to decide if we are using dynamic motion planning algorithms*/
 };
 }
 

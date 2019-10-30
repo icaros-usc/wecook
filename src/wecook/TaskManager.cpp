@@ -41,6 +41,7 @@ void TaskManager::addNewTask(const TaskMsg::ConstPtr &msg) {
     task.addAgent(agentMsg.pid, agentMsg.type, agentMsg.pose);
   }
   task.addTaskType(msg->type);
+  task.addMotionPlannerType(msg->motionPlannerType);
   m_taskQueue.push(task);
 }
 

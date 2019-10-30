@@ -7,12 +7,13 @@
 using namespace wecook;
 
 void TaskExecutorThread::run() {
+  ROS_INFO_STREAM(m_agent->getPid() + " starting execute the task in this task executor thread...");
   auto pid = m_agent->getPid();
   auto curr = m_currentTask->getHeadNode(pid);
   while (curr) {
     m_currentActionNode = curr;
     // wait until all agents involved in this action are ready
-//    m_syncCallback(m_currentActionNode);
+    //    m_syncCallback(m_currentActionNode);
     auto fatherNodes = curr->getFathers();
     for (auto &father : fatherNodes) {
       while (!father->m_ifExecuted) {
@@ -30,8 +31,15 @@ void TaskExecutorThread::run() {
           ros::Duration(0.5).sleep();
         }
       }
-
-      m_pae->execute(currPAN);
+      // if motionMutex is not nullptr
+      // we need to first lock the mutex
+      if (m_motionMutex) {
+        boost::unique_lock<boost::mutex> lock(*m_motionMutex);
+        m_pae->execute(currPAN);
+        lock.unlock();
+      } else {
+        m_pae->execute(currPAN);
+      }
 
       // find next primitive action node to execute
       auto last = currPAN;

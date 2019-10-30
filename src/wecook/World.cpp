@@ -1,6 +1,7 @@
 //
 // Created by hejia on 7/30/19.
 //
+#include <boost/thread/mutex.hpp>
 
 #include "wecook/TaskGraph.h"
 #include "wecook/World.h"
@@ -37,15 +38,21 @@ void World::run() {
         // TODO
       } else {
         // Do following mode
+        ROS_INFO("Setting up the environment...");
         setupFollowingTask(task);
 
         std::vector<Action> subgoals = task.getSubgoals();
+        ROS_INFO("Building the task graph...");
         auto taskGraph = std::make_shared<TaskGraph>(subgoals);
 
         // transfer taskGraph to primitive taskGraph
+        ROS_INFO("Compiling the task graph...");
         m_actionPlanner.compile(taskGraph, m_agents, m_containingMap, m_objectMgr);
 
+        boost::mutex motionMutex;
+
         // now dispatch taskgraph to all agents
+        ROS_INFO("Dispatching the task to agents...");
         for (const auto &agent : m_agents) {
           auto taskExecutorThread = std::make_shared<TaskExecutorThread>(agent.second,
                                                                          m_primitiveActionExecutor,
@@ -53,6 +60,9 @@ void World::run() {
                                                                          boost::bind(&World::syncToActionNode,
                                                                                      this,
                                                                                      ::_1));
+          if (task.getMotionPlannerType() == Task::RRTConnect) {
+            taskExecutorThread->setMotionMutex(&motionMutex);
+          }
           m_mapTaskExecutorThread.insert(std::make_pair(agent.first, taskExecutorThread));
         }
 
