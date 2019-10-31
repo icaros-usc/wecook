@@ -27,7 +27,7 @@ class IKMotionNode : public MotionNode {
 
   }
 
-  void plan(const std::shared_ptr<ada::Ada> &ada);
+  void plan(const std::shared_ptr<ada::Ada> &ada, const std::shared_ptr<ada::Ada> &adaImg);
 
  private:
   Eigen::Isometry3d m_targetPose;

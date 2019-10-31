@@ -5,3 +5,4 @@ string PDDLDomain
 string PDDLProblem
 string type
 string motionPlannerType
+bool ifSim

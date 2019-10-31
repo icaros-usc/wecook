@@ -8,7 +8,7 @@
 
 using namespace wecook;
 
-void LinearDeltaMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
+void LinearDeltaMotionNode::plan(const std::shared_ptr<ada::Ada> &ada, const std::shared_ptr<ada::Ada> &adaImg) {
   Eigen::VectorXd delta_q(6);
 
   for (int i = 0; i < m_repeat_time; i++) {
@@ -18,5 +18,8 @@ void LinearDeltaMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
     ros::Duration(0.1).sleep();
     Eigen::VectorXd new_pos = currPos + delta_q;
     m_skeleton->setPositions(new_pos);
+    if (adaImg) {
+      adaImg->getArm()->getMetaSkeleton()->setPositions(new_pos);
+    }
   }
 }

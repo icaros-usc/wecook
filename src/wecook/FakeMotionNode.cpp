@@ -6,7 +6,7 @@
 
 using namespace wecook;
 
-void FakeMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
+void FakeMotionNode::plan(const std::shared_ptr<ada::Ada> &ada, const std::shared_ptr<ada::Ada> &adaImg) {
   auto translation = m_objSkeleton->getBodyNode(0)->getTransform().translation();
   while (translation != m_targetTranslation) {
     auto transform = m_objSkeleton->getBodyNode(0)->getTransform();

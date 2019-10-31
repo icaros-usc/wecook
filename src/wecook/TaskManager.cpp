@@ -42,6 +42,7 @@ void TaskManager::addNewTask(const TaskMsg::ConstPtr &msg) {
   }
   task.addTaskType(msg->type);
   task.addMotionPlannerType(msg->motionPlannerType);
+  task.setSim(msg->ifSim);
   m_taskQueue.push(task);
 }
 

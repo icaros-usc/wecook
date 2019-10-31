@@ -9,7 +9,7 @@
 
 using namespace wecook;
 
-void IKMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
+void IKMotionNode::plan(const std::shared_ptr<ada::Ada> &ada, const std::shared_ptr<ada::Ada> &adaImg) {
   if (m_condition) {
     ROS_INFO("[IKMotionNode::plan]: Waiting for condition to be verified!");
     while (!m_condition->isSatisfied()) {

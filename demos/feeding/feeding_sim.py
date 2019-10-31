@@ -68,7 +68,7 @@ def talker():
                        "",
                        "follow",
                        "RRTConnect",
-                       False)
+                       True)
 
     # sleeping 10 seconds to publish
     rospy.sleep(1)

@@ -6,7 +6,7 @@
 
 using namespace wecook;
 
-void GravityMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
+void GravityMotionNode::plan(const std::shared_ptr<ada::Ada> &ada, const std::shared_ptr<ada::Ada> &adaImg) {
   Eigen::VectorXd delta_q(6);
 
   for (int i = 0; i < m_repeat_time; i++) {

@@ -38,7 +38,7 @@ void PrimitiveGraspNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
     auto collisionDetector = dart::collision::FCLCollisionDetector::create();
     std::shared_ptr<dart::collision::CollisionGroup>
         armCollisionGroup = collisionDetector->createCollisionGroup(armSkeleton.get(), handSkeleton.get());
-    auto envCollisionGroup = objMgr->createCollisionGroupExceptFoodAndMovingObj(collisionDetector);
+    auto envCollisionGroup = objMgr->createCollisionGroupExceptFoodAndMovingObj("hand",collisionDetector);
     std::shared_ptr<aikido::constraint::dart::CollisionFree> collisionFreeConstraint =
         std::make_shared<aikido::constraint::dart::CollisionFree>(armSpace, armSkeleton, collisionDetector);
     collisionFreeConstraint->addPairwiseCheck(armCollisionGroup, envCollisionGroup);
@@ -50,13 +50,15 @@ void PrimitiveGraspNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
                                                    armSkeleton,
                                                    nullptr,
                                                    false);
-    motion1->plan(robot->m_ada);
+    // TSRMotionNode
+    motion1->plan(robot->m_ada, robot->m_adaImg);
 
     auto conf = Eigen::Vector2d();
     conf << 1.1, 1.1;
     auto motion2 = std::make_shared<ConfMotionNode>(conf, handSpace, handSkeleton);
     ROS_INFO("Grabbing...Closing gripper");
-    motion2->plan(robot->m_ada);
+    // ConfMotionNode
+    motion2->plan(robot->m_ada, robot->m_adaImg);
 
     // before do grab, we need to check if to grab object is connected with other object
     if (objMgr->ifContained(m_toGrab)) {
@@ -73,7 +75,7 @@ void PrimitiveGraspNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
                                                        false,
                                                        armSpace,
                                                        armSkeleton);
-        motion->plan(robot->m_ada);
+        motion->plan(robot->m_ada, robot->m_adaImg);
       } else {
         for (auto &other : agents) {
           if (other.first != m_pid && other.second->getType() == "robot") {
@@ -85,7 +87,7 @@ void PrimitiveGraspNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
               ROS_INFO("Need to let the other robot ungrabs this object");
               auto
                   motion = std::make_shared<GrabMotionNode>(world->getSkeleton(m_toGrab), false, armSpace2, armSkeleton2);
-              motion->plan(robot2->m_ada);
+              motion->plan(robot2->m_ada, robot->m_adaImg);
             } else {
               break;
             }
@@ -94,7 +96,7 @@ void PrimitiveGraspNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
       }
     }
     auto motion3 = std::make_shared<GrabMotionNode>(world->getSkeleton(m_toGrab), true, armSpace, armSkeleton);
-    motion3->plan(robot->m_ada);
+    motion3->plan(robot->m_ada, robot->m_adaImg);
     ROS_INFO("Grabbing...Connecting");
 
     m_ifExecuted = true;

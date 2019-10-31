@@ -44,7 +44,7 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                     10,
                                                     armSpace,
                                                     armSkeleton);
-        motion4->plan(robot->m_ada);
+        motion4->plan(robot->m_ada, robot->m_adaImg);
 
         delta_x << 0., 0., 0.003;
         auto motion5 =
@@ -54,7 +54,7 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                     10,
                                                     armSpace,
                                                     armSkeleton);
-        motion5->plan(robot->m_ada);
+        motion5->plan(robot->m_ada, robot->m_adaImg);
       }
     } else if (m_motionType == "stir") {
       Eigen::Vector3d delta_x(-0.003, 0., -0.);
@@ -66,7 +66,7 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                   10,
                                                   armSpace,
                                                   armSkeleton);
-      motion6->plan(robot->m_ada);
+      motion6->plan(robot->m_ada, robot->m_adaImg);
       for (int j = 0; j < 3; j++) {
         Eigen::Vector3d delta_x(-0.003, 0., -0.);
         auto motion5 =
@@ -76,7 +76,7 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                     20,
                                                     armSpace,
                                                     armSkeleton);
-        motion5->plan(robot->m_ada);
+        motion5->plan(robot->m_ada, robot->m_adaImg);
 
         delta_x << +0.003, 0., 0.00;
         auto motion6 =
@@ -86,7 +86,7 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                     20,
                                                     armSpace,
                                                     armSkeleton);
-        motion6->plan(robot->m_ada);
+        motion6->plan(robot->m_ada, robot->m_adaImg);
       }
       delta_x << -0.003, 0., 0.00;
       motion6 =
@@ -96,7 +96,7 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                   10,
                                                   armSpace,
                                                   armSkeleton);
-      motion6->plan(robot->m_ada);
+      motion6->plan(robot->m_ada, robot->m_adaImg);
     } else if (m_motionType == "transfer1") {
       auto rotatePose = Eigen::Isometry3d::Identity();
       rotatePose.linear() << 0.5000, 0.500000, 0.7071, 0.5000, 0.5000, -0.7071, -0.7071, 0.7071, 0.0000;
@@ -105,7 +105,7 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                            dart::dynamics::Frame::World(),
                                                            armSpace,
                                                            armSkeleton);
-      motion->plan(robot->m_ada);
+      motion->plan(robot->m_ada, robot->m_adaImg);
     } else if (m_motionType == "transfer2") {
       // hacking
       // this action is used to grasp some food with the tool
@@ -120,11 +120,25 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
       auto toolNode = world->getSkeleton(toolName);
       // ungrab for connect
       robotHand->ungrab();
-      auto motionunconnect = std::make_shared<ConnMotionNode>(ingredientNode, oldLocation, oldLocationName, ingredientName, containingMap, false, armSpace, armSkeleton);
-      motionunconnect->plan(robot->m_ada);
+      auto motionunconnect = std::make_shared<ConnMotionNode>(ingredientNode,
+                                                              oldLocation,
+                                                              oldLocationName,
+                                                              ingredientName,
+                                                              containingMap,
+                                                              false,
+                                                              armSpace,
+                                                              armSkeleton);
+      motionunconnect->plan(robot->m_ada, robot->m_adaImg);
 
-      auto motionConnect = std::make_shared<ConnMotionNode>(ingredientNode, toolNode, toolName, ingredientName, containingMap, true, armSpace, armSkeleton);
-      motionConnect->plan(robot->m_ada);
+      auto motionConnect = std::make_shared<ConnMotionNode>(ingredientNode,
+                                                            toolNode,
+                                                            toolName,
+                                                            ingredientName,
+                                                            containingMap,
+                                                            true,
+                                                            armSpace,
+                                                            armSkeleton);
+      motionConnect->plan(robot->m_ada, robot->m_adaImg);
       // grab again
       robotHand->grab(toolNode);
       auto rotatePose = Eigen::Isometry3d::Identity();
@@ -138,7 +152,7 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                            dart::dynamics::Frame::World(),
                                                            armSpace,
                                                            armSkeleton);
-      motion->plan(robot->m_ada);
+      motion->plan(robot->m_ada, robot->m_adaImg);
       Eigen::Vector3d delta_x(0., 0., 0.005);
       auto motion2 = std::make_shared<LinearDeltaMotionNode>(bn,
                                                              delta_x,
@@ -146,7 +160,7 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                              10,
                                                              armSpace,
                                                              armSkeleton);
-      motion2->plan(robot->m_ada);
+      motion2->plan(robot->m_ada, robot->m_adaImg);
     } else if (m_motionType == "transfer3") {
       auto rotatePose = Eigen::Isometry3d::Identity();
       rotatePose.linear() <<
@@ -158,7 +172,7 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                            dart::dynamics::Frame::World(),
                                                            armSpace,
                                                            armSkeleton);
-      motion->plan(robot->m_ada);
+      motion->plan(robot->m_ada, robot->m_adaImg);
 
       // this action is used to release some food from the tool
       auto action = m_metaActuateInfo.getAction();
@@ -172,11 +186,25 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
       auto toolNode = world->getSkeleton(toolName);
       // ungrab for connect
       robotHand->ungrab();
-      auto motionunconnect = std::make_shared<ConnMotionNode>(ingredientNode, toolNode, toolName, ingredientName, containingMap, false, armSpace, armSkeleton);
-      motionunconnect->plan(robot->m_ada);
+      auto motionunconnect = std::make_shared<ConnMotionNode>(ingredientNode,
+                                                              toolNode,
+                                                              toolName,
+                                                              ingredientName,
+                                                              containingMap,
+                                                              false,
+                                                              armSpace,
+                                                              armSkeleton);
+      motionunconnect->plan(robot->m_ada, robot->m_adaImg);
 
-      auto motionConnect = std::make_shared<ConnMotionNode>(ingredientNode, newLocation, newLocationName, ingredientName, containingMap, true, armSpace, armSkeleton);
-      motionConnect->plan(robot->m_ada);
+      auto motionConnect = std::make_shared<ConnMotionNode>(ingredientNode,
+                                                            newLocation,
+                                                            newLocationName,
+                                                            ingredientName,
+                                                            containingMap,
+                                                            true,
+                                                            armSpace,
+                                                            armSkeleton);
+      motionConnect->plan(robot->m_ada, robot->m_adaImg);
       // grab again
       robotHand->grab(toolNode);
     } else if (m_motionType == "close") {
@@ -184,7 +212,7 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
       conf << 1., 1.;
       auto motion = std::make_shared<ConfMotionNode>(conf, handSpace, handSkeleton);
       ROS_INFO("Fully closing gripper");
-      motion->plan(robot->m_ada);
+      motion->plan(robot->m_ada, robot->m_adaImg);
     } else if (m_motionType == "roll") {
       for (int j = 0; j < 3; j++) {
         Eigen::Vector3d delta_x(-0.003, 0., -0.);
@@ -195,7 +223,7 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                     10,
                                                     armSpace,
                                                     armSkeleton);
-        motion5->plan(robot->m_ada);
+        motion5->plan(robot->m_ada, robot->m_adaImg);
 
         delta_x << +0.003, 0., 0.00;
         auto motion6 =
@@ -205,7 +233,7 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                     10,
                                                     armSpace,
                                                     armSkeleton);
-        motion6->plan(robot->m_ada);
+        motion6->plan(robot->m_ada, robot->m_adaImg);
       }
     } else if (m_motionType == "heat") {
       for (int j = 0; j < 3; j++) {
@@ -217,7 +245,7 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                     10,
                                                     armSpace,
                                                     armSkeleton);
-        motion5->plan(robot->m_ada);
+        motion5->plan(robot->m_ada, robot->m_adaImg);
 
         delta_x << +0.003, 0., 0.00;
         auto motion6 =
@@ -227,8 +255,47 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                     10,
                                                     armSpace,
                                                     armSkeleton);
-        motion6->plan(robot->m_ada);
+        motion6->plan(robot->m_ada, robot->m_adaImg);
       }
+    } else if (m_motionType == "feeding") {
+      // When we do feeding, we just hang around the mouth
+      // TODO tracking mouth
+      ROS_INFO("Feeding...");
+      ros::Duration(10).sleep();
+
+      // this action is used to release some food from the tool
+      auto action = m_metaActuateInfo.getAction();
+      auto ingredientName = action.get_ingredients()[0];
+      auto newLocationName = action.get_locations()[1];
+      auto toolName = action.get_tool();
+
+      auto world = robot->getWorld();
+      auto ingredientNode = world->getSkeleton(ingredientName);
+      auto newLocation = world->getSkeleton(newLocationName);
+      auto toolNode = world->getSkeleton(toolName);
+      // ungrab for connect
+      robotHand->ungrab();
+      auto motionunconnect = std::make_shared<ConnMotionNode>(ingredientNode,
+                                                              toolNode,
+                                                              toolName,
+                                                              ingredientName,
+                                                              containingMap,
+                                                              false,
+                                                              armSpace,
+                                                              armSkeleton);
+      motionunconnect->plan(robot->m_ada, robot->m_adaImg);
+
+      auto motionConnect = std::make_shared<ConnMotionNode>(ingredientNode,
+                                                            newLocation,
+                                                            newLocationName,
+                                                            ingredientName,
+                                                            containingMap,
+                                                            true,
+                                                            armSpace,
+                                                            armSkeleton);
+      motionConnect->plan(robot->m_ada, robot->m_adaImg);
+      // grab again
+      robotHand->grab(toolNode);
     }
     m_ifExecuted = true;
   }

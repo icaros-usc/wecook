@@ -23,7 +23,7 @@ class MotionNode {
 
   }
 
-  virtual void plan(const std::shared_ptr<ada::Ada> &ada) = 0;
+  virtual void plan(const std::shared_ptr<ada::Ada> &ada, const std::shared_ptr<ada::Ada> &adaImg) = 0;
 
  protected:
   aikido::statespace::dart::MetaSkeletonStateSpacePtr m_stateSpace = nullptr;

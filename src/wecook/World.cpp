@@ -1,6 +1,8 @@
 //
 // Created by hejia on 7/30/19.
 //
+#include <fstream>
+
 #include <boost/thread/mutex.hpp>
 
 #include "wecook/TaskGraph.h"
@@ -27,6 +29,44 @@ void World::stop() {
   m_thread.join();
 }
 
+void World::recording() {
+  // record time too
+  ros::Time begin = ros::Time::now();
+  std::vector<std::vector<double>> vecJoints;
+  while (!m_recordingEnd) {
+    // while recording is not end, we keep recording
+    for (const auto &agent : m_agents) {
+      // don't need so many states
+      ros::Duration(0.3).sleep();
+      auto adaImg = std::dynamic_pointer_cast<Robot, Agent>(agent.second)->m_adaImg;
+      // first get arm positions
+//      auto wholeJoints = adaImg->getMetaSkeleton()->getPositions();
+      auto armJoints = adaImg->getArm()->getMetaSkeleton()->getPositions();
+//      auto handJoints = ada->getHand()->getMetaSkeleton()->getPositions();
+//      Eigen::VectorXd joints(armJoints.size() + handJoints.size());
+//      joints << armJoints, handJoints;
+      std::vector<double> newJoints;
+      newJoints.resize(armJoints.size());
+      Eigen::VectorXd::Map(&newJoints[0], armJoints.size()) = armJoints;
+      vecJoints.emplace_back(newJoints);
+    }
+  }
+  ros::Time end = ros::Time::now();
+  ROS_INFO_STREAM("Started recording at: " << begin << "; Finished recording at: " << end);
+  ROS_INFO_STREAM("We have: " << vecJoints.size() << " points");
+
+  ROS_INFO("Caching");
+  std::ofstream cachingFile;
+  cachingFile.open("cached.txt");
+  for (const auto &joints : vecJoints) {
+    for (const auto &position : joints) {
+      cachingFile << position << ' ';
+    }
+    cachingFile << '\n';
+  }
+  cachingFile.close();
+}
+
 void World::run() {
   while (!m_isEnd) {
     if (!m_tasks.empty()) {
@@ -40,6 +80,10 @@ void World::run() {
         // Do following mode
         ROS_INFO("Setting up the environment...");
         setupFollowingTask(task);
+
+        // After setting up the environment, we want to start a skeleton state recording thread
+        m_recordingEnd = false;
+        boost::thread recordingThread(&World::recording, this);
 
         std::vector<Action> subgoals = task.getSubgoals();
         ROS_INFO("Building the task graph...");
@@ -72,6 +116,9 @@ void World::run() {
             ros::Duration(0.5).sleep();
           }
         }
+        // After executing we want to stop recording and cache the trajectory
+        m_recordingEnd = true;
+        recordingThread.join();
 
         cleanFollowingTask(task);
         m_tasks.pop_back();
@@ -91,8 +138,8 @@ void World::setupFollowingTask(const Task &task) {
     auto transform = vectorToIsometry(pose);
     if (agent.m_type == "r") {
       // This is a robot agent
-      auto pAgent = std::make_shared<Robot>(transform, agent.m_pid, m_ifSim);
-      addAgent(agent.m_pid, pAgent);
+      auto pAgent = std::make_shared<Robot>(transform, agent.m_pid, task.ifSim());
+      m_agents.emplace(std::pair<std::string, std::shared_ptr<Agent>>(agent.m_pid, pAgent));
     }
   }
 
@@ -104,7 +151,7 @@ void World::setupFollowingTask(const Task &task) {
 
   m_objectMgr = std::make_shared<ObjectMgr>();
 
-  m_objectMgr->init(objects, m_ifSim, m_env);
+  m_objectMgr->init(objects, task.ifSim(), m_env);
 
   m_containingMap = std::make_shared<ContainingMap>(task, m_objectMgr, m_env);
 
@@ -120,13 +167,14 @@ void World::cleanFollowingTask(const Task &task) {
   m_containingMap->unconnectAll();
   m_containingMap.reset();
 
-  m_objectMgr->clear(objects, m_ifSim, m_env);
+  m_objectMgr->clear(objects, m_env);
   m_objectMgr.reset();
 
   m_mapTaskExecutorThread.clear();
 
   // Remove all agents
   for (auto &agent : m_agents) {
+    // TODO stop trajectory controller
     agent.second->end();
   }
 }

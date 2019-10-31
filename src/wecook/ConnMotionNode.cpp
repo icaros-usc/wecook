@@ -6,7 +6,7 @@
 
 using namespace wecook;
 
-void ConnMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
+void ConnMotionNode::plan(const std::shared_ptr<ada::Ada> &ada, const std::shared_ptr<ada::Ada> &adaImg) {
   if (m_condition) {
     ROS_INFO("ConnMotionNode: waiting for condition...");
     while (!m_condition->isSatisfied()) {

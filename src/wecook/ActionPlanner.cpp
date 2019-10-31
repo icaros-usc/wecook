@@ -51,6 +51,8 @@ void ActionPlanner::plan(ActionNode *actionNode,
     planSprinkle(actionNode, agents, containingMap, objectMgr);
   } else if (actionNode->getAction().get_verb() == "squeeze") {
     planSqueeze(actionNode, agents, containingMap, objectMgr);
+  } else if (actionNode->getAction().get_verb() == "feeding") {
+    planFeeding(actionNode, agents, containingMap, objectMgr);
   }
 }
 
@@ -96,7 +98,14 @@ void ActionPlanner::planRoll(ActionNode *actionNode,
 
   // 3) create predefined rolling node
   auto predefinedNode =
-      std::make_shared<PrimitiveActuateNode>(pid, "end-effector", "roll", toolName, "", MetaActuateInfo(Action(actionNode->getAction())),false, false);
+      std::make_shared<PrimitiveActuateNode>(pid,
+                                             "end-effector",
+                                             "roll",
+                                             toolName,
+                                             "",
+                                             MetaActuateInfo(Action(actionNode->getAction())),
+                                             false,
+                                             false);
 
   // 4) create place back node
   auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
@@ -170,7 +179,14 @@ void ActionPlanner::planHeat(ActionNode *actionNode,
 
   // 3) create predefined heating node
   auto predefinedNode =
-      std::make_shared<PrimitiveActuateNode>(pid, "end-effector", "heat", toolName, "", MetaActuateInfo(Action(actionNode->getAction())), false, false);
+      std::make_shared<PrimitiveActuateNode>(pid,
+                                             "end-effector",
+                                             "heat",
+                                             toolName,
+                                             "",
+                                             MetaActuateInfo(Action(actionNode->getAction())),
+                                             false,
+                                             false);
 
   // 4) create place back node
   auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
@@ -253,7 +269,14 @@ void ActionPlanner::planCut(ActionNode *actionNode,
 
   // 3) create predefined cutting node
   auto predefinedNode =
-      std::make_shared<PrimitiveActuateNode>(pid, "end-effector", "cut", toolName, "", MetaActuateInfo(Action(actionNode->getAction())),false, false);
+      std::make_shared<PrimitiveActuateNode>(pid,
+                                             "end-effector",
+                                             "cut",
+                                             toolName,
+                                             "",
+                                             MetaActuateInfo(Action(actionNode->getAction())),
+                                             false,
+                                             false);
 
   // 4) create place back node
   auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
@@ -335,7 +358,14 @@ void ActionPlanner::planStir(ActionNode *actionNode,
 
   // 3) create predefined stirring node
   auto predefinedNode =
-      std::make_shared<PrimitiveActuateNode>(pid, "end-effector", "stir", toolName, "", MetaActuateInfo(Action(actionNode->getAction())),false, false);
+      std::make_shared<PrimitiveActuateNode>(pid,
+                                             "end-effector",
+                                             "stir",
+                                             toolName,
+                                             "",
+                                             MetaActuateInfo(Action(actionNode->getAction())),
+                                             false,
+                                             false);
 
   // 4) create place back node
   auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
@@ -470,7 +500,14 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
 
     // 3) create predefined pouring node
     auto predefinedNode =
-        std::make_shared<PrimitiveActuateNode>(pid, objectName, "transfer1", objectName, "", MetaActuateInfo(Action(actionNode->getAction())),false, false);
+        std::make_shared<PrimitiveActuateNode>(pid,
+                                               objectName,
+                                               "transfer1",
+                                               objectName,
+                                               "",
+                                               MetaActuateInfo(Action(actionNode->getAction())),
+                                               false,
+                                               false);
 
     // 4) create place back node
     auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
@@ -547,7 +584,14 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
 
     // 3) create predefined motion node
     auto predefinedNode =
-        std::make_shared<PrimitiveActuateNode>(pid, toolName, "transfer2", toolName, "", MetaActuateInfo(Action(actionNode->getAction())),false, false);
+        std::make_shared<PrimitiveActuateNode>(pid,
+                                               toolName,
+                                               "transfer2",
+                                               toolName,
+                                               "",
+                                               MetaActuateInfo(Action(actionNode->getAction())),
+                                               false,
+                                               false);
 
     // 4) move food to new location
     auto targetPose2 = std::make_shared<aikido::constraint::dart::TSR>();
@@ -575,7 +619,14 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
 
     // 5) create predefined pouring node
     auto predefinedNode2 =
-        std::make_shared<PrimitiveActuateNode>(pid, toolName, "transfer3", toolName, "", MetaActuateInfo(Action(actionNode->getAction())),false, false);
+        std::make_shared<PrimitiveActuateNode>(pid,
+                                               toolName,
+                                               "transfer3",
+                                               toolName,
+                                               "",
+                                               MetaActuateInfo(Action(actionNode->getAction())),
+                                               false,
+                                               false);
 
     // 6) create place back node
     auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
@@ -619,6 +670,139 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
 
     return;
   }
+}
+
+void ActionPlanner::planFeeding(ActionNode *actionNode,
+                                std::map<std::string, std::shared_ptr<Agent>> &agents,
+                                std::shared_ptr<ContainingMap> &containingMap,
+                                std::shared_ptr<ObjectMgr> &objectMgr) {
+// To do transfer object by tool, we have 6 steps: grab tool, move tool to start position,
+  // do predefined motion, move tool to new location, do predefined motion, place back tool
+  // 1) create grab node
+  // create grab pose
+  auto grabPose = std::make_shared<aikido::constraint::dart::TSR>();
+  grabPose->mTw_e.translation() = Eigen::Vector3d(-0.0, 0., 0.12);
+  Eigen::Matrix3d rot;
+  rot <<
+      1., 0., 0.,
+      0., -1., 0.,
+      0., 0., -1;
+  grabPose->mTw_e.linear() = rot;
+  auto epsilon = 0.01;
+  grabPose->mBw
+      << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
+  auto toolName = actionNode->getAction().get_tool();
+  auto pid = actionNode->getAction().get_pids()[0];
+  auto
+      grabNode =
+      std::make_shared<PrimitiveGraspNode>(grabPose, toolName, toolName, pid, toolName, "", true, false);
+
+  // 2) create move to node
+  // create start pose
+  auto targetPose = std::make_shared<aikido::constraint::dart::TSR>();
+  targetPose->mTw_e.translation() = Eigen::Vector3d(0., 0., 0.03);
+  targetPose->mBw
+      << -0.03, 0.03, -0.03, 0.03, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
+  auto oldLocationName = actionNode->getAction().get_locations()[0];
+  auto ingredientName = actionNode->getAction().get_ingredients()[0];
+  auto moveToNode =
+      std::make_shared<PrimitiveEngageNode>(targetPose,
+                                            toolName,
+                                            ingredientName,
+                                            pid,
+                                            toolName,
+                                            "",
+                                            false,
+                                            false);
+
+  // 3) create predefined motion node
+  auto predefinedNode =
+      std::make_shared<PrimitiveActuateNode>(pid,
+                                             toolName,
+                                             "transfer2",
+                                             toolName,
+                                             "",
+                                             MetaActuateInfo(Action(actionNode->getAction())),
+                                             false,
+                                             false);
+
+  // 4) move food to new location
+  auto targetPose2 = std::make_shared<aikido::constraint::dart::TSR>();
+  Eigen::Matrix3d rot2;
+  rot2 <<
+       1., 0., 0.,
+      0., 0.7071055, -0.7071081,
+      0., 0.7071081, 0.7071055;
+  targetPose2->mTw_e.linear() = rot2;
+  targetPose2->mTw_e.translation() = Eigen::Vector3d(0, 0, 0.06);
+  targetPose2->mBw << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -M_PI / 8, M_PI / 8, -M_PI / 8, M_PI
+      / 8, -M_PI / 8, M_PI / 8;
+  auto newLocationName = actionNode->getAction().get_locations()[1];
+  auto moveToNode2 =
+      std::make_shared<PrimitiveEngageNode>(targetPose2,
+                                            toolName,
+                                            newLocationName,
+                                            pid,
+                                            toolName,
+                                            "",
+                                            false,
+                                            false);
+  moveToNode2->setTimeStep(0.02);
+
+
+  // 5) create predefined pouring node
+  auto predefinedNode2 =
+      std::make_shared<PrimitiveActuateNode>(pid,
+                                             toolName,
+                                             "feeding",
+                                             toolName,
+                                             "",
+                                             MetaActuateInfo(Action(actionNode->getAction())),
+                                             false,
+                                             false);
+
+  // 6) create place back node
+  auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
+  auto translation = objectMgr->getObjTransform(toolName).translation();
+  placePose->mTw_e.translation() = translation - Eigen::Vector3d(0.5, 0.0, 0.);
+  placePose->mTw_e.linear() = objectMgr->getObjTransform(toolName).linear();
+  placePose->mBw
+      << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
+  auto
+      placeNode =
+      std::make_shared<PrimitivePlaceNode>(placePose,
+                                           toolName,
+                                           "table0",
+                                           pid,
+                                           "",
+                                           toolName,
+                                           false,
+                                           true);
+
+  // connect these nodes
+  grabNode->addChild(moveToNode);
+  moveToNode->addFather(grabNode);
+  moveToNode->addChild(predefinedNode);
+  predefinedNode->addFather(moveToNode);
+  predefinedNode->addChild(moveToNode2);
+  moveToNode2->addFather(predefinedNode);
+  moveToNode2->addChild(predefinedNode2);
+  predefinedNode2->addFather(moveToNode2);
+  predefinedNode2->addChild(placeNode);
+  placeNode->addFather(predefinedNode2);
+
+  // build sub primitive task graph for this action node
+  PrimitiveTaskGraph ptg{};
+  ptg.addNode(grabNode);
+  ptg.addNode(moveToNode);
+  ptg.addNode(predefinedNode);
+  ptg.addNode(moveToNode2);
+  ptg.addNode(predefinedNode2);
+  ptg.addNode(placeNode);
+
+  actionNode->setPrimitiveTaskGraph(ptg);
+
+  return;
 }
 
 void ActionPlanner::planHandover(ActionNode *actionNode,

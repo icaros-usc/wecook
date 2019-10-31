@@ -32,7 +32,7 @@ void PrimitivePlaceNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
       std::shared_ptr<dart::collision::CollisionGroup>
           armCollisionGroup = collisionDetector->createCollisionGroup(armSkeleton.get(), placeBn, handSkeleton.get());
       auto envCollisionGroup =
-          objMgr->createCollisionGroupExceptFoodAndMovingObj(collisionDetector);
+          objMgr->createCollisionGroupExceptFoodAndMovingObj(m_toPlace, collisionDetector);
       std::shared_ptr<aikido::constraint::dart::CollisionFree> collisionFreeConstraint =
           std::make_shared<aikido::constraint::dart::CollisionFree>(armSpace, armSkeleton, collisionDetector);
       collisionFreeConstraint->addPairwiseCheck(armCollisionGroup, envCollisionGroup);
@@ -44,16 +44,16 @@ void PrimitivePlaceNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
                                                      armSkeleton,
                                                      nullptr,
                                                      m_ifDebug);
-      motion1->plan(robot->m_ada);
+      motion1->plan(robot->m_ada, robot->m_adaImg);
 
       auto motion2 = std::make_shared<GrabMotionNode>(world->getSkeleton(m_toPlace), false, armSpace, armSkeleton);
-      motion2->plan(robot->m_ada);
+      motion2->plan(robot->m_ada, robot->m_adaImg);
     }
 
     auto conf = Eigen::Vector2d();
     conf << 0., 0.;
     auto motion3 = std::make_shared<ConfMotionNode>(conf, handSpace, handSkeleton);
-    motion3->plan(robot->m_ada);
+    motion3->plan(robot->m_ada, robot->m_adaImg);
 
     Eigen::Vector3d delta_x(0., 0., 0.005);
     auto motion4 =
@@ -63,7 +63,7 @@ void PrimitivePlaceNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
                                                 20,
                                                 armSpace,
                                                 armSkeleton);
-    motion4->plan(robot->m_ada);
+    motion4->plan(robot->m_ada, robot->m_adaImg);
 
     m_ifExecuted = true;
   }

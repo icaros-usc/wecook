@@ -57,6 +57,10 @@ class Task {
     m_PDDLDomain = PDDLDomain;
   }
 
+  void setSim(const uint8_t &ifSim) {
+    m_ifSim = ifSim;
+  }
+
   void addPDDLProblem(const std::string &PDDLProblem) {
     m_PDDLProblem = PDDLProblem;
   }
@@ -73,6 +77,10 @@ class Task {
     if (type == "RRTConnect") {
       m_motionPlannerType = RRTConnect;
     }
+  }
+
+  bool ifSim() const {
+    return m_ifSim;
   }
 
   MotionPlannerType getMotionPlannerType() {
@@ -117,6 +125,7 @@ class Task {
   std::vector<Agent> m_agents; /*! array of agents */
   MotionPlannerType
       m_motionPlannerType = RRTConnect; /*! use it to decide if we are using dynamic motion planning algorithms*/
+  bool m_ifSim = true;
 };
 }
 

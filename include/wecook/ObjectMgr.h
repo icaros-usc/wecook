@@ -19,6 +19,9 @@ class ObjectMgr {
         m_bn = m_skeleton->getBodyNode(0);
       } else {
         // TODO store another handle which could achieve transform of the object
+        // Temporally using the same in the simulator
+        m_skeleton = env->getSkeleton(object.getName());
+        m_bn = m_skeleton->getBodyNode(0);
       }
     }
 
@@ -27,6 +30,8 @@ class ObjectMgr {
         return m_bn->getTransform();
       } else {
         // TODO achieve from apriltag?
+        // Temporally using the same in the simulator
+        return m_bn->getTransform();
       }
     }
 
@@ -54,7 +59,7 @@ class ObjectMgr {
 
   void init(std::vector<Object> &objects, bool ifSim, aikido::planner::WorldPtr &env);
 
-  void clear(std::vector<Object> &objects, bool ifSim, aikido::planner::WorldPtr &env);
+  void clear(std::vector<Object> &objects, aikido::planner::WorldPtr &env);
 
   dart::dynamics::BodyNode *getObjBodyNode(const std::string &obj) const {
     return m_objects.at(obj).getBodyNode();
@@ -69,7 +74,7 @@ class ObjectMgr {
     return m_objects.at(obj).ifContained();
   }
 
-  dart::collision::CollisionGroupPtr createCollisionGroupExceptFoodAndMovingObj(dart::collision::FCLCollisionDetectorPtr &collisionDetector);
+  dart::collision::CollisionGroupPtr createCollisionGroupExceptFoodAndMovingObj(const std::string &toMove, dart::collision::FCLCollisionDetectorPtr &collisionDetector);
 
  private:
   std::map<std::string, InternalObject> m_objects;

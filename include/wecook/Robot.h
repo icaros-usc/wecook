@@ -44,9 +44,15 @@ class Robot : public Agent {
 
   std::shared_ptr<ada::Ada> m_ada = nullptr;
 
+  std::shared_ptr<ada::Ada> m_adaImg = nullptr;
+
  private:
   void createAda(const aikido::planner::WorldPtr &env) {
-    m_ada = std::make_shared<ada::Ada>(env, true, m_pid, m_transform);
+    m_ada = std::make_shared<ada::Ada>(env, m_ifSim, m_pid, m_transform);
+  }
+
+  void createAdaImg(const aikido::planner::WorldPtr &env) {
+    m_adaImg = std::make_shared<ada::Ada>(env, m_ifSim, m_pid + "_img", m_transform);
   }
 
   void moveToHome();

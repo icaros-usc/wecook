@@ -21,7 +21,7 @@ class GrabMotionNode : public MotionNode {
                                                                                 m_grab(grab) {
   }
 
-  void plan(const std::shared_ptr<ada::Ada> &ada);
+  void plan(const std::shared_ptr<ada::Ada> &ada, const std::shared_ptr<ada::Ada> &adaImg);
 
  private:
   dart::dynamics::SkeletonPtr m_bodyToGrab;

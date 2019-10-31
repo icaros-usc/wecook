@@ -20,7 +20,7 @@ class ConfMotionNode : public MotionNode {
                                                                                 m_goalConf(goalConf) {
   }
 
-  void plan(const std::shared_ptr<ada::Ada> &ada);
+  void plan(const std::shared_ptr<ada::Ada> &ada, const std::shared_ptr<ada::Ada> &adaImg);
 
  private:
   Eigen::VectorXd m_goalConf;

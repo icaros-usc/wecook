@@ -12,19 +12,7 @@
 
 using namespace wecook;
 
-//void compareTrajectory(aikido::trajectory::TrajectoryPtr traj1, aikido::trajectory::TrajectoryPtr traj2) {
-//  for (double i = 0; i <= 1; i+=0.02) {
-//    std::cout << "time: " << i << std::endl;
-//    Eigen::VectorXd state1;
-//    Eigen::VectorXd state2;
-//    traj1->evaluate(i, state1);
-//    traj2->evaluate(i, state2);
-//    std::cout << "traj1: " << state1 << std::endl;
-//    std::cout << "traj2: " << state2 <<std::endl;
-//  }
-//}
-
-void TSRMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
+void TSRMotionNode::plan(const std::shared_ptr<ada::Ada> &ada, const std::shared_ptr<ada::Ada> &adaImg) {
   if (m_condition) {
     ROS_INFO("Waiting for condition to be verified!");
     while (!m_condition->isSatisfied()) {
@@ -114,17 +102,66 @@ void TSRMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
           constraints.push_back(m_collisionFree);
         auto testable = std::make_shared<aikido::constraint::TestableIntersection>(m_stateSpace, constraints);
         if (num_waypoints == 2) {
-          auto future = ada->executeTrajectory(trajectory);
-          future.wait();
+          // we still need to retime the shortcutting path
+          std::unique_lock<std::mutex> lock(m_skeleton->getBodyNode(0)->getSkeleton()->getMutex());
+          aikido::trajectory::TrajectoryPtr timedTrajectory = ada->retimePath(m_skeleton, trajectory.get());
+          m_stateSpace->setState(m_skeleton.get(), startState.getState());
+          lock.unlock();
+          if (!ada->ifSim()) ada->startTrajectoryExecutor();
+          auto future = ada->executeTrajectory(timedTrajectory);
+          try
+          {
+            future.get();
+          }
+          catch (const std::exception& e)
+          {
+            ROS_ERROR("trajectory execution failed: %s", e.what());
+          }
+          if (ada->ifSim()) {
+            auto futureImg = adaImg->executeTrajectory(timedTrajectory);
+            try
+            {
+              futureImg.get();
+            }
+            catch (const std::exception& e)
+            {
+              ROS_ERROR("trajectory execution failed: %s", e.what());
+            }
+          }
+          if (!ada->ifSim()) ada->stopTrajectoryExecutor();
         } else {
           std::unique_lock<std::mutex> lock(m_skeleton->getBodyNode(0)->getSkeleton()->getMutex());
           aikido::trajectory::TrajectoryPtr timedTrajectory = planner::hauserSmoothPathHauserPath(ada, m_stateSpace, m_skeleton, trajectory.get(), testable);
           m_stateSpace->setState(m_skeleton.get(), startState.getState());
           lock.unlock();
+          ROS_INFO("TSRMotionNode::plan: executing...");
+          if (!ada->ifSim()) {
+            ada->startTrajectoryExecutor();
+          }
           auto future = ada->executeTrajectory(timedTrajectory);
-          future.wait();
+          try
+          {
+            future.get();
+          }
+          catch (const std::exception& e)
+          {
+            ROS_ERROR("trajectory execution failed: %s", e.what());
+          }
+          if (ada->ifSim()) {
+            auto futureImg = adaImg->executeTrajectory(timedTrajectory);
+            try
+            {
+              futureImg.get();
+            }
+            catch (const std::exception& e)
+            {
+              ROS_ERROR("trajectory execution failed: %s", e.what());
+            }
+          }
+          // it seems we should stop the trajectory executor when we are down
+          ROS_INFO("TSRMotionNode::plan: finished executing...");
+          if (!ada->ifSim()) ada->stopTrajectoryExecutor();
         }
-
       } else {
         ROS_INFO("[TSRMotionNode::plan]: Didn't find a valid trajectory!");
       }

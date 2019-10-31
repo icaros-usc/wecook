@@ -16,7 +16,7 @@
 
 using namespace wecook;
 
-void TSRMotionwithConstraintNode::plan(const std::shared_ptr<ada::Ada> &ada) {
+void TSRMotionwithConstraintNode::plan(const std::shared_ptr<ada::Ada> &ada, const std::shared_ptr<ada::Ada> &adaImg) {
   auto rng = std::unique_ptr<aikido::common::RNG>(new aikido::common::RNGWrapper<std::default_random_engine>(0));
   auto crrtParameters = aikido::robot::util::CRRTPlannerParameters{rng.get()};
   // Create seed constraint

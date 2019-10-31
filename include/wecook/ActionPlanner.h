@@ -52,6 +52,11 @@ class ActionPlanner {
                     std::shared_ptr<ContainingMap> &containingMap,
                     std::shared_ptr<ObjectMgr> &objectMgr);
 
+  void planFeeding(ActionNode *actionNode,
+                   std::map<std::string, std::shared_ptr<Agent>> &agents,
+                   std::shared_ptr<ContainingMap> &containingMap,
+                   std::shared_ptr<ObjectMgr> &objectMgr);
+
   void planHolding(ActionNode *actionNode,
                    std::map<std::string, std::shared_ptr<Agent>> &agents,
                    std::shared_ptr<ContainingMap> &containingMap,

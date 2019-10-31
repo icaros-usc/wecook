@@ -9,7 +9,7 @@
 
 using namespace wecook;
 
-void RelativeIKMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
+void RelativeIKMotionNode::plan(const std::shared_ptr<ada::Ada> &ada, const std::shared_ptr<ada::Ada> &adaImg) {
   Eigen::VectorXd delta_q(6);
 
   auto currentPose = m_bn->getTransform(m_incoordinatesOf);
@@ -24,6 +24,10 @@ void RelativeIKMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
     ros::Duration(0.1).sleep();
     Eigen::VectorXd new_pos = currPos + delta_q;
     m_skeleton->setPositions(new_pos);
+
+    if (adaImg) {
+      adaImg->getArm()->getMetaSkeleton()->setPositions(new_pos);
+    }
 
     currentPose = m_bn->getTransform(m_incoordinatesOf);
     currentSpatialVector = TransformMatrix2SpatialVector(currentPose);

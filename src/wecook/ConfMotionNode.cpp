@@ -6,7 +6,7 @@
 
 using namespace wecook;
 
-void ConfMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
+void ConfMotionNode::plan(const std::shared_ptr<ada::Ada> &ada, const std::shared_ptr<ada::Ada> &adaImg) {
   if (m_condition) {
     ROS_INFO("ConfMotionNode: waiting for condition...");
     while (!m_condition->isSatisfied()) {
@@ -26,4 +26,9 @@ void ConfMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
                                              1.0);
   auto future = ada->executeTrajectory(trajectory);
   future.wait();
+
+  if (adaImg) {
+    auto future2 = adaImg->executeTrajectory(trajectory);
+    future2.wait();
+  }
 }

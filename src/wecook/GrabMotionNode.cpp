@@ -6,7 +6,7 @@
 
 using namespace wecook;
 
-void GrabMotionNode::plan(const std::shared_ptr<ada::Ada> &ada) {
+void GrabMotionNode::plan(const std::shared_ptr<ada::Ada> &ada, const std::shared_ptr<ada::Ada> &adaImg) {
   if (m_condition) {
     ROS_INFO("GrabMotionNode: waiting for condition...");
     while (!m_condition->isSatisfied()) {

@@ -23,12 +23,8 @@
 namespace wecook {
 class World {
  public:
-  World(bool ifSim) : m_ifSim(ifSim), m_thread(&World::run, this) {
+  World() : m_thread(&World::run, this) {
 
-  }
-
-  void addAgent(const std::string &pid, const std::shared_ptr<Agent> &agent) {
-    m_agents.emplace(std::pair<std::string, std::shared_ptr<Agent>>(pid, agent));
   }
 
   void init() {
@@ -45,10 +41,6 @@ class World {
 
   void syncToActionNode(ActionNode *actionNode);
 
-  inline bool ifSim() {
-    return m_ifSim;
-  }
-
  private:
   void initialize();
 
@@ -56,6 +48,11 @@ class World {
    * Main thread runs, where world keeps execute the task in the m_tasks
    */
   void run();
+
+  /**
+   * Uses this thread run to record skeleton state of the robot
+   */
+  void recording();
 
   /**
    * This function sets up the world for a following task based on the task description.
@@ -92,10 +89,10 @@ class World {
   std::map<std::string, std::shared_ptr<Agent>> m_agents;
   bool m_isFree = true;
   bool m_isEnd = false;
+  bool m_recordingEnd = false;
   std::vector<Task> m_tasks;
   ActionPlanner m_actionPlanner;
   std::shared_ptr<ContainingMap> m_containingMap = nullptr;
-  bool m_ifSim = true;
   std::shared_ptr<ObjectMgr> m_objectMgr = nullptr;
   std::shared_ptr<PrimitiveActionExecutor> m_primitiveActionExecutor = nullptr;
   std::map<std::string, std::shared_ptr<TaskExecutorThread>> m_mapTaskExecutorThread;

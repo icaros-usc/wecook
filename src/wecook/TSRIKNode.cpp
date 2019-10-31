@@ -13,7 +13,7 @@
 
 using namespace wecook;
 
-void TSRIKNode::plan(const std::shared_ptr<ada::Ada> &ada) {
+void TSRIKNode::plan(const std::shared_ptr<ada::Ada> &ada, const std::shared_ptr<ada::Ada> &adaImg) {
   if (m_condition) {
     ROS_INFO("[TSRIKNode::plan]: Waiting for condition to be verified!");
     while (!m_condition->isSatisfied()) {

@@ -23,7 +23,7 @@ class GravityMotionNode : public MotionNode {
 
   }
 
-  void plan(const std::shared_ptr<ada::Ada> &ada);
+  void plan(const std::shared_ptr<ada::Ada> &ada, const std::shared_ptr<ada::Ada> &adaImg);
 
  private:
   double m_repeat_time;

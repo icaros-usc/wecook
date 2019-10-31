@@ -36,7 +36,7 @@ void PrimitiveEngageNode::execute(std::map<std::string, std::shared_ptr<Agent>> 
     for (const auto &containedBodyNode : containedBodyNodes) {
       armCollisionGroup->addShapeFramesOf(containedBodyNode);
     }
-    auto envCollisionGroup = objMgr->createCollisionGroupExceptFoodAndMovingObj(collisionDetector);
+    auto envCollisionGroup = objMgr->createCollisionGroupExceptFoodAndMovingObj(m_toMove, collisionDetector);
     std::shared_ptr<aikido::constraint::dart::CollisionFree> collisionFreeConstraint =
         std::make_shared<aikido::constraint::dart::CollisionFree>(armSpace, armSkeleton, collisionDetector);
     collisionFreeConstraint->addPairwiseCheck(armCollisionGroup, envCollisionGroup);
@@ -51,7 +51,7 @@ void PrimitiveEngageNode::execute(std::map<std::string, std::shared_ptr<Agent>> 
                                                    nullptr,
                                                    false);
     motion1->setTimeStep(m_timeStep);
-    motion1->plan(robot->m_ada);
+    motion1->plan(robot->m_ada, robot->m_adaImg);
 
     m_ifExecuted = true;
   }

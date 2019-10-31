@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
   ros::NodeHandle n;
 
   // first construct world
-  std::shared_ptr<World> world = std::make_shared<World>(true);
+  std::shared_ptr<World> world = std::make_shared<World>();
 
   // initialize world
   world->init();

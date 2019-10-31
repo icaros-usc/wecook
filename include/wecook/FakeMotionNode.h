@@ -23,7 +23,7 @@ class FakeMotionNode : public MotionNode {
 
   }
 
-  void plan(const std::shared_ptr<ada::Ada> &ada);
+  void plan(const std::shared_ptr<ada::Ada> &ada, const std::shared_ptr<ada::Ada> &adaImg);
 
  private:
   Eigen::Vector3d m_targetTranslation;
