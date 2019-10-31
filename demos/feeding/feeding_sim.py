@@ -63,7 +63,7 @@ def talker():
                         ActionMsg(['p1'], 'feeding', ['bowl0', 'mouth0'], 'spoon0', ['food_item2']),
                         ActionMsg(['p1'], 'feeding', ['bowl0', 'mouth0'], 'spoon0', ['food_item3']),
                         ActionMsg(['p1'], 'feeding', ['bowl0', 'mouth0'], 'spoon0', ['food_item4'])],
-                       [AgentMsg('p1', 'r', [-0.2, -0.3, 0.7, 0., 0., 0.7071068, 0.7071068])],
+                       [AgentMsg('p1', 'r', [-0., -0.3, 0.75, 0., 0., 0.7071068, 0.7071068])],
                        "",
                        "",
                        "follow",

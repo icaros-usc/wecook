@@ -33,11 +33,12 @@ void World::recording() {
   // record time too
   ros::Time begin = ros::Time::now();
   std::vector<std::vector<double>> vecJoints;
+  double waitingTime = 0.3;
   while (!m_recordingEnd) {
     // while recording is not end, we keep recording
     for (const auto &agent : m_agents) {
       // don't need so many states
-      ros::Duration(0.3).sleep();
+      ros::Duration(waitingTime).sleep();
       auto adaImg = std::dynamic_pointer_cast<Robot, Agent>(agent.second)->m_adaImg;
       // first get arm positions
 //      auto wholeJoints = adaImg->getMetaSkeleton()->getPositions();
@@ -48,6 +49,12 @@ void World::recording() {
       std::vector<double> newJoints;
       newJoints.resize(armJoints.size());
       Eigen::VectorXd::Map(&newJoints[0], armJoints.size()) = armJoints;
+      if (not vecJoints.empty() && vecJoints.back() == newJoints) {
+        ROS_INFO("Switch to longer waiting time...");
+        waitingTime = 1.5;
+      } else {
+        waitingTime = 0.3;
+      }
       vecJoints.emplace_back(newJoints);
     }
   }

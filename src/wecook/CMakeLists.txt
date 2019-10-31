@@ -13,3 +13,5 @@ target_link_libraries(wecook
         ${PROJECT_NAME}_ai_planner_taskPlanner)
 
 install(TARGETS wecook RUNTIME DESTINATION bin)
+
+add_subdirectory(applications)

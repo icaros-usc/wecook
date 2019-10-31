@@ -733,7 +733,11 @@ void ActionPlanner::planFeeding(ActionNode *actionNode,
        1., 0., 0.,
       0., 0.7071055, -0.7071081,
       0., 0.7071081, 0.7071055;
-  targetPose2->mTw_e.linear() = rot2;
+  Eigen::Matrix3d rot3;
+  rot3 << 0., -1., 0., 1, 0., 0., 0., 0., 1;
+  Eigen::Matrix3d rot4;
+  rot4 << 0, 0., 1., 0., 1., 0., -1., 0, 0.;
+  targetPose2->mTw_e.linear() = rot4 * rot3;
   targetPose2->mTw_e.translation() = Eigen::Vector3d(0, 0, 0.06);
   targetPose2->mBw << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -M_PI / 8, M_PI / 8, -M_PI / 8, M_PI
       / 8, -M_PI / 8, M_PI / 8;
