@@ -28,4 +28,4 @@ $ cd $ROS_WORKSPACE
 $ catkin build
 ```
 ## Run demo
-**Now you are ready to run all [demos](../README.md#demo)!**
+**Now you are ready to run all [demos](../README.md#usage)!**
