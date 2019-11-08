@@ -41,7 +41,7 @@ class PrimitiveActuateNode : public PrimitiveActionNode {
                std::shared_ptr<ContainingMap> &containingMap);
 
  private:
-  MetaActuateInfo m_metaActuateInfo;
+  MetaActuateInfo m_metaActuateInfo; /*! used to store the action object */
   std::string m_motionType;
   std::string m_manipulatedObj;
 };

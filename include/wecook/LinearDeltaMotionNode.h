@@ -19,13 +19,15 @@ class LinearDeltaMotionNode : public MotionNode {
                         double repeat_time,
                         const aikido::statespace::dart::MetaSkeletonStateSpacePtr &stateSpace,
                         const dart::dynamics::MetaSkeletonPtr &skeleton,
+                        const aikido::constraint::dart::CollisionFreePtr &collisionFree,
                         const std::shared_ptr<PreCondition> &condition = nullptr) : MotionNode(stateSpace,
                                                                                                   skeleton,
                                                                                                   condition),
                                                                                        m_bn(bn),
                                                                                        m_delta_x(delta_x),
                                                                                        m_incoordinatesOf(incoordinatesOf),
-                                                                                       m_repeat_time(repeat_time) {
+                                                                                       m_repeat_time(repeat_time),
+                                                                                       m_collisionFree(collisionFree) {
 
   }
 
@@ -36,6 +38,7 @@ class LinearDeltaMotionNode : public MotionNode {
   double m_repeat_time;
   dart::dynamics::BodyNode *m_bn = nullptr;
   dart::dynamics::Frame *m_incoordinatesOf = nullptr;
+  aikido::constraint::dart::CollisionFreePtr m_collisionFree = nullptr;
 };
 
 }

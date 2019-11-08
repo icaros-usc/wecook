@@ -34,6 +34,15 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
       bn = objMgr->getObjBodyNode(m_manipulatedObj);
     }
 
+    // Create the collision free constraints
+    auto collisionDetector = dart::collision::FCLCollisionDetector::create();
+    std::shared_ptr<dart::collision::CollisionGroup>
+        armCollisionGroup = collisionDetector->createCollisionGroup(armSkeleton.get(), handSkeleton.get(), bn);
+    auto envCollisionGroup = objMgr->createCollisionGroupExceptFoodAndMovingObj(m_manipulatedObj, collisionDetector);
+    std::shared_ptr<aikido::constraint::dart::CollisionFree> collisionFreeConstraint =
+        std::make_shared<aikido::constraint::dart::CollisionFree>(armSpace, armSkeleton, collisionDetector);
+    collisionFreeConstraint->addPairwiseCheck(armCollisionGroup, envCollisionGroup);
+
     if (m_motionType == "cut") {
       for (int j = 0; j < 3; j++) {
         Eigen::Vector3d delta_x(0., 0., -0.003);
@@ -43,7 +52,8 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                     dart::dynamics::Frame::World(),
                                                     10,
                                                     armSpace,
-                                                    armSkeleton);
+                                                    armSkeleton,
+                                                    collisionFreeConstraint);
         motion4->plan(robot->m_ada, robot->m_adaImg);
 
         delta_x << 0., 0., 0.003;
@@ -53,7 +63,8 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                     dart::dynamics::Frame::World(),
                                                     10,
                                                     armSpace,
-                                                    armSkeleton);
+                                                    armSkeleton,
+                                                    collisionFreeConstraint);
         motion5->plan(robot->m_ada, robot->m_adaImg);
       }
     } else if (m_motionType == "stir") {
@@ -65,7 +76,8 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                   dart::dynamics::Frame::World(),
                                                   10,
                                                   armSpace,
-                                                  armSkeleton);
+                                                  armSkeleton,
+                                                  collisionFreeConstraint);
       motion6->plan(robot->m_ada, robot->m_adaImg);
       for (int j = 0; j < 3; j++) {
         Eigen::Vector3d delta_x(-0.003, 0., -0.);
@@ -75,7 +87,8 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                     dart::dynamics::Frame::World(),
                                                     20,
                                                     armSpace,
-                                                    armSkeleton);
+                                                    armSkeleton,
+                                                    collisionFreeConstraint);
         motion5->plan(robot->m_ada, robot->m_adaImg);
 
         delta_x << +0.003, 0., 0.00;
@@ -85,7 +98,8 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                     dart::dynamics::Frame::World(),
                                                     20,
                                                     armSpace,
-                                                    armSkeleton);
+                                                    armSkeleton,
+                                                    collisionFreeConstraint);
         motion6->plan(robot->m_ada, robot->m_adaImg);
       }
       delta_x << -0.003, 0., 0.00;
@@ -95,19 +109,22 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                   dart::dynamics::Frame::World(),
                                                   10,
                                                   armSpace,
-                                                  armSkeleton);
+                                                  armSkeleton,
+                                                  collisionFreeConstraint);
       motion6->plan(robot->m_ada, robot->m_adaImg);
     } else if (m_motionType == "transfer1") {
+      // This motion is used to do transfer by container
       auto rotatePose = Eigen::Isometry3d::Identity();
       rotatePose.linear() << 0.5000, 0.500000, 0.7071, 0.5000, 0.5000, -0.7071, -0.7071, 0.7071, 0.0000;
+
       auto motion = std::make_shared<RelativeIKMotionNode>(bn,
                                                            rotatePose,
                                                            dart::dynamics::Frame::World(),
                                                            armSpace,
-                                                           armSkeleton);
+                                                           armSkeleton,
+                                                           collisionFreeConstraint);
       motion->plan(robot->m_ada, robot->m_adaImg);
     } else if (m_motionType == "transfer2") {
-      // hacking
       // this action is used to grasp some food with the tool
       auto action = m_metaActuateInfo.getAction();
       auto ingredientName = action.get_ingredients()[0];
@@ -147,11 +164,13 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
           1., 0., 0.,
           0., 0.50000, -0.866,
           0., 0.8666, 0.5;
+
       auto motion = std::make_shared<RelativeIKMotionNode>(bn,
                                                            rotatePose,
                                                            dart::dynamics::Frame::World(),
                                                            armSpace,
-                                                           armSkeleton);
+                                                           armSkeleton,
+                                                           collisionFreeConstraint);
       motion->plan(robot->m_ada, robot->m_adaImg);
       Eigen::Vector3d delta_x(0., 0., 0.005);
       auto motion2 = std::make_shared<LinearDeltaMotionNode>(bn,
@@ -159,7 +178,8 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                              dart::dynamics::Frame::World(),
                                                              10,
                                                              armSpace,
-                                                             armSkeleton);
+                                                             armSkeleton,
+                                                             collisionFreeConstraint);
       motion2->plan(robot->m_ada, robot->m_adaImg);
     } else if (m_motionType == "transfer3") {
       auto rotatePose = Eigen::Isometry3d::Identity();
@@ -167,11 +187,13 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                           1., 0., 0.,
           0., 0.7071055, 0.7071081,
           0., -0.7071081, 0.7071055;
+
       auto motion = std::make_shared<RelativeIKMotionNode>(bn,
                                                            rotatePose,
                                                            dart::dynamics::Frame::World(),
                                                            armSpace,
-                                                           armSkeleton);
+                                                           armSkeleton,
+                                                           collisionFreeConstraint);
       motion->plan(robot->m_ada, robot->m_adaImg);
 
       // this action is used to release some food from the tool
@@ -222,7 +244,8 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                     dart::dynamics::Frame::World(),
                                                     10,
                                                     armSpace,
-                                                    armSkeleton);
+                                                    armSkeleton,
+                                                    collisionFreeConstraint);
         motion5->plan(robot->m_ada, robot->m_adaImg);
 
         delta_x << +0.003, 0., 0.00;
@@ -232,7 +255,8 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                     dart::dynamics::Frame::World(),
                                                     10,
                                                     armSpace,
-                                                    armSkeleton);
+                                                    armSkeleton,
+                                                    collisionFreeConstraint);
         motion6->plan(robot->m_ada, robot->m_adaImg);
       }
     } else if (m_motionType == "heat") {
@@ -244,7 +268,8 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                     dart::dynamics::Frame::World(),
                                                     10,
                                                     armSpace,
-                                                    armSkeleton);
+                                                    armSkeleton,
+                                                    collisionFreeConstraint);
         motion5->plan(robot->m_ada, robot->m_adaImg);
 
         delta_x << +0.003, 0., 0.00;
@@ -254,7 +279,8 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                     dart::dynamics::Frame::World(),
                                                     10,
                                                     armSpace,
-                                                    armSkeleton);
+                                                    armSkeleton,
+                                                    collisionFreeConstraint);
         motion6->plan(robot->m_ada, robot->m_adaImg);
       }
     } else if (m_motionType == "feeding") {

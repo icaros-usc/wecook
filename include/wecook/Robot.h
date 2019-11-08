@@ -8,7 +8,7 @@
 #include "Agent.h"
 
 namespace wecook {
-
+/*! Robot class, used for represent a robot agent. */
 class Robot : public Agent {
 
  public:
@@ -42,17 +42,17 @@ class Robot : public Agent {
     return m_ada->getHand();
   }
 
-  std::shared_ptr<ada::Ada> m_ada = nullptr;
+  std::shared_ptr<ada::Ada> m_ada = nullptr; /*! This ada is used to do real planning job (tons of sampling), and visualize, i.e., robot's mind. */
 
-  std::shared_ptr<ada::Ada> m_adaImg = nullptr;
+  std::shared_ptr<ada::Ada> m_adaImg = nullptr; /*! This ada is used to represent robot itself. */
 
  private:
   void createAda(const aikido::planner::WorldPtr &env) {
-    m_ada = std::make_shared<ada::Ada>(env, m_ifSim, m_pid, m_transform);
+    m_ada = std::make_shared<ada::Ada>(env, m_ifSim, m_pid, m_transform, true);
   }
 
   void createAdaImg(const aikido::planner::WorldPtr &env) {
-    m_adaImg = std::make_shared<ada::Ada>(env, m_ifSim, m_pid + "_img", m_transform);
+    m_adaImg = std::make_shared<ada::Ada>(env, m_ifSim, m_pid + "_img", m_transform, false);
   }
 
   void moveToHome();

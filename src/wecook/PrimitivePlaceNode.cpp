@@ -62,7 +62,8 @@ void PrimitivePlaceNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
                                                 dart::dynamics::Frame::World(),
                                                 20,
                                                 armSpace,
-                                                armSkeleton);
+                                                armSkeleton,
+                                                nullptr);
     motion4->plan(robot->m_ada, robot->m_adaImg);
 
     m_ifExecuted = true;

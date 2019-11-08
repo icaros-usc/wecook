@@ -18,9 +18,11 @@ class RelativeIKMotionNode : public MotionNode {
                        dart::dynamics::Frame *incoordinatesOf,
                        const aikido::statespace::dart::MetaSkeletonStateSpacePtr &stateSpace,
                        const dart::dynamics::MetaSkeletonPtr &skeleton,
+                       const aikido::constraint::dart::CollisionFreePtr &collisionFree,
                        const std::shared_ptr<PreCondition> &condition = nullptr) : MotionNode(stateSpace,
                                                                                               skeleton,
                                                                                               condition),
+                                                                                   m_collisionFree(collisionFree),
                                                                                    m_bn(bn),
                                                                                    m_relT(relT),
                                                                                    m_incoordinatesOf(incoordinatesOf) {
@@ -33,6 +35,7 @@ class RelativeIKMotionNode : public MotionNode {
   Eigen::Isometry3d m_relT; // relative transformation matrix
   dart::dynamics::BodyNode *m_bn = nullptr;
   dart::dynamics::Frame *m_incoordinatesOf = nullptr;
+  aikido::constraint::dart::CollisionFreePtr m_collisionFree = nullptr;
 };
 
 }
