@@ -1,15 +1,9 @@
-<img src="logo.png" width="100"/>
+<img src="logo.png" width="200"/>
 
 # Overview
 WeCook is a C++ framework started by the Interactive and Collaborative Autonomous Robotics (ICAROS) lab at University of Southern California (USC). It is a platform for testing and analyzing planning algorithms for long-horizontal robotic manipulation and human-robot collaboration. 
 
 We hope you find this tool useful. Please contact our team if you wish to share your comments, questions, success stories, or frustrations. And please contribute your best bug fixes, features, and examples!
-
-> :warning: **Warning:** WeCook is under heavy development. These instructions are
-> primarily for reference by the developers.
-
-WeCook is a platform for long horizontal robotic manipulation
-and human-robot collaboration research.
 
 ## Setup Instructions
 **WeCook depends on [AIKIDO](https://github.com/personalrobotics/aikido), [z3](https://github.com/Z3Prover/z3).** 
@@ -18,7 +12,7 @@ and human-robot collaboration research.
 - Ubuntu 18.04 / ROS Melodic
 - Ubuntu 16.04 / ROS Kinetic
 
-### [Setup Instructions](docs/instructions.md)
+**[Setup Instructions](docs/instructions.md)**
 
 ## [Usage](#usage)
 There are two types of tasks WeCook supports, "following" and "planning". In the "following" mode, agents will follow 
