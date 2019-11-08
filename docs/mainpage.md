@@ -28,7 +28,7 @@ $ roscore
 # Open another terminal; Don't forget to subscribe to visualization topic
 $ rviz
 # Open another terminal
-$ rosrun wecook wecook
+$ cd $ROS_WORKSPACE && ./devel/bin/wecook
 ```
 ### "Following" (sim)
 **To run the demo, type in following commands in your terminal**
