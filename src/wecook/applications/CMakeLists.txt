@@ -1,1 +1,2 @@
-add_subdirectory(playbackTrajectory)
+add_subdirectory(playback_trajectory)
+add_subdirectory(simple_trajectory)

@@ -33,7 +33,9 @@ void PrimitiveEngageNode::execute(std::map<std::string, std::shared_ptr<Agent>> 
     auto containedBodyNodes = containingMap->getContainedBodyNodes(m_toMove);
     std::shared_ptr<dart::collision::CollisionGroup>
         armCollisionGroup = collisionDetector->createCollisionGroup(armSkeleton.get(), moveBn, handSkeleton.get());
+    std::cout << "[Arm] Adding for conflict " << moveBn->getName() << std::endl;
     for (const auto &containedBodyNode : containedBodyNodes) {
+//      std::cout << "[Arm] Adding for conflict " << containedBodyNode->getName() << std::endl;
       armCollisionGroup->addShapeFramesOf(containedBodyNode);
     }
     auto envCollisionGroup = objMgr->createCollisionGroupExceptFoodAndMovingObj(m_toMove, collisionDetector);

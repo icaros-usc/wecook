@@ -206,8 +206,9 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
       auto ingredientNode = world->getSkeleton(ingredientName);
       auto newLocation = world->getSkeleton(newLocationName);
       auto toolNode = world->getSkeleton(toolName);
-      // ungrab for connect
+      // ungrab for unconnect
       robotHand->ungrab();
+      // unconnect food from the tool
       auto motionunconnect = std::make_shared<ConnMotionNode>(ingredientNode,
                                                               toolNode,
                                                               toolName,
@@ -217,7 +218,7 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                               armSpace,
                                                               armSkeleton);
       motionunconnect->plan(robot->m_ada, robot->m_adaImg);
-
+      // connect food to the tool
       auto motionConnect = std::make_shared<ConnMotionNode>(ingredientNode,
                                                             newLocation,
                                                             newLocationName,
@@ -227,7 +228,7 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                             armSpace,
                                                             armSkeleton);
       motionConnect->plan(robot->m_ada, robot->m_adaImg);
-      // grab again
+      // grab the tool again
       robotHand->grab(toolNode);
     } else if (m_motionType == "close") {
       auto conf = Eigen::Vector2d();

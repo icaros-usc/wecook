@@ -24,7 +24,7 @@ def talker():
                                     'package://wecook_assets/data/objects/plate.urdf',
                                     [0.2, 0.2, 0.73, 0., 0., 0., 1.]),
                           ObjectMsg('bowl0',
-                                    'package://wecook_assets/data/objects/bowl.urdf',
+                                    'package://wecook_assets/data/objects/tbowl.urdf',
                                     [0.4, 0.0, 0.73, 0., 0., 0., 1.]),
                           ObjectMsg('shelf0',
                                     'package://wecook_assets/data/furniture/shelf.urdf',

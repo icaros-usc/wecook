@@ -32,6 +32,7 @@ dart::collision::CollisionGroupPtr ObjectMgr::createCollisionGroupExceptFoodAndM
         || object.first.find("mouth") != std::string::npos)
       continue;
     auto newNode = object.second.getBodyNode();
+    std::cout << "Adding for conflict " << newNode->getName() << std::endl;
     envCollisionGroup->addShapeFramesOf(newNode);
   }
   return envCollisionGroup;
