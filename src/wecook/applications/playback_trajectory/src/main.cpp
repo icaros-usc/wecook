@@ -60,7 +60,7 @@ void executeTraj(
     const MetaSkeletonStateSpacePtr &metaSpace,
     const MetaSkeletonPtr &metaSkeleton) {
   // First we need to read in the trajectory file
-  std::ifstream trajectoryFile("cached_traj_wield.txt");
+  std::ifstream trajectoryFile("cached.txt");
   std::vector<std::vector<double>> trajectory;
   std::string line;
   while (getline(trajectoryFile, line)) {
@@ -92,7 +92,7 @@ void executeTraj(
     auto positions = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(joints.data(), joints.size());
     armSpace->convertPositionsToState(positions, state);
     traj->addWaypoint(t, state);
-    t += 0.03;
+    t += 0.3;
   }
 
   auto future = robot.executeTrajectory(std::move(traj));

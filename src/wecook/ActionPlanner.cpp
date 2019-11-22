@@ -676,7 +676,7 @@ void ActionPlanner::planFeeding(ActionNode *actionNode,
                                 std::map<std::string, std::shared_ptr<Agent>> &agents,
                                 std::shared_ptr<ContainingMap> &containingMap,
                                 std::shared_ptr<ObjectMgr> &objectMgr) {
-// To do transfer object by tool, we have 6 steps: grab tool, move tool to start position,
+  // To do transfer object by tool, we have 6 steps: grab tool, move tool to start position,
   // do predefined motion, move tool to new location, do predefined motion, place back tool
   // 1) create grab node
   // create grab pose
@@ -700,7 +700,7 @@ void ActionPlanner::planFeeding(ActionNode *actionNode,
   // 2) create move to node
   // create start pose
   auto targetPose = std::make_shared<aikido::constraint::dart::TSR>();
-  targetPose->mTw_e.translation() = Eigen::Vector3d(0., 0., 0.03);
+  targetPose->mTw_e.translation() = Eigen::Vector3d(0., 0., 0.1);
   targetPose->mBw
       << -0.03, 0.03, -0.03, 0.03, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
   auto oldLocationName = actionNode->getAction().get_locations()[0];
@@ -719,7 +719,7 @@ void ActionPlanner::planFeeding(ActionNode *actionNode,
   auto predefinedNode =
       std::make_shared<PrimitiveActuateNode>(pid,
                                              toolName,
-                                             "transfer2",
+                                             "feeding1",
                                              toolName,
                                              "",
                                              MetaActuateInfo(Action(actionNode->getAction())),
@@ -739,8 +739,8 @@ void ActionPlanner::planFeeding(ActionNode *actionNode,
   rot4 << 0, 0., 1., 0., 1., 0., -1., 0, 0.;
   targetPose2->mTw_e.linear() = rot4 * rot3;
   targetPose2->mTw_e.translation() = Eigen::Vector3d(0, 0, 0.06);
-  targetPose2->mBw << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -M_PI / 8, M_PI / 8, -M_PI / 8, M_PI
-      / 8, -M_PI / 8, M_PI / 8;
+  targetPose2->mBw << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -M_PI / 16, M_PI / 16, -M_PI / 16, M_PI
+      / 16, -M_PI / 16, M_PI / 16;
   auto newLocationName = actionNode->getAction().get_locations()[1];
   auto moveToNode2 =
       std::make_shared<PrimitiveEngageNode>(targetPose2,
@@ -758,7 +758,7 @@ void ActionPlanner::planFeeding(ActionNode *actionNode,
   auto predefinedNode2 =
       std::make_shared<PrimitiveActuateNode>(pid,
                                              toolName,
-                                             "feeding",
+                                             "feeding2",
                                              toolName,
                                              "",
                                              MetaActuateInfo(Action(actionNode->getAction())),

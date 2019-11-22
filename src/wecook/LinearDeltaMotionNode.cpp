@@ -15,7 +15,7 @@ void LinearDeltaMotionNode::plan(const std::shared_ptr<ada::Ada> &ada, const std
     auto jac = m_skeleton->getLinearJacobian(m_bn, m_incoordinatesOf);
     delta_q << aikido::common::pseudoinverse(jac) * m_delta_x;
     Eigen::VectorXd currPos = m_skeleton->getPositions();
-    ros::Duration(0.1).sleep();
+    ros::Duration(0.05).sleep();
     Eigen::VectorXd new_pos = currPos + delta_q;
 
     // now check if it will be in collision

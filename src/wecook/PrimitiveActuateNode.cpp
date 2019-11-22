@@ -284,7 +284,118 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
                                                     collisionFreeConstraint);
         motion6->plan(robot->m_ada, robot->m_adaImg);
       }
-    } else if (m_motionType == "feeding") {
+    } else if (m_motionType == "feeding1") {
+      // In feeding1, we do scoop up
+
+      // 4) rotate
+
+      // this action is used to grasp some food with the tool
+      auto action = m_metaActuateInfo.getAction();
+      auto ingredientName = action.get_ingredients()[0];
+      auto oldLocationName = action.get_locations()[0];
+      auto toolName = action.get_tool();
+      auto world = robot->getWorld();
+      auto ingredientNode = world->getSkeleton(ingredientName);
+      auto oldLocation = world->getSkeleton(oldLocationName);
+      auto toolNode = world->getSkeleton(toolName);
+
+      // 1) First go down
+      for (int j = 0; j < 3; j++) {
+        Eigen::Vector3d delta_x(0., 0., -0.003);
+        auto motion4 =
+            std::make_shared<LinearDeltaMotionNode>(bn,
+                                                    delta_x,
+                                                    dart::dynamics::Frame::World(),
+                                                    10,
+                                                    armSpace,
+                                                    armSkeleton,
+                                                    collisionFreeConstraint);
+        motion4->plan(robot->m_ada, robot->m_adaImg);
+      }
+
+      // 2) rotate
+      auto rotatePose = Eigen::Isometry3d::Identity();
+      rotatePose.linear()
+          <<
+          1., 0., 0.,
+          0., 0.50000, -0.866,
+          0., 0.8666, 0.5;
+
+      auto motion = std::make_shared<RelativeIKMotionNode>(bn,
+                                                           rotatePose,
+                                                           dart::dynamics::Frame::World(),
+                                                           armSpace,
+                                                           armSkeleton,
+                                                           collisionFreeConstraint);
+      motion->plan(robot->m_ada, robot->m_adaImg);
+
+      // 3) move horizontally to get more food
+      for (int j = 0; j < 1; j++) {
+        Eigen::Vector3d delta_x(0., 0.003, 0.);
+        auto motion4 =
+            std::make_shared<LinearDeltaMotionNode>(bn,
+                                                    delta_x,
+                                                    dart::dynamics::Frame::World(),
+                                                    10,
+                                                    armSpace,
+                                                    armSkeleton,
+                                                    collisionFreeConstraint);
+        motion4->plan(robot->m_ada, robot->m_adaImg);
+      }
+
+      // 4) rotate again to be more lean
+      auto rotatePose2 = Eigen::Isometry3d::Identity();
+      rotatePose2.linear()
+          <<
+          1., 0., 0.,
+          0., 0.707, -0.707,
+          0., 0.707, 0.707;
+
+      auto motion3 = std::make_shared<RelativeIKMotionNode>(bn,
+                                                            rotatePose2,
+                                                            dart::dynamics::Frame::World(),
+                                                            armSpace,
+                                                            armSkeleton,
+                                                            collisionFreeConstraint);
+      motion3->plan(robot->m_ada, robot->m_adaImg);
+
+      // 5) grab
+      // ungrab for connect
+      robotHand->ungrab();
+      auto motionunconnect = std::make_shared<ConnMotionNode>(ingredientNode,
+                                                              oldLocation,
+                                                              oldLocationName,
+                                                              ingredientName,
+                                                              containingMap,
+                                                              false,
+                                                              armSpace,
+                                                              armSkeleton);
+      motionunconnect->plan(robot->m_ada, robot->m_adaImg);
+
+      auto motionConnect = std::make_shared<ConnMotionNode>(ingredientNode,
+                                                            toolNode,
+                                                            toolName,
+                                                            ingredientName,
+                                                            containingMap,
+                                                            true,
+                                                            armSpace,
+                                                            armSkeleton);
+      motionConnect->plan(robot->m_ada, robot->m_adaImg);
+      // grab again
+      robotHand->grab(toolNode);
+
+      // 6) go up
+      Eigen::Vector3d delta_x(0., 0., 0.005);
+      auto motion2 = std::make_shared<LinearDeltaMotionNode>(bn,
+                                                             delta_x,
+                                                             dart::dynamics::Frame::World(),
+                                                             15,
+                                                             armSpace,
+                                                             armSkeleton,
+                                                             collisionFreeConstraint);
+      motion2->plan(robot->m_ada, robot->m_adaImg);
+
+    } else if (m_motionType == "feeding2") {
       // When we do feeding, we just hang around the mouth
       // TODO tracking mouth
       ROS_INFO("Feeding...");

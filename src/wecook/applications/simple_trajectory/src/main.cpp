@@ -155,7 +155,12 @@ void executeTraj(
   //aikido::trajectory::TrajectoryPtr timedTrajectory
   //   = std::move(robot.retimePath(robot.getArm()->getMetaSkeleton(),traj.get()));
 //  waitForUser("Press key to move arm to goal");
-  auto future = robot.executeTrajectory(std::move(traj));
+
+  auto smoothTrajectory
+      = robot.smoothPath(armSkeleton, traj.get(), satisfied);
+  aikido::trajectory::TrajectoryPtr timedTrajectory
+      = std::move(robot.retimePath(armSkeleton, smoothTrajectory.get()));
+  auto future = robot.executeTrajectory(std::move(timedTrajectory));
 
   future.wait();
   getCurrentConfig(robot);
