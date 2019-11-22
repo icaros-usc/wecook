@@ -1,2 +1,3 @@
 add_subdirectory(playback_trajectory)
 add_subdirectory(simple_trajectory)
+add_subdirectory(test_tsr_motion_node)

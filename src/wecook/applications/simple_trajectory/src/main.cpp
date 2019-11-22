@@ -166,8 +166,7 @@ void executeTraj(
   getCurrentConfig(robot);
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   bool adaSim = true;
 
   // Default options for flags

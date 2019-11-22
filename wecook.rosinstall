@@ -30,3 +30,7 @@
 - git:
     local-name: pybind11_catkin
     uri: https://github.com/icaros-usc/pybind11_catkin.git
+- git:
+    local-name: ompl
+    uri: https://github.com/icaros-usc/ompl.git
+    version: master
