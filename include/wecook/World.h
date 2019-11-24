@@ -39,8 +39,6 @@ class World {
 
   void stop();
 
-  void syncToActionNode(ActionNode *actionNode);
-
  private:
   void initialize();
 

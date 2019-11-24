@@ -107,10 +107,7 @@ void World::run() {
         for (const auto &agent : m_agents) {
           auto taskExecutorThread = std::make_shared<TaskExecutorThread>(agent.second,
                                                                          m_primitiveActionExecutor,
-                                                                         taskGraph,
-                                                                         boost::bind(&World::syncToActionNode,
-                                                                                     this,
-                                                                                     ::_1));
+                                                                         taskGraph);
           if (task.getMotionPlannerType() == Task::RRTConnect) {
             taskExecutorThread->setMotionMutex(&motionMutex);
           }
@@ -196,12 +193,4 @@ void World::setupPlanningTask(const Task &task) {
 
 void World::cleanPlanningTask(const Task &task) {
   // TODO
-}
-
-void World::syncToActionNode(ActionNode *actionNode) {
-  auto pids = actionNode->getAction().get_pids();
-  for (const auto &pid : pids) {
-    auto thread = m_mapTaskExecutorThread[pid];
-    while (thread->getCurrentActionNode() != actionNode) ros::Duration(0.5).sleep();
-  }
 }

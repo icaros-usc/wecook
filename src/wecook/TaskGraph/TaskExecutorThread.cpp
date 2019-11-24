@@ -12,8 +12,6 @@ void TaskExecutorThread::run() {
   auto curr = m_currentTask->getHeadNode(pid);
   while (curr) {
     m_currentActionNode = curr;
-    // wait until all agents involved in this action are ready
-    //    m_syncCallback(m_currentActionNode);
     auto fatherNodes = curr->getFathers();
     for (auto &father : fatherNodes) {
       while (!father->m_ifExecuted) {

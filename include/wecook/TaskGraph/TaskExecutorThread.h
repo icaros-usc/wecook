@@ -22,12 +22,10 @@ class TaskExecutorThread {
  public:
   TaskExecutorThread(const std::shared_ptr<Agent> &agent,
                      const std::shared_ptr<PrimitiveActionExecutor> &pae,
-                     const std::shared_ptr<TaskGraph> &taskGraph,
-                     syncCallback callback)
+                     const std::shared_ptr<TaskGraph> &taskGraph)
       : m_pae(pae),
         m_agent(agent),
         m_currentTask(taskGraph),
-        m_syncCallback(callback),
         m_thread(&TaskExecutorThread::run, this) {
 
   }
@@ -47,7 +45,6 @@ class TaskExecutorThread {
  private:
   void run();
 
-  syncCallback m_syncCallback;
   std::shared_ptr<TaskGraph> m_currentTask = nullptr;
   std::shared_ptr<Agent> m_agent;
   std::shared_ptr<PrimitiveActionExecutor> m_pae;
