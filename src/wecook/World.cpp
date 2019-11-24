@@ -5,11 +5,11 @@
 
 #include <boost/thread/mutex.hpp>
 
-#include "wecook/TaskGraph.h"
+#include "wecook/TaskGraph/TaskGraph.h"
 #include "wecook/World.h"
 #include "wecook/utils.h"
-#include "wecook/Robot.h"
-#include "wecook/PrimitiveTaskGraph.h"
+#include "wecook/Agents/Robot.h"
+#include "wecook/PrimitiveTaskGraph/PrimitiveTaskGraph.h"
 
 using namespace wecook;
 

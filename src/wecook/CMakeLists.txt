@@ -1,4 +1,4 @@
-FILE(GLOB ${PROJECT_NAME}_wecook_source *.cpp)
+FILE(GLOB ${PROJECT_NAME}_wecook_source *.cpp Agents/*.cpp LowLevelMotionNodes/*.cpp PrimitiveTaskGraph/*.cpp TaskGraph/*.cpp)
 
 add_executable(wecook ${${PROJECT_NAME}_wecook_source})
 

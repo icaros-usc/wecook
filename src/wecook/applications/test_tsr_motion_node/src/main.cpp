@@ -17,7 +17,7 @@
 #include <dart/utils/urdf/DartLoader.hpp>
 #include <libada/Ada.hpp>
 
-#include "wecook/TSRMotionNode.h"
+#include "wecook/LowLevelMotionNodes/TSRMotionNode.h"
 #include "wecook/utils.h"
 
 namespace po = boost::program_options;
@@ -168,10 +168,11 @@ int main(int argc, char **argv) {
                                                                collisionFreeConstraint,
                                                                armSpace,
                                                                armSkeleton,
-                                                               nullptr,
                                                                false);
 
-  tsrMotionNode->plan(robot, robotImg);
+  wecook::MotionNode::Result result{};
+
+  tsrMotionNode->plan(robot, robotImg, &result);
 
   waitForUser("Press [ENTER] to exit. ");
   ros::shutdown();

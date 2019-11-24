@@ -1,4 +1,4 @@
-add_executable(${PROJECT_NAME}_test_tsr_motion_node src/main.cpp ../../TSRMotionNode.cpp)
+add_executable(${PROJECT_NAME}_test_tsr_motion_node src/main.cpp ../../LowLevelMotionNodes/TSRMotionNode.cpp)
 
 target_link_libraries(${PROJECT_NAME}_test_tsr_motion_node
         ${DART_LIBRARIES}

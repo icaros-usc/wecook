@@ -13,12 +13,12 @@
 #include <libada/Ada.hpp>
 
 #include "Task.h"
-#include "Agent.h"
+#include "wecook/Agents/Agent.h"
 #include "utils.h"
-#include "ActionPlanner.h"
+#include "wecook/TaskGraph/ActionPlanner.h"
 #include "ContainingMap.h"
 #include "ObjectMgr.h"
-#include "TaskExecutorThread.h"
+#include "wecook/TaskGraph/TaskExecutorThread.h"
 
 namespace wecook {
 class World {
