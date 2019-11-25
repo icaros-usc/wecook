@@ -31,14 +31,19 @@ void TaskExecutorThread::run() {
       }
       // if motionMutex is not nullptr
       // we need to first lock the mutex
+      PrimitiveActionNode::Result result{};
       if (m_motionMutex) {
         boost::unique_lock<boost::mutex> lock(*m_motionMutex);
-        m_pae->execute(currPAN);
+        m_pae->execute(currPAN, &result);
         lock.unlock();
       } else {
-        m_pae->execute(currPAN);
+        m_pae->execute(currPAN, &result);
       }
-
+      if (result.getStatus() == PrimitiveActionNode::Result::StatusType::INVALID_MOTION_GOAL) {
+        // we can keep trying
+        ros::Duration(0.5).sleep();
+        continue;
+      }
       // find next primitive action node to execute
       auto last = currPAN;
       currPAN = nullptr;

@@ -19,6 +19,8 @@ namespace wecook {
 
 class PrimitiveActionNode {
  public:
+  class Result;
+
   PrimitiveActionNode(const std::string &pid,
                       const std::string &type,
                       const std::string &grabbingObj = "",
@@ -92,7 +94,8 @@ class PrimitiveActionNode {
 
   virtual void execute(std::map<std::string, std::shared_ptr<Agent>> &agents,
                        std::shared_ptr<ObjectMgr> &objMgr,
-                       std::shared_ptr<ContainingMap> &containingMap) = 0;
+                       std::shared_ptr<ContainingMap> &containingMap,
+                       Result *result = nullptr) = 0;
 
   void removeChild(std::shared_ptr<PrimitiveActionNode> &child);
 
@@ -114,6 +117,47 @@ class PrimitiveActionNode {
   std::string m_type;
   std::string m_grabbingObj;
   std::string m_placingObj;
+};
+
+/// Base class for executing result of primitive action node.
+class PrimitiveActionNode::Result {
+ public:
+  enum StatusType {
+    /// Uninitialized status
+        UNKNOWN = 0,
+    /// Invalid start state or no start state specified (only for motion planning node)
+        INVALID_MOTION_START,
+    /// Invalid goal state (only for motion planning node)
+        INVALID_MOTION_GOAL,
+    /// General Motion Planning failed
+        INVALID_MOTION_FAIL,
+    /// Succeeded
+        SUCCEEDED,
+    /// Failed
+        FAILED
+  };
+
+  /// Returns message.
+  const std::string &getMessage() const {
+    return mMessage;
+  }
+
+  void setMessage(const std::string &message) {
+    mMessage = message;
+  }
+
+  const StatusType &getStatus() const {
+    return mStatus;
+  }
+
+  void setStatus(const StatusType &status) {
+    mStatus = status;
+  }
+
+ protected:
+  /// Message.
+  std::string mMessage = "";
+  StatusType mStatus = StatusType::UNKNOWN;
 };
 
 }

@@ -18,7 +18,7 @@ class PrimitiveActionExecutor {
 
   }
 
-  void execute(std::shared_ptr<PrimitiveActionNode> &pan);
+  void execute(std::shared_ptr<PrimitiveActionNode> &pan, PrimitiveActionNode::Result *result = nullptr);
 
  private:
   std::map<std::string, std::shared_ptr<Agent>> m_agents;

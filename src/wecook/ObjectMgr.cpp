@@ -25,7 +25,6 @@ void ObjectMgr::clear(std::vector<Object> &objects, aikido::planner::WorldPtr &e
 
 dart::collision::CollisionGroupPtr ObjectMgr::createCollisionGroupExceptFoodAndToMoveObj(const std::string &toMove,
                                                                                          dart::collision::FCLCollisionDetectorPtr &collisionDetector) {
-  // TODO add collision check between agents
   auto envCollisionGroup = collisionDetector->createCollisionGroup();
   for (auto &object : m_objects) {
     if (object.first == toMove || object.first.find("food") != std::string::npos

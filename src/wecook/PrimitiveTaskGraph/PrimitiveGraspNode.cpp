@@ -12,7 +12,8 @@ using namespace wecook;
 
 void PrimitiveGraspNode::execute(std::map<std::string, std::shared_ptr<Agent>> &agents,
                                  std::shared_ptr<ObjectMgr> &objMgr,
-                                 std::shared_ptr<ContainingMap> &containingMap) {
+                                 std::shared_ptr<ContainingMap> &containingMap,
+                                 Result *result) {
   auto agent = agents[m_pid];
 
   // since every primitive action node only involves one agent
@@ -59,7 +60,23 @@ void PrimitiveGraspNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
                                                    armSpace,
                                                    armSkeleton);
     // TSRMotionNode
-    motion1->plan(robot->m_ada, robot->m_adaImg);
+    MotionNode::Result motionNodeResult{};
+    motion1->plan(robot->m_ada, robot->m_adaImg, &motionNodeResult);
+    if (motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_GOAL) {
+      if (result) {
+        result->setStatus(PrimitiveActionNode::Result::StatusType::INVALID_MOTION_GOAL);
+        return;
+      }
+    } else if (motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_IK
+        || motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_START
+        || motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_START
+        || motionNodeResult.getStatus() == MotionNode::Result::StatusType::FAILED) {
+      if (result) {
+        result->setStatus(PrimitiveActionNode::Result::StatusType::INVALID_MOTION_FAIL);
+      }
+    } else if (result) {
+      result->setStatus(PrimitiveActionNode::Result::StatusType::SUCCEEDED);
+    }
 
     auto conf = Eigen::Vector2d();
     conf << 1.1, 1.1;
@@ -94,7 +111,8 @@ void PrimitiveGraspNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
             if (robot2->getHand()->isGrabbing(m_toGrab) == 0) {
               ROS_INFO("Need to let the other robot ungrabs this object");
               auto
-                  motion = std::make_shared<GrabMotionNode>(world->getSkeleton(m_toGrab), false, armSpace2, armSkeleton2);
+                  motion =
+                  std::make_shared<GrabMotionNode>(world->getSkeleton(m_toGrab), false, armSpace2, armSkeleton2);
               motion->plan(robot2->m_ada, robot->m_adaImg);
             } else {
               break;

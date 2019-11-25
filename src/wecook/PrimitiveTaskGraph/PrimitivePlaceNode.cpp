@@ -9,7 +9,8 @@ using namespace wecook;
 
 void PrimitivePlaceNode::execute(std::map<std::string, std::shared_ptr<Agent>> &agents,
                                  std::shared_ptr<ObjectMgr> &objMgr,
-                                 std::shared_ptr<ContainingMap> &containingMap) {
+                                 std::shared_ptr<ContainingMap> &containingMap,
+                                 Result *result) {
   auto agent = agents[m_pid];
   if (agent->getType() == "human") {
     waitForUser("Please place object " + m_toPlace);
@@ -53,7 +54,23 @@ void PrimitivePlaceNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
                                                      armSpace,
                                                      armSkeleton,
                                                      m_ifDebug);
-      motion1->plan(robot->m_ada, robot->m_adaImg);
+      MotionNode::Result motionNodeResult{};
+      motion1->plan(robot->m_ada, robot->m_adaImg, &motionNodeResult);
+      if (motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_GOAL) {
+        if (result) {
+          result->setStatus(PrimitiveActionNode::Result::StatusType::INVALID_MOTION_GOAL);
+          return;
+        }
+      } else if (motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_IK
+          || motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_START
+          || motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_START
+          || motionNodeResult.getStatus() == MotionNode::Result::StatusType::FAILED) {
+        if (result) {
+          result->setStatus(PrimitiveActionNode::Result::StatusType::INVALID_MOTION_FAIL);
+        }
+      } else if (result) {
+        result->setStatus(PrimitiveActionNode::Result::StatusType::SUCCEEDED);
+      }
 
       auto motion2 = std::make_shared<GrabMotionNode>(world->getSkeleton(m_toPlace), false, armSpace, armSkeleton);
       motion2->plan(robot->m_ada, robot->m_adaImg);

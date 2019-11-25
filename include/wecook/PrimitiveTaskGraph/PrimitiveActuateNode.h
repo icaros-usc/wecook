@@ -38,7 +38,8 @@ class PrimitiveActuateNode : public PrimitiveActionNode {
 
   void execute(std::map<std::string, std::shared_ptr<Agent>> &agents,
                std::shared_ptr<ObjectMgr> &objMgr,
-               std::shared_ptr<ContainingMap> &containingMap);
+               std::shared_ptr<ContainingMap> &containingMap,
+               Result *result = nullptr);
 
  private:
   MetaActuateInfo m_metaActuateInfo; /*! used to store the action object */
