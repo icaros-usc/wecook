@@ -32,7 +32,17 @@ void PrimitivePlaceNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
       std::shared_ptr<dart::collision::CollisionGroup>
           armCollisionGroup = collisionDetector->createCollisionGroup(armSkeleton.get(), placeBn, handSkeleton.get());
       auto envCollisionGroup =
-          objMgr->createCollisionGroupExceptFoodAndMovingObj(m_toPlace, collisionDetector);
+          objMgr->createCollisionGroupExceptFoodAndToMoveObj(m_toPlace, collisionDetector);
+      // We also need to add skeletons of other agents
+      for (const auto &itr : agents) {
+        if (itr.first == m_pid) {
+          continue;
+        } else if (itr.second->getType() == "robot") {
+          auto otherArmSkeleton = std::dynamic_pointer_cast<Robot, Agent>(itr.second)->getArm()->getMetaSkeleton();
+          auto otherHandSkeleton = std::dynamic_pointer_cast<Robot, Agent>(itr.second)->getHand()->getMetaSkeleton();
+          envCollisionGroup->addShapeFramesOf(otherArmSkeleton.get(), otherHandSkeleton.get());
+        }
+      }
       std::shared_ptr<aikido::constraint::dart::CollisionFree> collisionFreeConstraint =
           std::make_shared<aikido::constraint::dart::CollisionFree>(armSpace, armSkeleton, collisionDetector);
       collisionFreeConstraint->addPairwiseCheck(armCollisionGroup, envCollisionGroup);

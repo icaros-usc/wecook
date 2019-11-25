@@ -23,7 +23,7 @@ void ObjectMgr::clear(std::vector<Object> &objects, aikido::planner::WorldPtr &e
   }
 }
 
-dart::collision::CollisionGroupPtr ObjectMgr::createCollisionGroupExceptFoodAndMovingObj(const std::string &toMove,
+dart::collision::CollisionGroupPtr ObjectMgr::createCollisionGroupExceptFoodAndToMoveObj(const std::string &toMove,
                                                                                          dart::collision::FCLCollisionDetectorPtr &collisionDetector) {
   // TODO add collision check between agents
   auto envCollisionGroup = collisionDetector->createCollisionGroup();
@@ -32,7 +32,6 @@ dart::collision::CollisionGroupPtr ObjectMgr::createCollisionGroupExceptFoodAndM
         || object.first.find("mouth") != std::string::npos)
       continue;
     auto newNode = object.second.getBodyNode();
-    std::cout << "Adding for conflict " << newNode->getName() << std::endl;
     envCollisionGroup->addShapeFramesOf(newNode);
   }
   return envCollisionGroup;
