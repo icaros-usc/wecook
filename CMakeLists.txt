@@ -69,6 +69,8 @@ find_package(Z3
         # NO_DEFAULT_PATH
         )
 
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
+
 include_directories(include)
 
 add_subdirectory(src)
