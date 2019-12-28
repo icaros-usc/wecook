@@ -34,3 +34,11 @@
     local-name: ompl
     uri: https://github.com/icaros-usc/ompl.git
     version: master
+- git:
+    local-name: apriltags-cpp
+    uri: https://github.com/icaros-usc/apriltags-cpp.git
+    version: wecook
+- git:
+    local-name: apriltags
+    uri: https://github.com/icaros-usc/apriltags.git
+    version: wecook
