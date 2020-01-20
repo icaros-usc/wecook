@@ -1,5 +1,5 @@
 # Setup Instructions
-These instructions are tested on UBuntu 18.04.3 version of linux with 'melodic' version of ros.
+These instructions are tested on Ubuntu 18.04.3 version of linux with 'melodic' version of ros.
 If you faced any issues during following these instructions, consider updating this document.
 (Talk to one of owners for help on how to update the document if you don't know).
 
