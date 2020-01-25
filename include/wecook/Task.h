@@ -10,6 +10,7 @@
 
 #include "Action.h"
 #include "Object.h"
+#include "Tag.h"
 
 namespace wecook {
 /*!
@@ -49,6 +50,10 @@ class Task {
 
   void addObject(const Object &object) {
     m_objects.emplace_back(object);
+  }
+
+  void addTag(const Tag &tag) {
+    m_tags.emplace_back(tag);
   }
 
   void addContainingPair(const std::string &containerName, const std::string &objectName) {
@@ -105,6 +110,10 @@ class Task {
     return m_objects;
   }
 
+  std::vector<Tag> getTags() const {
+    return m_tags;
+  }
+
   std::vector<std::pair<std::string, std::string>> getContainingPairs() const {
     return m_containingPairs;
   }
@@ -120,6 +129,7 @@ class Task {
  private:
   std::vector<Action> m_subgoals;
   std::vector<Object> m_objects;
+  std::vector<Tag> m_tags;
   std::vector<std::pair<std::string, std::string>> m_containingPairs;
   std::string m_PDDLDomain;
   std::string m_PDDLProblem;

@@ -28,6 +28,10 @@ void TaskManager::addNewTask(const TaskMsg::ConstPtr &msg) {
     Object object(objectMsg.name, objectMsg.url, objectMsg.pose);
     task.addObject(object);
   }
+  for (const auto &tagMsg : msg->scene.tags) {
+    Tag tag(tagMsg.tagId, tagMsg.objectName, tagMsg.objectPose);
+    task.addTag(tag);
+  }
   for (const auto &actionMsg : msg->actions) {
     Action action(actionMsg.pid, actionMsg.location, actionMsg.ingredients, actionMsg.verb, actionMsg.tool);
     task.addSubgoal(action);
