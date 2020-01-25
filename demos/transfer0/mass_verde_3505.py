@@ -3,7 +3,7 @@
 # mass_verde_3505
 
 import rospy
-from wecook.msg import ActionMsg, TaskMsg, SceneMsg, ObjectMsg, ContainingMsg
+from wecook.msg import ActionMsg, TaskMsg, SceneMsg, ObjectMsg, ContainingMsg, TagMsg
 
 
 def talker():
@@ -58,6 +58,7 @@ def talker():
                          # ObjectMsg('cooker0',
                          #           'package://wecook_assets/data/objects/cooker.urdf',
                          #           [-0.55, 0, 0.45, 0., 0., 0., 1])],
+                         [TagMsg('baseTag','None', [0.0, 0.0, 0.0, 0.0, 0.0, 0.0])],
                          [ContainingMsg(['chopping_board0', 'food_item0']),
                           ContainingMsg(['chopping_board0', 'food_item1']),
                           ContainingMsg(['chopping_board0', 'food_item3'])])

@@ -21,6 +21,7 @@ add_message_files(
         ObjectMsg.msg
         ContainingMsg.msg
         AgentMsg.msg
+        TagMsg.msg
 )
 
 generate_messages(DEPENDENCIES std_msgs)
