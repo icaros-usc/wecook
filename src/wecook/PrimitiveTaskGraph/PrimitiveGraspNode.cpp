@@ -79,7 +79,7 @@ void PrimitiveGraspNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
     }
 
     auto conf = Eigen::Vector2d();
-    conf << 1.1, 1.1;
+    conf << 0.5, 0.5;
     auto motion2 = std::make_shared<ConfMotionNode>(conf, handSpace, handSkeleton);
     ROS_INFO("Grabbing...Closing gripper");
     // ConfMotionNode
