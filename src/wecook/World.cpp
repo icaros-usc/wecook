@@ -152,10 +152,11 @@ void World::setupFollowingTask(const Task &task) {
   }
 
   std::vector<Object> objects = task.getObjects();
+  auto tags = task.getTags();
 
-  m_objectMgr = std::make_shared<ObjectMgr>();
+  m_objectMgr = std::make_shared<ObjectMgr>(m_nh);
 
-  m_objectMgr->init(objects, task.ifSim(), m_env);
+  m_objectMgr->init(objects, tags, task.ifSim(), m_env);
 
   m_containingMap = std::make_shared<ContainingMap>(task, m_objectMgr, m_env);
 
@@ -165,13 +166,14 @@ void World::setupFollowingTask(const Task &task) {
 
 void World::cleanFollowingTask(const Task &task) {
   std::vector<Object> objects = task.getObjects();
+  auto tags = task.getTags();
 
   m_primitiveActionExecutor.reset();
 
   m_containingMap->unconnectAll();
   m_containingMap.reset();
 
-  m_objectMgr->clear(objects, m_env);
+  m_objectMgr->clear(objects, tags, m_env);
   m_objectMgr.reset();
 
   m_mapTaskExecutorThread.clear();

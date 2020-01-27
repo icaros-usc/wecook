@@ -13,7 +13,7 @@ namespace wecook {
 
 class Tag {
  public:
-  Tag(const std::string &tagId,
+  Tag(const uint32_t &tagId,
          const std::string &objectName,
          const std::vector<double> &objectPose) : m_tagId(tagId), m_objectName(objectName), m_objectPose(objectPose) {
 
@@ -27,12 +27,12 @@ class Tag {
     return m_objectPose;
   }
 
-  std::string getTagId() const {
+  uint32_t getTagId() const {
     return m_tagId;
   }
 
  private:
-  std::string m_tagId;
+  uint32_t m_tagId;
   std::string m_objectName;
   std::vector<double>  m_objectPose;
 
