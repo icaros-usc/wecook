@@ -51,7 +51,7 @@ def talker():
                           ObjectMsg('mouth0',
                                     'package://wecook_assets/data/human/mouth.urdf',
                                     [0., 0.0, 1.1, 0., 0., 0., 1.])],
-                         [TagMsg('baseTag','None', [0.0, 0.0, 0.0, 0.0, 0.0, 0.0])],
+                         [TagMsg(1,'None', [0.0, 0.0, 0.0, 0.0, 0.0, 0.0])],
                          [ContainingMsg(['bowl0', 'food_item0']),
                           ContainingMsg(['bowl0', 'food_item1']),
                           ContainingMsg(['bowl0', 'food_item2']),

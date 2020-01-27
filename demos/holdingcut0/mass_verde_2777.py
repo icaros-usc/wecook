@@ -64,7 +64,7 @@ def talker():
                          # ObjectMsg('cooker0',
                          #           'package://wecook_assets/data/objects/cooker.urdf',
                          #           [-0.55, 0, 0.45, 0., 0., 0., 1])],
-                         [TagMsg('baseTag','None', [0.0, 0.0, 0.0, 0.0, 0.0, 0.0])],
+                         [TagMsg(1,'None', [0.0, 0.0, 0.0, 0.0, 0.0, 0.0])],
                          [ContainingMsg(['chopping_board0', 'food_item3'])])
 
     task_msg = TaskMsg(scene_msg, [ActionMsg(['p2', 'p1'], 'holding_chopping_board0_cut',
