@@ -60,7 +60,7 @@ class Robot : public Agent {
     if (m_ifFloat) {
       m_adaImg = std::make_shared<ada::Ada>(env, m_ifSim, m_pid + "_img", m_transform, false);
     } else {
-      m_ada = std::make_shared<ada::Ada>(env, m_ifSim, m_pid, false);
+      m_adaImg = std::make_shared<ada::Ada>(env, m_ifSim, m_pid, false);
     }
   }
 
