@@ -33,9 +33,9 @@ static const std::string topicName("dart_markers");
 static const std::string baseFrameName("map");
 
 dart::common::Uri adaUrdfUri{
-    "package://ada_description/robots_urdf/ada_with_camera.urdf"};
+    "package://ada_description/robots_urdf/ada_with_camera_fixed.urdf"};
 dart::common::Uri adaSrdfUri{
-    "package://ada_description/robots_urdf/ada_with_camera.srdf"};
+    "package://ada_description/robots_urdf/ada_with_camera_fixed.srdf"};
 
 static const double planningTimeout{5.};
 
@@ -196,7 +196,7 @@ int main(int argc, char** argv) {
 
   // Load ADA either in simulation or real based on arguments
   ROS_INFO("Loading ADA.");
-  ada::Ada robot(env, adaSim, adaUrdfUri, adaSrdfUri);
+  ada::Ada robot(env, adaSim, "p1", true);
   auto robotSkeleton = robot.getMetaSkeleton();
 
   // Start Visualization Topic

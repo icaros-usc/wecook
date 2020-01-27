@@ -38,7 +38,7 @@ void TaskManager::addNewTask(const TaskMsg::ConstPtr &msg) {
   task.addPDDLDomain(msg->PDDLDomain);
   task.addPDDLProblem(msg->PDDLProblem);
   for (const auto &agentMsg : msg->agents) {
-    task.addAgent(agentMsg.pid, agentMsg.type, agentMsg.pose);
+    task.addAgent(agentMsg.pid, agentMsg.type, agentMsg.pose, agentMsg.if_float);
   }
   task.addTaskType(msg->type);
   task.addMotionPlannerType(msg->motionPlannerType);
