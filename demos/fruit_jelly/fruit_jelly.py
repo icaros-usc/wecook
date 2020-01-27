@@ -62,7 +62,7 @@ def talker():
                           ObjectMsg('spoonHolder0',
                                     'package://wecook_assets/data/objects/holder.urdf',
                                     [0.25, 0.45, 0.73, 0., 0., 0., 1])],
-                         [TagMsg('baseTag','None', [0.0, 0.0, 0.0, 0.0, 0.0, 0.0])],
+                         [TagMsg(1,'None', [0.0, 0.0, 0.0, 0.0, 0.0, 0.0])],
                          [ContainingMsg(['plate1', 'food_item1']),
                           ContainingMsg(['plate0', 'food_item0'])])
 
