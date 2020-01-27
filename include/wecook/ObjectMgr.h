@@ -111,7 +111,7 @@ class ObjectMgr {
   std::map<std::string, InternalObject> m_objects;
   std::map<std::string, uint32_t> m_objectToTagMap;
   std::map<uint32_t, InternalTag > m_tags;
-  const uint32_t baseTagId = 1; //PK_TODO: Update this value as per our usage
+  const uint32_t baseTagId = 0; //PK_TODO: Update this value as per our usage
   ros::NodeHandle m_nh;
   ros::Subscriber m_Listener;
   void processTagMsg(const apriltags::AprilTagDetections::ConstPtr &msg);

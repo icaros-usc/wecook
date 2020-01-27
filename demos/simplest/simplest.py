@@ -20,7 +20,7 @@ def talker():
                           ObjectMsg('roller0',
                                     'package://wecook_assets/data/objects/box.urdf',
                                     [0.31, -0.30,  0.0, 0., 0., 0., 1.])],
-                         [TagMsg(1,'None', [0, -0.045, 0.08, 0.7071068, 0, 0, 0.7071068]),
+                         [TagMsg(0,'None', [0, -0.037, 0.23, 0.7071068, 0, 0, 0.7071068]),
                           TagMsg(7,'roller0', [0, -0.04, 0.075, 0.7071068, 0, 0, 0.7071068])],
                          [])
 
