@@ -73,7 +73,7 @@ def talker():
                         ActionMsg(['p1', 'p2'], 'holding_plate1_transfer', ['plate1', 'bowl0'], 'spoon1',
                                   ['food_item1']),
                         ActionMsg(['p1'], 'stir', ['bowl0'], 'spoon0', ['food_item0', 'food_item1'])],
-                       [AgentMsg('p1', 'r', [-0.2, 0.15, 0.7, 0., 0., 0.7071068, 0.7071068], True),
+                       [AgentMsg('p1', 'r', [0.0, 0.35, 0, 0., 0., 0.7071068, 0.7071068], True),
                         AgentMsg('p2', 'r', [-0.2, -0.2, 0.7, 0., 0., 0.7071068, 0.7071068], False)],
                        "",
                        "",
