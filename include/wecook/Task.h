@@ -29,14 +29,16 @@ class Task {
   };
 
   struct Agent {
-    Agent(const std::string &pid, const std::string &agentType, const std::vector<double> &pose) {
+    Agent(const std::string &pid, const std::string &agentType, const std::vector<double> &pose, bool if_float) {
       m_pid = pid;
       m_type = agentType;
       m_pose = pose;
+      m_if_float = if_float;
     }
     std::string m_pid;
     std::string m_type;
     std::vector<double> m_pose;
+    bool m_if_float;
   };
 
   Task() = default;
@@ -69,8 +71,8 @@ class Task {
     m_type = taskType == "plan" ? Planning : Following;
   }
 
-  void addAgent(const std::string &pid, const std::string &agentType, const std::vector<double> &pose) {
-    m_agents.emplace_back(Agent(pid, agentType, pose));
+  void addAgent(const std::string &pid, const std::string &agentType, const std::vector<double> &pose, bool if_float) {
+    m_agents.emplace_back(Agent(pid, agentType, pose, if_float));
   }
 
   void addMotionPlannerType(const std::string &type) {

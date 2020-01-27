@@ -15,8 +15,9 @@ class Robot : public Agent {
   Robot(const Eigen::Isometry3d &transform,
         const std::string &pid,
         bool ifSim = true,
+        bool ifFloat = false,
         std::vector<double> homePositions = std::vector<double>{4.8, 2.9147, 1.009, 4.1957, 1.44237, 1.3166})
-      : m_transform(transform), Agent(pid, ifSim) {
+      : m_transform(transform), Agent(pid, ifSim), m_ifFloat(ifFloat) {
     m_homePositions = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(homePositions.data(), homePositions.size());
   }
 
@@ -48,17 +49,26 @@ class Robot : public Agent {
 
  private:
   void createAda(const aikido::planner::WorldPtr &env) {
-    m_ada = std::make_shared<ada::Ada>(env, m_ifSim, m_pid, m_transform, true);
+    if (m_ifFloat) {
+      m_ada = std::make_shared<ada::Ada>(env, m_ifSim, m_pid, m_transform, true);
+    } else {
+      m_ada = std::make_shared<ada::Ada>(env, m_ifSim, m_pid, true);
+    }
   }
 
   void createAdaImg(const aikido::planner::WorldPtr &env) {
-    m_adaImg = std::make_shared<ada::Ada>(env, m_ifSim, m_pid + "_img", m_transform, false);
+    if (m_ifFloat) {
+      m_adaImg = std::make_shared<ada::Ada>(env, m_ifSim, m_pid + "_img", m_transform, false);
+    } else {
+      m_ada = std::make_shared<ada::Ada>(env, m_ifSim, m_pid, false);
+    }
   }
 
   void moveToHome();
 
   Eigen::Isometry3d m_transform;
   Eigen::VectorXd m_homePositions;
+  bool m_ifFloat;
 
 };
 

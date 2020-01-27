@@ -142,7 +142,7 @@ void World::setupFollowingTask(const Task &task) {
     auto transform = vectorToIsometry(pose);
     if (agent.m_type == "r") {
       // This is a robot agent
-      auto pAgent = std::make_shared<Robot>(transform, agent.m_pid, task.ifSim());
+      auto pAgent = std::make_shared<Robot>(transform, agent.m_pid, task.ifSim(), agent.m_if_float);
       m_agents.emplace(std::pair<std::string, std::shared_ptr<Agent>>(agent.m_pid, pAgent));
     }
   }
