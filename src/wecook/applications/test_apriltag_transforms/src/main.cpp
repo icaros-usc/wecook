@@ -21,7 +21,7 @@ Eigen::Isometry3d vectorToIsometry(std::vector<double> &poseVector) {
 
 void processTagMsg(const apriltags::AprilTagDetections::ConstPtr &msg) {
   Eigen::Isometry3d T_basetag_cam;
-  Eigen::Isometry3d T_tag7_cam;
+  Eigen::Isometry3d T_testTag_cam;
   for (auto &detection: msg->detections) {
     std::vector<double> vector;
     vector.push_back(detection.pose.position.x);
@@ -31,16 +31,17 @@ void processTagMsg(const apriltags::AprilTagDetections::ConstPtr &msg) {
     vector.push_back(detection.pose.orientation.y);
     vector.push_back(detection.pose.orientation.z);
     vector.push_back(detection.pose.orientation.w);
-    if (detection.id == 1) {
+    if (detection.id == 0) {
       T_basetag_cam = vectorToIsometry(vector);
     }
-    if (detection.id == 7) {
-      T_tag7_cam = vectorToIsometry(vector);
+    if (detection.id == 1) {
+      T_testTag_cam = vectorToIsometry(vector);
     }
   }
 
+  // Replace the fixed values with the tag transformations in demo scenario (.py) file.
   Eigen::Isometry3d T_baseTag_robot = Eigen::Isometry3d::Identity();
-  T_baseTag_robot.translation() = Eigen::Vector3d(0, -0.045, 0.08);
+  T_baseTag_robot.translation() = Eigen::Vector3d(0, -0.037, 0.23);
   Eigen::Matrix3d rot1;
   rot1 <<
       1, 0, 0,
@@ -48,16 +49,17 @@ void processTagMsg(const apriltags::AprilTagDetections::ConstPtr &msg) {
       0, 1, 0;
   T_baseTag_robot.linear() = rot1;
 
-  Eigen::Isometry3d T_tag7_sodacan = Eigen::Isometry3d::Identity();
-  T_tag7_sodacan.translation() = Eigen::Vector3d(0, -0.04, 0.075);
+  // Replace the fixed values with the tag transformations in demo scenario (.py) file.
+  Eigen::Isometry3d T_testTag_sodacan = Eigen::Isometry3d::Identity();
+  T_testTag_sodacan.translation() = Eigen::Vector3d(0, -0.04, 0.075);
   Eigen::Matrix3d rot2;
   rot2 <<
       1, 0, 0,
       0, 0, -1,
       0, 1, 0;
-  T_tag7_sodacan.linear() = rot2;
+  T_testTag_sodacan.linear() = rot2;
 
-  auto T_sodacan_robot = T_baseTag_robot * T_basetag_cam.inverse() * T_tag7_cam * T_tag7_sodacan.inverse();
+  auto T_sodacan_robot = T_baseTag_robot * T_basetag_cam.inverse() * T_testTag_cam * T_testTag_sodacan.inverse();
 
   std::cout << "Rotation: " << T_sodacan_robot.linear() << std::endl;
   std::cout << "Translation: " << T_sodacan_robot.translation() << std::endl;
