@@ -26,7 +26,7 @@ def talker():
 
     task_msg = TaskMsg(scene_msg,
                        [ActionMsg(['p1'], 'roll', [], 'roller0', ['food_item0'])],
-                       [AgentMsg('p1', 'r', [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0])],
+                       [AgentMsg('p1', 'r', [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0], False)],
                        "",
                        "",
                        "follow",
