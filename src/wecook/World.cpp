@@ -87,10 +87,21 @@ void World::run() {
         // Do following mode
         ROS_INFO("Setting up the environment...");
         setupFollowingTask(task);
+        
+        // PK_TODO: Hack: apriltags notification is coming a little late and robots are asking
+        // for object position before tag notifications are coming. Sleeping a bit to adjust for that.
+        // Should figure out a better plan?
+        ros::Duration(1).sleep();
 
         // After setting up the environment, we want to start a skeleton state recording thread
         m_recordingEnd = false;
-        boost::thread recordingThread(&World::recording, this);
+        boost::thread *recordingThread;
+        // PK_TODO: There was an issue with running recording in real robot demo, this was done till the issue
+        // is fully figured out.
+        bool runRecording = false; //task.ifSim()
+        if (runRecording) {
+            recordingThread = new boost::thread(&World::recording, this);
+        }
 
         std::vector<Action> subgoals = task.getSubgoals();
         ROS_INFO("Building the task graph...");
@@ -122,7 +133,9 @@ void World::run() {
         }
         // After executing we want to stop recording and cache the trajectory
         m_recordingEnd = true;
-        recordingThread.join();
+        if (runRecording) {
+            recordingThread->join();
+        }
 
         cleanFollowingTask(task);
         m_tasks.pop_back();

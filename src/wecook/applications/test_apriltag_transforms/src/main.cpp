@@ -41,7 +41,7 @@ void processTagMsg(const apriltags::AprilTagDetections::ConstPtr &msg) {
 
   // Replace the fixed values with the tag transformations in demo scenario (.py) file.
   Eigen::Isometry3d T_baseTag_robot = Eigen::Isometry3d::Identity();
-  T_baseTag_robot.translation() = Eigen::Vector3d(0, -0.037, 0.23);
+  T_baseTag_robot.translation() = Eigen::Vector3d(0, -0.045, 0.13);
   Eigen::Matrix3d rot1;
   rot1 <<
       1, 0, 0,
@@ -58,6 +58,15 @@ void processTagMsg(const apriltags::AprilTagDetections::ConstPtr &msg) {
       0, 0, -1,
       0, 1, 0;
   T_testTag_sodacan.linear() = rot2;
+
+  std::cout << "T_baseTag_robot Rotation: " << T_baseTag_robot.linear() << std::endl;
+  std::cout << "T_baseTag_robot Translation: " << T_baseTag_robot.translation() << std::endl;
+  std::cout << "T_basetag_cam Rotation: " << T_basetag_cam.linear() << std::endl;
+  std::cout << "T_basetag_cam Translation: " << T_basetag_cam.translation() << std::endl;
+  std::cout << "T_testTag_cam Rotation: " << T_testTag_cam.linear() << std::endl;
+  std::cout << "T_testTag_cam Translation: " << T_testTag_cam.translation() << std::endl;
+  std::cout << "T_testTag_sodacan Rotation: " << T_testTag_sodacan.linear() << std::endl;
+  std::cout << "T_testTag_sodacan Translation: " << T_testTag_sodacan.translation() << std::endl;
 
   auto T_sodacan_robot = T_baseTag_robot * T_basetag_cam.inverse() * T_testTag_cam * T_testTag_sodacan.inverse();
 
