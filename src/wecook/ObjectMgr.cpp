@@ -21,7 +21,7 @@ void ObjectMgr::init(std::vector<Object> &objects, std::vector<Tag> &tags, bool 
     auto objTransform = vectorToIsometry(objPose);
     m_tags.emplace(std::pair<uint32_t, InternalTag>{tag.getTagId(), InternalTag{tag.getTagId(), objTransform}});
   }
-  m_Listener = m_nh.subscribe("detections", 1000, &ObjectMgr::processTagMsg, this);
+  m_Listener = m_nh.subscribe("/apriltags/detections", 1000, &ObjectMgr::processTagMsg, this);
 }
 
 void ObjectMgr::clear(std::vector<Object> &objects, std::vector<Tag> &tags, aikido::planner::WorldPtr &env) {
@@ -51,6 +51,9 @@ dart::collision::CollisionGroupPtr ObjectMgr::createCollisionGroupExceptFoodAndT
 }
 
 void ObjectMgr::processTagMsg(const apriltags::AprilTagDetections::ConstPtr &msg) {
+  if (m_tagMsgCounter == 0) {
+      ROS_DEBUG_STREAM("processTagMsg is called first time");
+  }
   for (auto &detection: msg->detections) {
   // PK-TODO: My lack of knowledge with C++ standard API - there must be a better way to construct the vector below!
     std::vector<double> vector;
@@ -65,6 +68,12 @@ void ObjectMgr::processTagMsg(const apriltags::AprilTagDetections::ConstPtr &msg
     auto tag = m_tags.find(detection.id);
     if(tag != m_tags.end()) {
       tag->second.updateCameraTransform(camTransform);
+      if (m_tagMsgCounter % 10 == 0) {
+          ROS_DEBUG_STREAM("processTagMsg: Updated the tag cam transform for tag id " << detection.id);
+          ROS_DEBUG_STREAM("processTagMsg: tag for " << detection.id << " is updated, orientation w.r.t camera: " << tag->second.m_T_tag_cam.linear());
+          ROS_DEBUG_STREAM("processTagMsg: tag for " << detection.id << " is updated, position w.r.t camera: " << tag->second.m_T_tag_cam.translation());
+      }
     }
   }
+  m_tagMsgCounter++;
 }

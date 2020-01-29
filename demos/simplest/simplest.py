@@ -11,12 +11,12 @@ def talker():
     rospy.init_node('wecook_simplest', anonymous=True)
 
     scene_msg = SceneMsg([
-        # ObjectMsg('table0',
-        #                             'package://wecook_assets/data/furniture/table.urdf',
-        #                             [-0.09, -1.0, -0.94, 0., 0., 0., 1.]),
+                          ObjectMsg('table0',
+                                    'package://wecook_assets/data/furniture/table_top.urdf',
+                                    [0.5075, -0.3, -0.935, 0., 0., 0., 1.]),
                           ObjectMsg('food_item0',
                                     'package://wecook_assets/data/food/food_item1.urdf',
-                                    [0.40, -0.25,  0.1, 0., 0., 0., 1.]),
+                                    [0.40, -0.30,  0.02, 0., 0., 0., 1.]),
                           ObjectMsg('roller0',
                                     'package://wecook_assets/data/objects/soda_can.urdf',
                                     [0.31, -0.30,  0.0, 0., 0., 0., 1.])],

@@ -45,6 +45,7 @@ class ObjectMgr {
     }
 
     Eigen::Isometry3d getTransform() const {
+      ROS_DEBUG_STREAM("ObjectMgr: getTransform  called for object " << m_name << ", sim value: " << m_ifSim);
       if (m_ifSim) {
         return m_bn->getTransform();
       } else {
@@ -55,9 +56,20 @@ class ObjectMgr {
           if (tagIdObjPair != m_mgr.m_tags.end() && baseTagIdObjPair != m_mgr.m_tags.end()) {
             auto tag = tagIdObjPair->second;
             auto baseTag = baseTagIdObjPair->second;
-            return baseTag.m_T_tag_object * baseTag.m_T_tag_cam.inverse() * tag.m_T_tag_cam * tag.m_T_tag_object.inverse();
+            auto result = baseTag.m_T_tag_object * baseTag.m_T_tag_cam.inverse() * tag.m_T_tag_cam * tag.m_T_tag_object.inverse();
+            ROS_DEBUG_STREAM("ObjectMgr: base tag has orientation w.r.t camera: " << baseTag.m_T_tag_cam.linear());
+            ROS_DEBUG_STREAM("ObjectMgr: base tag has position w.r.t camera: " << baseTag.m_T_tag_cam.translation());
+            ROS_DEBUG_STREAM("ObjectMgr: object tag for " << m_name << " has orientation w.r.t camera: " << tag.m_T_tag_cam.linear());
+            ROS_DEBUG_STREAM("ObjectMgr: object tag for " << m_name << " has position w.r.t camera: " << tag.m_T_tag_cam.translation());
+            ROS_DEBUG_STREAM("ObjectMgr: Object " << m_name << " orientation w.r.t robot: " << result.linear());
+            ROS_DEBUG_STREAM("ObjectMgr: Object " << m_name << " position w.r.t robot: " << result.translation());
+            return result;
           }
-          // PK_TODO: What should we do in else case? Throw error?
+          else {
+          // PK_TODO: This is probably incorrect?
+           ROS_DEBUG_STREAM("ObjectMgr: Object " << m_name << " is using simulated transform in real demo likely because it doesn't have a tag attached to it");
+           return m_bn->getTransform();   
+          }
         }
       }
     }
@@ -115,6 +127,7 @@ class ObjectMgr {
   ros::NodeHandle m_nh;
   ros::Subscriber m_Listener;
   void processTagMsg(const apriltags::AprilTagDetections::ConstPtr &msg);
+  uint32_t m_tagMsgCounter = 0; // For debugging and understanding purpose
 };
 
 }
