@@ -10,6 +10,9 @@ def talker(ifSim):
     scene_msg = SceneMsg([ObjectMsg('table0',
                                     'package://wecook_assets/data/furniture/table.urdf',
                                     [0.5, 0.0, 0.0, 0., 0., 0., 1.]),
+                        #   ObjectMsg('table0',
+                        #             'package://wecook_assets/data/furniture/table_top.urdf',
+                        #             [0.1, -0.1, -0.235, 0., 0., 0.7071068, 0.7071068]),
                           ObjectMsg('plate1',
                                     'package://wecook_assets/data/objects/plate.urdf',
                                     [0.2, -0.15, 0.73, 0., 0., 0., 1.]),
@@ -43,7 +46,11 @@ def talker(ifSim):
                           ObjectMsg('spoonHolder0',
                                     'package://wecook_assets/data/objects/holder.urdf',
                                     [0.25, 0.45, 0.73, 0., 0., 0., 1])],
-                         [TagMsg(1,'None', [0.0, 0.0, 0.0, 0.0, 0.0, 0.0])],
+                         [TagMsg(0,'None', [0.0, -0.045, 0.13, 0.7071068, 0, 0, 0.7071068]),
+                          TagMsg(4,'bowl0', [0.0, -0.06, 0.04, 0.7071068, 0, 0, 0.7071068]),
+                          TagMsg(6,'plate0', [0.0, -0.06, 0.04, 0.7071068, 0, 0, 0.7071068]),
+                          TagMsg(7,'plate1', [0.0, -0.06, 0.037, 0.7071068, 0, 0, 0.7071068]),
+                         ],
                          [ContainingMsg(['plate1', 'food_item1']),
                           ContainingMsg(['plate0', 'food_item0'])])
 
