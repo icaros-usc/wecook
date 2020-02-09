@@ -34,7 +34,7 @@ void processTagMsg(const apriltags::AprilTagDetections::ConstPtr &msg) {
     if (detection.id == 0) {
       T_basetag_cam = vectorToIsometry(vector);
     }
-    if (detection.id == 1) {
+    if (detection.id == 6) {
       T_testTag_cam = vectorToIsometry(vector);
     }
   }
@@ -51,7 +51,7 @@ void processTagMsg(const apriltags::AprilTagDetections::ConstPtr &msg) {
 
   // Replace the fixed values with the tag transformations in demo scenario (.py) file.
   Eigen::Isometry3d T_testTag_sodacan = Eigen::Isometry3d::Identity();
-  T_testTag_sodacan.translation() = Eigen::Vector3d(0, -0.04, 0.075);
+  T_testTag_sodacan.translation() = Eigen::Vector3d(0.0, -0.06, 0.04);
   Eigen::Matrix3d rot2;
   rot2 <<
       1, 0, 0,

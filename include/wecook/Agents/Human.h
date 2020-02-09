@@ -12,7 +12,8 @@ namespace wecook {
 class Human : public Agent {
 
  public:
-  Human(const std::string &pid) : Agent(pid, false) {
+  Human(const Eigen::Isometry3d &transform,
+          const std::string &pid) : Agent(pid, false), m_transform(transform) {
 
   }
 
@@ -25,6 +26,8 @@ class Human : public Agent {
   void end();
 
   Eigen::Vector3d getPosition();
+
+  Eigen::Isometry3d m_transform;
 
 };
 
