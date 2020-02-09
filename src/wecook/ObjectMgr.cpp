@@ -52,7 +52,7 @@ dart::collision::CollisionGroupPtr ObjectMgr::createCollisionGroupExceptFoodAndT
 
 void ObjectMgr::processTagMsg(const apriltags::AprilTagDetections::ConstPtr &msg) {
   if (m_tagMsgCounter == 0) {
-      ROS_DEBUG_STREAM("processTagMsg is called first time");
+      ROS_WARN_STREAM("processTagMsg is called first time");
   }
   for (auto &detection: msg->detections) {
   // PK-TODO: My lack of knowledge with C++ standard API - there must be a better way to construct the vector below!
@@ -68,10 +68,10 @@ void ObjectMgr::processTagMsg(const apriltags::AprilTagDetections::ConstPtr &msg
     auto tag = m_tags.find(detection.id);
     if(tag != m_tags.end()) {
       tag->second.updateCameraTransform(camTransform);
-      if (m_tagMsgCounter % 10 == 0) {
-          ROS_DEBUG_STREAM("processTagMsg: Updated the tag cam transform for tag id " << detection.id);
-          ROS_DEBUG_STREAM("processTagMsg: tag for " << detection.id << " is updated, orientation w.r.t camera: " << tag->second.m_T_tag_cam.linear());
-          ROS_DEBUG_STREAM("processTagMsg: tag for " << detection.id << " is updated, position w.r.t camera: " << tag->second.m_T_tag_cam.translation());
+      if (m_tagMsgCounter == 0) {
+          ROS_WARN_STREAM("processTagMsg: Updated the tag cam transform for tag id " << detection.id);
+          ROS_WARN_STREAM("processTagMsg: tag for " << detection.id << " is updated, orientation w.r.t camera: " << std::endl << tag->second.m_T_tag_cam.linear());
+          ROS_WARN_STREAM("processTagMsg: tag for " << detection.id << " is updated, position w.r.t camera: " << std::endl << tag->second.m_T_tag_cam.translation());
       }
     }
   }

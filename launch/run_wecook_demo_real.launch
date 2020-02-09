@@ -1,8 +1,8 @@
 <launch>
-        <node pkg="rviz" name="rviz" type="rviz" />
+        <!--node pkg="rviz" name="rviz" type="rviz" /-->
 
         <!--node pkg="wecook" name="wecook" type="wecook" /-->
 
-	<include file="$(find ada_launch)/launch/default.launch" />
+	<!--include file="$(find ada_launch)/launch/default.launch" /-->
 	<include file="$(find wecook)/launch/test_apriltag_setup.launch" />
 </launch>

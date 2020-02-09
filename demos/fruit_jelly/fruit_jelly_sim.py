@@ -3,6 +3,15 @@
 import rospy
 from wecook.msg import ActionMsg, TaskMsg, SceneMsg, ObjectMsg, ContainingMsg, AgentMsg, TagMsg
 
+def validate_pose_dimension(objects, hint):
+    for i, o in enumerate(objects):
+        if len(o.pose) > 7:
+            raise Exception(str.format("Wrong number of values for pose at index {0} in section {1}", i, hint))
+
+def validate_tag_pose_dimension(tags, hint):
+    for i, t in enumerate(tags):
+        if len(t.objectPose) > 7:
+            raise Exception(str.format("Wrong number of values for pose at index {0} in section {1}", i, hint))
 
 def talker():
     pub = rospy.Publisher('WeCookDispatch', TaskMsg, queue_size=10)
@@ -85,9 +94,9 @@ def talker():
     
 
     # For debugging
-    for obj in scene_msg.objects:
-        if len(obj.pose) > 7:
-            raise "Wrong number of values for object pose in scene definition"
+    validate_pose_dimension(scene_msg.objects, 'ObjectMsg array')
+    validate_tag_pose_dimension(scene_msg.tags, 'TagMsg array')
+    validate_pose_dimension(task_msg.agents, 'AgentMsg array')
 
     # sleeping 10 seconds to publish
     rospy.sleep(1)

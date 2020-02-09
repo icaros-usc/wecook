@@ -14,7 +14,9 @@ void PrimitiveEngageNode::execute(std::map<std::string, std::shared_ptr<Agent>> 
   auto agent = agents[m_pid];
 
   if (agent->getType() == "human") {
-    waitForUser("Please move object to...");
+//    waitForUser("Please move object to...");
+
+    ros::Duration(1.0).sleep();
 
     m_ifExecuted = true;
   } else if (agent->getType() == "robot") {
@@ -27,6 +29,7 @@ void PrimitiveEngageNode::execute(std::map<std::string, std::shared_ptr<Agent>> 
     auto handSkeleton = robotHand->getMetaSkeleton();
     auto handSpace = std::make_shared<aikido::statespace::dart::MetaSkeletonStateSpace>(handSkeleton.get());
     auto world = robot->getWorld();
+    ROS_INFO("Created ARM and Hand meta skeletons");
 
     // setup collisionDetector
     auto moveBn = objMgr->getObjBodyNode(m_toMove);
@@ -43,9 +46,11 @@ void PrimitiveEngageNode::execute(std::map<std::string, std::shared_ptr<Agent>> 
       if (itr.first == m_pid) {
         continue;
       } else if (itr.second->getType() == "robot") {
+        ROS_INFO("Creating other ARM and Hand meta skeletons");
         auto otherArmSkeleton = std::dynamic_pointer_cast<Robot, Agent>(itr.second)->getArm()->getMetaSkeleton();
         auto otherHandSkeleton = std::dynamic_pointer_cast<Robot, Agent>(itr.second)->getHand()->getMetaSkeleton();
         envCollisionGroup->addShapeFramesOf(otherArmSkeleton.get(), otherHandSkeleton.get());
+        ROS_INFO("Created other ARM and Hand meta skeletons");
       }
     }
     std::shared_ptr<aikido::constraint::dart::CollisionFree> collisionFreeConstraint =
@@ -61,7 +66,9 @@ void PrimitiveEngageNode::execute(std::map<std::string, std::shared_ptr<Agent>> 
                                                    armSkeleton);
     motion1->setTimeStep(m_timeStep);
     MotionNode::Result motionNodeResult{};
+    ROS_INFO("About to execute plan for primitive engage node");
     motion1->plan(robot->m_ada, robot->m_adaImg, &motionNodeResult);
+    ROS_INFO("Should have executed plan for primitive engage node");
     if (motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_GOAL) {
       if (result) {
         result->setStatus(PrimitiveActionNode::Result::StatusType::INVALID_MOTION_GOAL);

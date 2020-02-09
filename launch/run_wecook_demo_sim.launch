@@ -1,5 +1,5 @@
 <launch>
-        <node pkg="rviz" name="rviz" type="rviz" />
+        <!--node pkg="rviz" name="rviz" type="rviz" /-->
 
         <!--node pkg="wecook" name="wecook" type="wecook" /-->
 </launch>
