@@ -1,0 +1,5 @@
+<launch>
+        <node pkg="rviz" name="rviz" type="rviz" />
+        <include file="$(find wecook)/launch/test_apriltag_setup.launch" />
+        <!--node pkg="wecook" name="wecook" type="wecook" /-->
+</launch>

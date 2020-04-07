@@ -7,6 +7,8 @@
 
 #include <vector>
 #include <map>
+#include <ros/subscriber.h>
+#include <ros/node_handle.h>
 #include <boost/thread.hpp>
 #include <aikido/planner/World.hpp>
 #include <aikido/rviz/WorldInteractiveMarkerViewer.hpp>
@@ -23,7 +25,7 @@
 namespace wecook {
 class World {
  public:
-  World() : m_thread(&World::run, this) {
+  World(const ros::NodeHandle &nh) : m_nh(nh), m_thread(&World::run, this) {
 
   }
 
@@ -94,6 +96,7 @@ class World {
   std::shared_ptr<ObjectMgr> m_objectMgr = nullptr;
   std::shared_ptr<PrimitiveActionExecutor> m_primitiveActionExecutor = nullptr;
   std::map<std::string, std::shared_ptr<TaskExecutorThread>> m_mapTaskExecutorThread;
+  ros::NodeHandle m_nh;
 };
 }
 #endif //WECOOK_WORLD_H

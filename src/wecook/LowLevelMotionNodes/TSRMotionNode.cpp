@@ -90,6 +90,7 @@ aikido::trajectory::TrajectoryPtr TSRMotionNode::planToConfiguration(
   auto collisionConstraint
       = ada->getFullCollisionConstraint(space, metaSkeleton, collisionFree);
 
+  assert(startState != goalState);
   auto problem = ConfigurationToConfiguration(
       space, startState, goalState, collisionConstraint);
   auto planner = std::make_shared<SnapConfigurationToConfigurationPlanner>(
@@ -143,7 +144,13 @@ void TSRMotionNode::executeTrajectory(const aikido::trajectory::TrajectoryPtr &t
                                       const aikido::statespace::dart::MetaSkeletonStateSpace::ScopedState &startState) {
   m_stateSpace->setState(m_skeleton.get(), startState.getState());
 
-  if (!ada->ifSim()) ada->startTrajectoryExecutor();
+  if (!ada->ifSim())  {
+      try {
+          ada->startTrajectoryExecutor();
+      } catch (const std::exception &e) {
+          ROS_ERROR("[TSRMotionNode::executeTrajectory:] some error in starting trajectory executor: %", e.what());
+      }
+  }
   auto future = ada->executeTrajectory(timedTrajectory);
   try {
     future.get();
@@ -160,7 +167,8 @@ void TSRMotionNode::executeTrajectory(const aikido::trajectory::TrajectoryPtr &t
       ROS_ERROR("[TSRMotionNode::executeTrajectory:] trajectory execution failed: %s", e.what());
     }
   }
-  if (!ada->ifSim()) ada->stopTrajectoryExecutor();
+  ros::Duration(3).sleep();
+//  if (!ada->ifSim()) ada->stopTrajectoryExecutor();
 }
 
 void TSRMotionNode::plan(const std::shared_ptr<ada::Ada> &ada,
