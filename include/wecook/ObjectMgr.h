@@ -5,6 +5,8 @@
 #ifndef WECOOK_OBJECTMGR_H
 #define WECOOK_OBJECTMGR_H
 
+#include <boost/thread.hpp>
+
 #include "utils.h"
 #include "Object.h"
 #include "Tag.h"
@@ -44,42 +46,12 @@ class ObjectMgr {
       }
     }
 
+    Eigen::Isometry3d setTransform(Eigen::Isometry3d newTransform) const {
+        dynamic_cast<dart::dynamics::FreeJoint *>(m_skeleton->getJoint(0))->setTransform(newTransform);
+    }
+    
     Eigen::Isometry3d getTransform() const {
-      ROS_WARN_STREAM("ObjectMgr: getTransform  called for object " << m_name << ", sim value: " << m_ifSim);
-      if (m_ifSim) {
-           auto result = m_bn->getTransform();
-           ROS_WARN_STREAM("ObjectMgr: Object " << m_name << " orientation w.r.t robot: " << std::endl << result.linear());
-           ROS_WARN_STREAM("ObjectMgr: Object " << m_name << " position w.r.t robot: " << std::endl << result.translation());
-           return result;
-      } else {
-          bool fallBackToSimulation = true;
-          Eigen::Isometry3d result;
-        auto objectTagPair = m_mgr.m_objectToTagMap.find(m_name);
-        if (objectTagPair != m_mgr.m_objectToTagMap.end()) {
-          auto tagIdObjPair = m_mgr.m_tags.find(objectTagPair->second);
-          auto baseTagIdObjPair = m_mgr.m_tags.find(m_mgr.baseTagId);
-          if (tagIdObjPair != m_mgr.m_tags.end() && baseTagIdObjPair != m_mgr.m_tags.end()) {
-            auto tag = tagIdObjPair->second;
-            auto baseTag = baseTagIdObjPair->second;
-            result = baseTag.m_T_tag_object * baseTag.m_T_tag_cam.inverse() * tag.m_T_tag_cam * tag.m_T_tag_object.inverse();
-            ROS_WARN_STREAM("ObjectMgr: base tag has orientation w.r.t camera: " << std::endl << baseTag.m_T_tag_cam.linear());
-            ROS_WARN_STREAM("ObjectMgr: base tag has position w.r.t camera: " << std::endl << baseTag.m_T_tag_cam.translation());
-            ROS_WARN_STREAM("ObjectMgr: object tag for " << m_name << " has orientation w.r.t camera: " << std::endl << tag.m_T_tag_cam.linear());
-            ROS_WARN_STREAM("ObjectMgr: object tag for " << m_name << " has position w.r.t camera: " << std::endl << tag.m_T_tag_cam.translation());
-            ROS_WARN_STREAM("ObjectMgr: Object " << m_name << " orientation w.r.t robot: " << std::endl << result.linear());
-            ROS_WARN_STREAM("ObjectMgr: Object " << m_name << " position w.r.t robot: " << std::endl << result.translation());
-            fallBackToSimulation = false;
-          }
-        }
-        if (fallBackToSimulation) {
-        // PK-TODO: Fallback to simulated value when there is no tag information, need to revisit.
-            result = m_bn->getTransform();
-            ROS_WARN_STREAM("ObjectMgr: Object " << m_name << " is using simulated transform in real demo likely because it doesn't have a tag attached to it");
-            ROS_WARN_STREAM("ObjectMgr: Object " << m_name << " orientation w.r.t robot: " << std::endl << result.linear());
-            ROS_WARN_STREAM("ObjectMgr: Object " << m_name << " position w.r.t robot: " << std::endl << result.translation());
-        }
-        return result;
-      }
+        return m_bn->getTransform();
     }
 
     dart::dynamics::BodyNode *getBodyNode() const {
@@ -131,11 +103,15 @@ class ObjectMgr {
   std::map<std::string, InternalObject> m_objects;
   std::map<std::string, uint32_t> m_objectToTagMap;
   std::map<uint32_t, InternalTag > m_tags;
-  const uint32_t baseTagId = 0; //PK_TODO: Update this value as per our usage
+  const uint32_t baseTagId = 0;
   ros::NodeHandle m_nh;
   ros::Subscriber m_Listener;
   void processTagMsg(const apriltags::AprilTagDetections::ConstPtr &msg);
+  void updateObjectTransforms();
+  Eigen::Isometry3d setObjTransform(const std::string &obj, Eigen::Isometry3d newTransform);
   uint32_t m_tagMsgCounter = 0; // For debugging and understanding purpose
+  bool m_stopUpdatingFromTags = false;
+  boost::thread *m_objectPoseUpdateThread = nullptr;
 };
 
 }

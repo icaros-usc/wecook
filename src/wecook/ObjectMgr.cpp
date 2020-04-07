@@ -3,6 +3,7 @@
 //
 
 #include <ros/console.h>
+#include <boost/thread.hpp>
 
 #include "wecook/ObjectMgr.h"
 #include "apriltags/AprilTagDetections.h"
@@ -22,6 +23,7 @@ void ObjectMgr::init(std::vector<Object> &objects, std::vector<Tag> &tags, bool 
     m_tags.emplace(std::pair<uint32_t, InternalTag>{tag.getTagId(), InternalTag{tag.getTagId(), objTransform}});
   }
   m_Listener = m_nh.subscribe("/apriltags/detections", 1000, &ObjectMgr::processTagMsg, this);
+  m_objectPoseUpdateThread = new boost::thread(&ObjectMgr::updateObjectTransforms, this);
 }
 
 void ObjectMgr::clear(std::vector<Object> &objects, std::vector<Tag> &tags, aikido::planner::WorldPtr &env) {
@@ -32,9 +34,11 @@ void ObjectMgr::clear(std::vector<Object> &objects, std::vector<Tag> &tags, aiki
   // PK-TODO: Do we really need to get tags as input to this method? Can we simple clear the tags and objectToTags dictionaries?
   for (auto &tag : tags) {
   }
+  m_Listener.shutdown(); //PK_TODO: Do I need to explicitly call this?
+  m_stopUpdatingFromTags = true;
+  m_objectPoseUpdateThread->join();
   m_tags.clear();
   m_objectToTagMap.clear();
-  m_Listener.shutdown(); //PK_TODO: Do I need to explicitly call this?
 }
 
 dart::collision::CollisionGroupPtr ObjectMgr::createCollisionGroupExceptFoodAndToMoveObj(const std::string &toMove,
@@ -76,4 +80,34 @@ void ObjectMgr::processTagMsg(const apriltags::AprilTagDetections::ConstPtr &msg
     }
   }
   m_tagMsgCounter++;
+}
+
+Eigen::Isometry3d ObjectMgr::setObjTransform(const std::string &obj, Eigen::Isometry3d newTransform) {
+  return m_objects.at(obj).setTransform(newTransform);
+}
+
+void ObjectMgr::updateObjectTransforms() {
+    ROS_WARN_STREAM("updateObjectTransforms: Started");
+    auto waitingTime = 1.0;
+    while (!m_stopUpdatingFromTags) {
+        ros::Duration(waitingTime).sleep();
+        auto baseTagIdObjPair = m_tags.find(baseTagId);
+        if (baseTagIdObjPair != m_tags.end()) {
+            auto baseTag = baseTagIdObjPair->second;
+            auto objectTagPair = m_objectToTagMap.begin();
+            while (objectTagPair != m_objectToTagMap.end()) {
+                auto tagId = objectTagPair->second;
+                if (tagId != baseTagId) {
+                    auto tagIdObjPair = m_tags.find(tagId);
+                    if (tagIdObjPair != m_tags.end()) {
+                        auto tag = tagIdObjPair->second;
+                        auto newTransform = baseTag.m_T_tag_object * baseTag.m_T_tag_cam.inverse() * tag.m_T_tag_cam * tag.m_T_tag_object.inverse();
+                        setObjTransform(objectTagPair->first, newTransform);
+                    }
+                }
+                objectTagPair++;
+            }
+        }
+    }
+    ROS_WARN_STREAM("updateObjectTransforms: Finished");
 }
