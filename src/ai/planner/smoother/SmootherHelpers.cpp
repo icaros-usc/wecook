@@ -90,13 +90,13 @@ aikido::trajectory::InterpolatedPtr unroll(const aikido::statespace::dart::MetaS
       auto dim = subSpace->getDimension();
       auto newSubState = stateSpace->getSubState<>(newState, j);
       if (dynamic_cast<const aikido::statespace::dart::SO2Joint *>(subSpace.get())) {
-        dynamic_cast<const aikido::statespace::dart::SO2Joint *>(subSpace.get())->expMapUnbounded(traj.row(i).segment(index, dim), newSubState);
+        dynamic_cast<const aikido::statespace::dart::SO2Joint *>(subSpace.get())->expMap(traj.row(i).segment(index, dim), newSubState);
       } else {
         subSpace->expMap(traj.row(i).segment(index, dim), newSubState);
       }
       index += dim;
     }
-    newInterpolated->addWaypointUnbounded(i, newState);
+    newInterpolated->addWaypoint(i, newState);
   }
 
   return newInterpolated;
@@ -110,8 +110,8 @@ aikido::trajectory::InterpolatedPtr simpleSmoothPath(const std::shared_ptr<ada::
                                                      const dart::dynamics::MetaSkeletonPtr &metaSkeletonPtr,
                                                      const aikido::trajectory::Trajectory *path,
                                                      const aikido::constraint::TestablePtr &constraint) {
-  Eigen::VectorXd velocityLimits = ada->getVelocityLimits(metaSkeletonPtr);
-  Eigen::VectorXd accelerationLimits = ada->getAccelerationLimits(metaSkeletonPtr);
+  Eigen::VectorXd velocityLimits = ada->getVelocityLimits();
+  Eigen::VectorXd accelerationLimits = ada->getAccelerationLimits();
   auto interpolated = dynamic_cast<const aikido::trajectory::Interpolated *>(path);
   if (!interpolated) {
     auto spline = dynamic_cast<const aikido::trajectory::Spline *>(path);
@@ -164,8 +164,8 @@ aikido::trajectory::UniqueSplinePtr hauserSmoothPath(const std::shared_ptr<ada::
                                                      const dart::dynamics::MetaSkeletonPtr &metaSkeletonPtr,
                                                      const aikido::trajectory::Trajectory *path,
                                                      const aikido::constraint::TestablePtr &constraint) {
-  Eigen::VectorXd velocityLimits = ada->getVelocityLimits(metaSkeletonPtr);
-  Eigen::VectorXd accelerationLimits = ada->getAccelerationLimits(metaSkeletonPtr);
+  Eigen::VectorXd velocityLimits = ada->getVelocityLimits();
+  Eigen::VectorXd accelerationLimits = ada->getAccelerationLimits();
   auto interpolated = dynamic_cast<const aikido::trajectory::Interpolated *>(path);
   if (!interpolated) {
     auto spline = dynamic_cast<const aikido::trajectory::Spline *>(path);
@@ -218,8 +218,8 @@ aikido::trajectory::InterpolatedPtr hauserSmoothPathInterpolated(const std::shar
                                                                  const dart::dynamics::MetaSkeletonPtr &metaSkeletonPtr,
                                                                  const aikido::trajectory::Trajectory *path,
                                                                  const aikido::constraint::TestablePtr &constraint) {
-  Eigen::VectorXd velocityLimits = ada->getVelocityLimits(metaSkeletonPtr);
-  Eigen::VectorXd accelerationLimits = ada->getAccelerationLimits(metaSkeletonPtr);
+  Eigen::VectorXd velocityLimits = ada->getVelocityLimits();
+  Eigen::VectorXd accelerationLimits = ada->getAccelerationLimits();
   auto interpolated = dynamic_cast<const aikido::trajectory::Interpolated *>(path);
   if (!interpolated) {
     auto spline = dynamic_cast<const aikido::trajectory::Spline *>(path);
@@ -272,8 +272,8 @@ std::unique_ptr<ai::trajectory::HauserPath> hauserSmoothPathHauserPath(const std
                                                                        const dart::dynamics::MetaSkeletonPtr &metaSkeletonPtr,
                                                                        const aikido::trajectory::Trajectory *path,
                                                                        const aikido::constraint::TestablePtr &constraint) {
-  Eigen::VectorXd velocityLimits = ada->getVelocityLimits(metaSkeletonPtr);
-  Eigen::VectorXd accelerationLimits = ada->getAccelerationLimits(metaSkeletonPtr);
+  Eigen::VectorXd velocityLimits = ada->getVelocityLimits();
+  Eigen::VectorXd accelerationLimits = ada->getAccelerationLimits();
 //  auto interpolated = dynamic_cast<const aikido::trajectory::Interpolated *>(path);
 //  if (!interpolated) {
 //    auto spline = dynamic_cast<const aikido::trajectory::Spline *>(path);

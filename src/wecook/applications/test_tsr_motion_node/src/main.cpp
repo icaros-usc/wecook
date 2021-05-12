@@ -7,7 +7,7 @@
 
 #include <aikido/constraint/Satisfied.hpp>
 #include <aikido/planner/World.hpp>
-#include <aikido/rviz/WorldInteractiveMarkerViewer.hpp>
+#include <aikido/rviz/InteractiveMarkerViewer.hpp>
 #include <aikido/statespace/dart/MetaSkeletonStateSpace.hpp>
 #include <aikido/trajectory/Trajectory.hpp>
 #include <aikido/trajectory/Interpolated.hpp>
@@ -111,8 +111,8 @@ int main(int argc, char **argv) {
       "Starting viewer. Please subscribe to the '"
           << execTopicName
           << "' InteractiveMarker topic in RViz.");
-  aikido::rviz::WorldInteractiveMarkerViewer viewer(
-      env, execTopicName, baseFrameName);
+  aikido::rviz::InteractiveMarkerViewer viewer(
+      execTopicName, baseFrameName, env);
 
   // Add ADA to the viewer.
   viewer.setAutoUpdate(true);

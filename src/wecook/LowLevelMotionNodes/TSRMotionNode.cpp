@@ -124,7 +124,8 @@ aikido::trajectory::TrajectoryPtr TSRMotionNode::smoothTrajectory(aikido::trajec
 
   if (num_waypoints == 2) {
     // we still need to retime the shortcutting path
-    aikido::trajectory::TrajectoryPtr timedTrajectory = ada->retimePath(m_skeleton, untimedTrajectory.get());
+    aikido::trajectory::TrajectoryPtr timedTrajectory = ada->postProcessPath<aikido::planner::kunzretimer::KunzRetimer>(
+            untimedTrajectory.get(), nullptr, ada::KunzParams());
     return timedTrajectory;
   } else {
     std::vector<aikido::constraint::ConstTestablePtr> constraints;
@@ -195,24 +196,25 @@ void TSRMotionNode::plan(const std::shared_ptr<ada::Ada> &ada,
                                           m_collisionFree,
                                           &planningResult);
     if (trajectory) {
-      auto timedTrajectory = smoothTrajectory(trajectory, ada);
-      executeTrajectory(timedTrajectory, ada, adaImg, startState);
-      if (result) {
-        result->setStatus(MotionNode::Result::StatusType::SUCCEEDED);
-      }
-      return;
-    } else if (planningResult.getStatus() == aikido::planner::Planner::Result::StatusType::INVALID_START) {
-      ROS_ERROR("[TSRMotionNode::plan]: The start state is invalid");
-      if (result) {
-        result->setStatus(MotionNode::Result::StatusType::INVALID_START);
-      }
-      return;
-    } else if (planningResult.getStatus() == aikido::planner::Planner::Result::StatusType::INVALID_GOAL) {
-      ROS_WARN("[TSRMotionNode::plan]: The goal state is invalid, trying different goal");
-      if (result) {
-        result->setStatus(MotionNode::Result::StatusType::INVALID_GOAL);
-      }
+        auto timedTrajectory = smoothTrajectory(trajectory, ada);
+        executeTrajectory(timedTrajectory, ada, adaImg, startState);
+        if (result) {
+            result->setStatus(MotionNode::Result::StatusType::SUCCEEDED);
+        }
+        return;
     }
+//    } else if (planningResult.getStatus() == aikido::planner::Planner::Result::StatusType::INVALID_START) {
+//      ROS_ERROR("[TSRMotionNode::plan]: The start state is invalid");
+//      if (result) {
+//        result->setStatus(MotionNode::Result::StatusType::INVALID_START);
+//      }
+//      return;
+//    } else if (planningResult.getStatus() == aikido::planner::Planner::Result::StatusType::INVALID_GOAL) {
+//      ROS_WARN("[TSRMotionNode::plan]: The goal state is invalid, trying different goal");
+//      if (result) {
+//        result->setStatus(MotionNode::Result::StatusType::INVALID_GOAL);
+//      }
+//    }
     curr_conf += 1;
   }
 }

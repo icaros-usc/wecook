@@ -9,7 +9,7 @@
 #include <map>
 #include <boost/thread.hpp>
 #include <aikido/planner/World.hpp>
-#include <aikido/rviz/WorldInteractiveMarkerViewer.hpp>
+#include <aikido/rviz/InteractiveMarkerViewer.hpp>
 #include <libada/Ada.hpp>
 
 #include "Task.h"
@@ -81,7 +81,7 @@ class World {
    */
   void cleanPlanningTask(const Task &task);
 
-  aikido::rviz::WorldInteractiveMarkerViewerPtr m_viewer = nullptr;
+  aikido::rviz::InteractiveMarkerViewerPtr m_viewer = nullptr;
   aikido::planner::WorldPtr m_env = nullptr;
   boost::thread m_thread;
   std::map<std::string, std::shared_ptr<Agent>> m_agents;

@@ -19,7 +19,7 @@ int World::addTask(wecook::Task &task) {
 
 void World::initialize() {
   m_env = std::make_shared<aikido::planner::World>("wecook");
-  m_viewer = std::make_shared<aikido::rviz::WorldInteractiveMarkerViewer>(m_env, "wecook", "map");
+  m_viewer = std::make_shared<aikido::rviz::InteractiveMarkerViewer>("wecook", "map", m_env);
   m_viewer->setAutoUpdate(true);
   ros::Duration(1.).sleep();
 }
