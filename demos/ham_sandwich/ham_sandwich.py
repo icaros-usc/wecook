@@ -69,13 +69,13 @@ def talker():
                           ContainingMsg(['bowl0', 'pasta0'])])
 
     task_msg = TaskMsg(scene_msg,
-                       [ActionMsg(['p1'], 'cut', ['cutting_board0'], 'knife0', ['lime0'])],
+                       [ActionMsg(['p1'], 'cut', ['plate0'], 'knife0', ['lime0'])],
                        [AgentMsg('p1', 'r', [0., 0., 0.75, 0., 0., 0., 0.])],
                        "",
                        "",
                        "follow",
                        "RRTConnect",
-                       True)
+                       False)
 
     # sleeping 10 seconds to publish
     rospy.sleep(1)
