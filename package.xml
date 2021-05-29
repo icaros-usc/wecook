@@ -10,6 +10,7 @@
     <depend>eigen</depend>
     <depend>aikido</depend>
     <depend>libada</depend>
+    <depend>libhuman</depend>
     <depend>tf_conversions</depend>
     <depend>ada_description</depend>
     <depend>pr_tsr</depend>

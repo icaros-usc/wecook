@@ -57,6 +57,8 @@ find_package(pr_tsr REQUIRED)
 include_directories(${pr_tsr_INCLUDE_DIRS})
 find_package(Boost COMPONENTS program_options REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
+find_package(libhuman REQUIRED)
+include_directories(${libhuman_INCLUDE_DIRS})
 
 find_package(Z3
         REQUIRED

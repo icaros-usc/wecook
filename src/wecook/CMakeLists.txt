@@ -8,6 +8,7 @@ target_link_libraries(wecook
         ${aikido_LIBRARIES}
         ${Boost_LIBRARIES}
         libada
+        libhuman
         ${PROJECT_NAME}_ai_planner_smoother
         ${PROJECT_NAME}_ai_trajectory
         ${PROJECT_NAME}_ai_planner_taskPlanner)
