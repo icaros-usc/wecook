@@ -31,6 +31,7 @@ dart::collision::CollisionGroupPtr ObjectMgr::createCollisionGroupExceptFoodAndT
         || object.first.find("mouth") != std::string::npos)
       continue;
     auto newNode = object.second.getBodyNode();
+    std::cout << object.first << std::endl;
     envCollisionGroup->addShapeFramesOf(newNode);
   }
   return envCollisionGroup;

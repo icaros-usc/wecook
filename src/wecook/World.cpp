@@ -9,6 +9,7 @@
 #include "wecook/World.h"
 #include "wecook/utils.h"
 #include "wecook/Agents/Robot.h"
+#include "wecook/Agents/Human.h"
 #include "wecook/PrimitiveTaskGraph/PrimitiveTaskGraph.h"
 
 using namespace wecook;
@@ -143,6 +144,10 @@ void World::setupFollowingTask(const Task &task) {
     if (agent.m_type == "r") {
       // This is a robot agent
       auto pAgent = std::make_shared<Robot>(transform, agent.m_pid, task.ifSim());
+      m_agents.emplace(std::pair<std::string, std::shared_ptr<Agent>>(agent.m_pid, pAgent));
+    } else if (agent.m_type == "h") {
+      // This is a human agent
+      auto pAgent = std::make_shared<Human>(transform, agent.m_pid, task.ifSim());
       m_agents.emplace(std::pair<std::string, std::shared_ptr<Agent>>(agent.m_pid, pAgent));
     }
   }

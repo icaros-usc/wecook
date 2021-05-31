@@ -15,10 +15,10 @@ namespace wecook {
     public:
         Human(const Eigen::Isometry3d &transform,
               const std::string &pid,
-              bool isSim = true,
+              bool ifSim = true,
               std::vector<double> homePositions = std::vector<double>{0., 0., 0., 0., 0., 0., 0.})
-                : Agent(pid, false) {
-
+                : m_transform(transform), Agent(pid, ifSim) {
+          m_homePositions = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(homePositions.data(), homePositions.size());
         }
 
         std::string getType() {
@@ -37,15 +37,17 @@ namespace wecook {
 
     private:
         void createHuman(const aikido::planner::WorldPtr &env) {
-            m_human = std::make_shared<human::Human>(env, m_ifSim);
+            m_human = std::make_shared<human::Human>(env, m_ifSim, m_pid, m_transform, true);
         }
 
         void createHumanImg(const aikido::planner::WorldPtr &env) {
-            m_humanImg = std::make_shared<human::Human>(env, m_ifSim);
+            m_humanImg = std::make_shared<human::Human>(env, m_ifSim, m_pid + "_img", m_transform, false);
         }
 
         void moveToHome();
 
+        Eigen::Isometry3d m_transform;
+        Eigen::VectorXd m_homePositions;
     };
 
 }

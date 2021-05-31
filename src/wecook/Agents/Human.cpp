@@ -7,13 +7,22 @@
 using namespace wecook;
 
 void Human::init(std::shared_ptr<aikido::planner::World> &env) {
-  // TODO initialze human
+  // sim human initialize function
+  createHuman(env);
+  if (m_ifSim) createHumanImg(env);
+  moveToHome();
 }
 
 Eigen::Vector3d Human::getPosition() {
-  // TODO get position of human
+  return m_transform.translation();
 }
 
 void Human::end() {
-  // TODO release human
+  m_human.reset();
+  if (m_humanImg) m_humanImg.reset();
+}
+
+void Human::moveToHome() {
+  m_human->getRightArm()->getMetaSkeleton()->setPositions(m_homePositions);
+  if (m_humanImg) m_humanImg->getRightArm()->getMetaSkeleton()->setPositions(m_homePositions);
 }

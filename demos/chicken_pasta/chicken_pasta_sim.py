@@ -8,7 +8,8 @@ def talker():
     pub = rospy.Publisher('WeCookDispatch', TaskMsg, queue_size=10)
     rospy.init_node('wecook_chicken_pasta', anonymous=True)
 
-    scene_msg = SceneMsg([ObjectMsg('wall0',
+    scene_msg = SceneMsg([
+        ObjectMsg('wall0',
                                     'package://wecook_assets/data/furniture/wall.urdf',
                                     [0.75, 0.05, 0., 0., 0., 0., 1.]),
                           ObjectMsg('wall1',
@@ -37,7 +38,7 @@ def talker():
                                     [0.3, 0.7, 0.75, 0., 0., -0.707, .707]),
                           ObjectMsg('cutting_board0',
                                     'package://wecook_assets/data/objects/cutting_board.urdf',
-                                    [0.3, -0.3, 0.75, 0., 0., 0., 1.]),         
+                                    [0.3, -0.3, 0.75, 0., 0., 0., 1.]),
                           ObjectMsg('knife0',
                                     'package://wecook_assets/data/objects/knife_big.urdf',
                                     [0.215, -0.55, 0.775, 0., 0., 0., 1.]),
@@ -67,14 +68,15 @@ def talker():
                                     [0.3, -0.3, 0.757, 0., 0., 0., 1.]),
                           ObjectMsg('pasta0',
                                     'package://wecook_assets/data/food/pasta.urdf',
-                                    [0.45, 0.375, 0.757, 0., 0., 0., 1.])],
+                                    [0.45, 0.375, 0.757, 0., 0., 0., 1.])
+                          ],
                          [ContainingMsg(['plate0', 'chicken0']),
                           ContainingMsg(['bowl0', 'pasta0'])])
 
     task_msg = TaskMsg(scene_msg,
                        [ActionMsg(['p1'], 'cut', ['cutting_board0'], 'knife0', ['lime0'])],
                        [AgentMsg('p1', 'r', [0., 0., 0.75, 0., 0., 0., 1.]),
-                        AgentMsg('p2', 'h', [0., 0., 0., 0., 0., 0., 1.])],
+                        AgentMsg('p2', 'h', [-0.5, 0.25, 1.00, 0., 0., 0.707, 0.707])],
                        "",
                        "",
                        "follow",

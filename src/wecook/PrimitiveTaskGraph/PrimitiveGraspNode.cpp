@@ -32,7 +32,6 @@ void PrimitiveGraspNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
     auto handSkeleton = robotHand->getMetaSkeleton();
     auto handSpace = std::make_shared<aikido::statespace::dart::MetaSkeletonStateSpace>(handSkeleton.get());
     auto world = robot->getWorld();
-
     m_grabPose->mT0_w = objMgr->getObjTransform(m_toGrab);
 
     // setup collisionDetector
