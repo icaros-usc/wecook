@@ -55,7 +55,7 @@ Eigen::VectorXd getCurrentConfig(human::Human &human) {
   return defaultPose;
 }
 
-void executeTraj(
+void executeTraj(std::size_t armNumDof,
     human::Human &human,
     const MetaSkeletonStateSpacePtr &armSpace,
     const MetaSkeletonPtr &armSkeleton) {
@@ -70,11 +70,11 @@ void executeTraj(
   traj = std::make_shared<aikido::trajectory::Interpolated>(armSpace, interpolator);
 
   Eigen::VectorXd positions = human.getRightArm()->getMetaSkeleton()->getPositions();
-  Eigen::VectorXd positions2(7);
-  Eigen::VectorXd positions3(7);
-  Eigen::VectorXd positions4(7);
-  Eigen::VectorXd positions5(7);
-  Eigen::VectorXd positions6(7);
+  Eigen::VectorXd positions2(armNumDof);
+  Eigen::VectorXd positions3(armNumDof);
+  Eigen::VectorXd positions4(armNumDof);
+  Eigen::VectorXd positions5(armNumDof);
+  Eigen::VectorXd positions6(armNumDof);
   positions2 << positions;
   positions3 << positions;
   positions4 << positions;
@@ -197,7 +197,8 @@ int main(int argc, char **argv) {
 
   // Load ADA either in simulation or real based on arguments
   ROS_INFO("Loading ADA.");
-  std::string modelSrc = "icaros";
+//  std::string modelSrc = "icaros";
+  std::string modelSrc = "prl";
   human::Human human(env, adaSim, modelSrc);
   auto robotSkeleton = human.getMetaSkeleton();
 
@@ -221,9 +222,9 @@ int main(int argc, char **argv) {
   auto armSkeleton = human.getRightArm()->getMetaSkeleton();
   auto armSpace = std::make_shared<MetaSkeletonStateSpace>(armSkeleton.get());
 
-
+  auto armNumDof = armSkeleton->getNumDofs();
   if (adaSim) {
-    Eigen::VectorXd home(Eigen::VectorXd::Zero(7));
+    Eigen::VectorXd home(Eigen::VectorXd::Zero(armNumDof));
 //    home[1] = 3.14;
 //    home[2] = 3.14;
     armSkeleton->setPositions(home);
@@ -247,7 +248,7 @@ int main(int argc, char **argv) {
 //    robot.startTrajectoryExecutor();
 //  }
 
-  executeTraj(human, armSpace, armSkeleton);
+  executeTraj(armNumDof, human, armSpace, armSkeleton);
 
   waitForUser("Press [ENTER] to exit. ");
   ros::shutdown();
