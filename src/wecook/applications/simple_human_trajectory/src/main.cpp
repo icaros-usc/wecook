@@ -15,7 +15,7 @@
 #include <boost/program_options.hpp>
 #include <dart/dart.hpp>
 #include <dart/utils/urdf/DartLoader.hpp>
-#include <libhuman/Human.h>
+#include <Human.hpp>
 #include "aikido/trajectory/Trajectory.hpp"
 #include "aikido/trajectory/Interpolated.hpp"
 
@@ -197,7 +197,8 @@ int main(int argc, char **argv) {
 
   // Load ADA either in simulation or real based on arguments
   ROS_INFO("Loading ADA.");
-  human::Human human(env, adaSim);
+  std::string modelSrc = "icaros";
+  human::Human human(env, adaSim, modelSrc);
   auto robotSkeleton = human.getMetaSkeleton();
 
   // Start Visualization Topic

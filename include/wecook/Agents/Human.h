@@ -6,7 +6,7 @@
 #define WECOOK_HUMAN_H
 
 #include "Agent.h"
-#include <libhuman/Human.h>
+#include <Human.hpp>
 
 namespace wecook {
 
@@ -37,11 +37,11 @@ namespace wecook {
 
     private:
         void createHuman(const aikido::planner::WorldPtr &env) {
-            m_human = std::make_shared<human::Human>(env, m_ifSim, m_pid, m_transform, true);
+            m_human = std::make_shared<human::Human>(env, m_ifSim, m_pid, m_transform, true, "icaros");
         }
 
         void createHumanImg(const aikido::planner::WorldPtr &env) {
-            m_humanImg = std::make_shared<human::Human>(env, m_ifSim, m_pid + "_img", m_transform, false);
+            m_humanImg = std::make_shared<human::Human>(env, m_ifSim, m_pid + "_img", m_transform, false, "icaros");
         }
 
         void moveToHome();
