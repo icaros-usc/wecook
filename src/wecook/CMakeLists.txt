@@ -9,8 +9,7 @@ target_link_libraries(wecook
         ${Boost_LIBRARIES}
         libada
         ${PROJECT_NAME}_ai_planner_smoother
-        ${PROJECT_NAME}_ai_trajectory
-        ${PROJECT_NAME}_ai_planner_taskPlanner)
+        ${PROJECT_NAME}_ai_trajectory)
 
 install(TARGETS wecook RUNTIME DESTINATION bin)
 

@@ -58,16 +58,6 @@ include_directories(${pr_tsr_INCLUDE_DIRS})
 find_package(Boost COMPONENTS program_options REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
-find_package(Z3
-        REQUIRED
-        CONFIG
-        # `NO_DEFAULT_PATH` is set so that -DZ3_DIR has to be passed to find Z3.
-        # This should prevent us from accidentally picking up an installed
-        # copy of Z3. This is here to benefit Z3's build system when building
-        # this project. When making your own project you probably shouldn't
-        # use this option.
-        # NO_DEFAULT_PATH
-        )
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
 
