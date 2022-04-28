@@ -630,6 +630,7 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
     auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
     auto translation = objectMgr->getObjTransform(toolName).translation();
     placePose->mTw_e.translation() = translation - Eigen::Vector3d(0.5, 0.0, 0.);
+    placePose->mTw_e.linear() = objectMgr->getObjTransform(toolName).linear();
     placePose->mBw
         << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
     auto
