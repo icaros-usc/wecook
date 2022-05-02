@@ -232,6 +232,7 @@ void ActionPlanner::planCut(ActionNode *actionNode,
                             std::shared_ptr<ObjectMgr> &objectMgr) {
     // since every object will be placed back to the original position, we should save it.
     auto table0_pose = objectMgr->getObjTransform("table0");
+    std::cout << table0_pose.matrix() << std::endl;
 
     // To do cutting, we have 4 steps: grab tool, move tool to start position,
     // do predefined cutting motion, place tool back
@@ -248,7 +249,33 @@ void ActionPlanner::planCut(ActionNode *actionNode,
     auto epsilon = 0.005;
     grabPose->mBw
             << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
+    // when we create grab pose we can also create a place pose since we will place the object to the same position
     auto toolName = actionNode->getAction().get_tool();
+    auto tool_pose = objectMgr->getObjTransform(toolName);
+    auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
+    placePose->mTw_e = tool_pose * table0_pose.inverse();
+    std::cout << placePose->mTw_e.matrix() << std::endl;
+    Eigen::Matrix4d place_correction_rot;
+//    place_correction_rot <<
+//                         Eigen::Vector3d(-0.32, -0.55, 0.78) * placePose->mTw_e.translation().inverse();
+    Eigen::Matrix4d c1;
+    c1 <<     1,     0,     0, -0.55,
+    0,     1,     0, 0.32,
+    0,     0,     1,  0.78,
+    0,     0,     0,     1;
+
+    Eigen::Matrix4d c2;
+    c2 <<     1,     0,     0, -0.32,
+            0,     1,     0, -0.55,
+            0,     0,     1,  0.78,
+            0,     0,     0,     1;
+
+    place_correction_rot << c2 * c1.inverse();
+    std::cout << place_correction_rot << std::endl;
+//    placePose->mTw_e.translation() = place_correction_rot * placePose->mTw_e.translation();
+    placePose->mTw_e.translation() = Eigen::Vector3d(-0.32, -0.55, 0.78);
+    std::cout << placePose->mTw_e.matrix() << std::endl;
+
     auto pid = actionNode->getAction().get_pids()[0];
     auto agent = agents[pid];
 
@@ -262,6 +289,7 @@ void ActionPlanner::planCut(ActionNode *actionNode,
     targetPose->mBw
             << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
     auto toCutName = actionNode->getAction().get_ingredients()[0];
+    std::cout << objectMgr->getObjTransform(toCutName).matrix() << std::endl;
     auto moveToNode =
             std::make_shared<PrimitiveEngageNode>(targetPose,
                                                   toolName,
@@ -284,12 +312,12 @@ void ActionPlanner::planCut(ActionNode *actionNode,
                                                    false);
 
     // 4) create place back node
-    auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
+//    auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
     // get the original place of the tool
-    auto translation = objectMgr->getObjTransform(toolName).translation();
+//    auto translation = objectMgr->getObjTransform(toolName).translation();
     epsilon = 0.005;
 //    placePose->mTw_e.translation() = translation - Eigen::Vector3d(0.5, 0.0, 0.);
-    placePose->mTw_e.translation() = translation - Eigen::Vector3d(-0.2, -0.45, 0.0);
+//    placePose->mTw_e.translation() = translation - Eigen::Vector3d(-0.2, -0.45, 0.0);
     placePose->mBw
             << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
     auto

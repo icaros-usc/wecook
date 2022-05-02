@@ -28,6 +28,8 @@ void PrimitivePlaceNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
 
         if (robot->getHand()->isGrabbing(m_toPlace) == 0) {
             m_targetPose->mT0_w = objMgr->getObjTransform(m_refObject);
+            std::cout << m_targetPose->mT0_w.matrix() << std::endl;
+            std::cout << m_targetPose->mTw_e.matrix() << std::endl;
             auto placeBn = objMgr->getObjBodyNode(m_toPlace);
             auto collisionDetector = dart::collision::FCLCollisionDetector::create();
             std::shared_ptr<dart::collision::CollisionGroup>
@@ -86,12 +88,12 @@ void PrimitivePlaceNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
         motion3->plan(robot->m_ada, robot->m_adaImg);
 
         if (agent->ifSim()) {
-            Eigen::Vector3d delta_x(0., 0., 0.10);
+            Eigen::Vector3d delta_x(0., 0., 0.005);
             auto motion4 =
                     std::make_shared<LinearDeltaMotionNode>(robotHand->getEndEffectorBodyNode(),
                                                             delta_x,
                                                             dart::dynamics::Frame::World(),
-                                                            1,
+                                                            20,
                                                             armSpace,
                                                             armSkeleton,
                                                             nullptr);
