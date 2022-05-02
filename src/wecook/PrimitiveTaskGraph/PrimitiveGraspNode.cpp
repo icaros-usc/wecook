@@ -56,41 +56,99 @@ void PrimitiveGraspNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
                 std::make_shared<aikido::constraint::dart::CollisionFree>(armSpace, armSkeleton, collisionDetector);
         collisionFreeConstraint->addPairwiseCheck(armCollisionGroup, envCollisionGroup);
 
-        auto upPose = m_grabPose;
-        upPose->mTw_e.translation()[2] += 0.05;
 
-        if (m_toGrab.find('spoon') != std::string::npos) {
-            upPose->mTw_e.translation()[2] += 0.10;
+        if (robot->ifSim()) {
+            // If the robot is simulated we don't need to set an up pose
+            auto motion1 = std::make_shared<TSRMotionNode>(m_grabPose,
+                                                           robotHand->getEndEffectorBodyNode(),
+                                                           collisionFreeConstraint,
+                                                           armSpace,
+                                                           armSkeleton);
+            // TSRMotionNode
+            MotionNode::Result motionNodeResult{};
+            motion1->plan(robot->m_ada, robot->m_adaImg, &motionNodeResult);
+            if (motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_GOAL) {
+                if (result) {
+                    result->setStatus(PrimitiveActionNode::Result::StatusType::INVALID_MOTION_GOAL);
+                    return;
+                }
+            } else if (motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_IK
+                       || motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_START
+                       || motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_START
+                       || motionNodeResult.getStatus() == MotionNode::Result::StatusType::FAILED) {
+                if (result) {
+                    result->setStatus(PrimitiveActionNode::Result::StatusType::INVALID_MOTION_FAIL);
+                }
+            } else if (result) {
+                result->setStatus(PrimitiveActionNode::Result::StatusType::SUCCEEDED);
+            }
+        } else {
+            auto upPose = m_grabPose;
+            upPose->mTw_e.translation()[2] += 0.05;
+
+            if (m_toGrab.find('spoon') != std::string::npos) {
+                upPose->mTw_e.translation()[2] += 0.10;
+            }
+
+            auto motion1 = std::make_shared<TSRMotionNode>(upPose,
+                                                           robotHand->getEndEffectorBodyNode(),
+                                                           collisionFreeConstraint,
+                                                           armSpace,
+                                                           armSkeleton);
+            // TSRMotionNode
+            MotionNode::Result motionNodeResult{};
+            motion1->plan(robot->m_ada, robot->m_adaImg, &motionNodeResult);
+            if (motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_GOAL) {
+                if (result) {
+                    result->setStatus(PrimitiveActionNode::Result::StatusType::INVALID_MOTION_GOAL);
+                    return;
+                }
+            } else if (motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_IK
+                       || motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_START
+                       || motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_START
+                       || motionNodeResult.getStatus() == MotionNode::Result::StatusType::FAILED) {
+                if (result) {
+                    result->setStatus(PrimitiveActionNode::Result::StatusType::INVALID_MOTION_FAIL);
+                }
+            } else if (result) {
+                result->setStatus(PrimitiveActionNode::Result::StatusType::SUCCEEDED);
+            }
         }
 
-        auto motion1 = std::make_shared<TSRMotionNode>(upPose,
-                                                       robotHand->getEndEffectorBodyNode(),
-                                                       collisionFreeConstraint,
-                                                       armSpace,
-                                                       armSkeleton);
+        if (robot->ifSim()) {
+            auto conf = Eigen::Vector2d();
+            conf << 1.1, 1.1;
+            auto motion2 = std::make_shared<ConfMotionNode>(conf, handSpace, handSkeleton);
+            ROS_INFO("Grabbing...Closing gripper");
+            // ConfMotionNode
+            motion2->plan(robot->m_ada, robot->m_adaImg);
+        } else {
+            if (m_toGrab.find('spoon') != std::string::npos) {
+                Eigen::Vector3d delta_x(0., 0, -0.04);
+                auto motiony =
+                        std::make_shared<LinearDeltaMotionNode>(robotHand->getEndEffectorBodyNode(),
+                                                                delta_x,
+                                                                dart::dynamics::Frame::World(),
+                                                                1,
+                                                                armSpace,
+                                                                armSkeleton,
+                                                                nullptr);
+                motiony->plan(robot->m_ada, robot->m_adaImg);
 
-        // TSRMotionNode
-        MotionNode::Result motionNodeResult{};
-        motion1->plan(robot->m_ada, robot->m_adaImg, &motionNodeResult);
-        if (motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_GOAL) {
-            if (result) {
-                result->setStatus(PrimitiveActionNode::Result::StatusType::INVALID_MOTION_GOAL);
-                return;
+                Eigen::Vector3d delta_x3(0., 0., -0.04);
+                auto motion4 =
+                        std::make_shared<LinearDeltaMotionNode>(robotHand->getEndEffectorBodyNode(),
+                                                                delta_x3,
+                                                                dart::dynamics::Frame::World(),
+                                                                1,
+                                                                armSpace,
+                                                                armSkeleton,
+                                                                nullptr);
+                motion4->plan(robot->m_ada, robot->m_adaImg);
             }
-        } else if (motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_IK
-                   || motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_START
-                   || motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_START
-                   || motionNodeResult.getStatus() == MotionNode::Result::StatusType::FAILED) {
-            if (result) {
-                result->setStatus(PrimitiveActionNode::Result::StatusType::INVALID_MOTION_FAIL);
-            }
-        } else if (result) {
-            result->setStatus(PrimitiveActionNode::Result::StatusType::SUCCEEDED);
-        }
 
-        if (m_toGrab.find('spoon') != std::string::npos) {
-            Eigen::Vector3d delta_x(0., 0, -0.04);
-            auto motiony =
+            Eigen::Vector3d delta_x(0., 0., -0.05);
+            auto motion4 =
                     std::make_shared<LinearDeltaMotionNode>(robotHand->getEndEffectorBodyNode(),
                                                             delta_x,
                                                             dart::dynamics::Frame::World(),
@@ -98,40 +156,16 @@ void PrimitiveGraspNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
                                                             armSpace,
                                                             armSkeleton,
                                                             nullptr);
-            motiony->plan(robot->m_ada, robot->m_adaImg);
-
-            Eigen::Vector3d delta_x3(0., 0., -0.04);
-            auto motion4 =
-                    std::make_shared<LinearDeltaMotionNode>(robotHand->getEndEffectorBodyNode(),
-                                                            delta_x3,
-                                                            dart::dynamics::Frame::World(),
-                                                            1,
-                                                            armSpace,
-                                                            armSkeleton,
-                                                            nullptr);
             motion4->plan(robot->m_ada, robot->m_adaImg);
+
+            auto conf = Eigen::Vector2d();
+            conf << 1.6, 1.6;
+            auto motion2 = std::make_shared<ConfMotionNode>(conf, handSpace, handSkeleton);
+            ROS_INFO("Grabbing...Closing gripper");
+            // ConfMotionNode
+            motion2->plan(robot->m_ada, robot->m_adaImg);
+            ROS_INFO("Grabbing...Should have Closed gripper");
         }
-
-        Eigen::Vector3d delta_x(0., 0., -0.05);
-        auto motion4 =
-                std::make_shared<LinearDeltaMotionNode>(robotHand->getEndEffectorBodyNode(),
-                                                        delta_x,
-                                                        dart::dynamics::Frame::World(),
-                                                        1,
-                                                        armSpace,
-                                                        armSkeleton,
-                                                        nullptr);
-        motion4->plan(robot->m_ada, robot->m_adaImg);
-
-
-
-        auto conf = Eigen::Vector2d();
-        conf << 1.6, 1.6;
-        auto motion2 = std::make_shared<ConfMotionNode>(conf, handSpace, handSkeleton);
-        ROS_INFO("Grabbing...Closing gripper");
-        // ConfMotionNode
-        motion2->plan(robot->m_ada, robot->m_adaImg);
-        ROS_INFO("Grabbing...Should have Closed gripper");
 
         // before do grab, we need to check if to grab object is connected with other object
         if (objMgr->ifContained(m_toGrab)) {

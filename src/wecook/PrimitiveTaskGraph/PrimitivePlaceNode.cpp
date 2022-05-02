@@ -85,16 +85,29 @@ void PrimitivePlaceNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
         auto motion3 = std::make_shared<ConfMotionNode>(conf, handSpace, handSkeleton);
         motion3->plan(robot->m_ada, robot->m_adaImg);
 
-        Eigen::Vector3d delta_x(0., 0., 0.10);
-        auto motion4 =
-                std::make_shared<LinearDeltaMotionNode>(robotHand->getEndEffectorBodyNode(),
-                                                        delta_x,
-                                                        dart::dynamics::Frame::World(),
-                                                        1,
-                                                        armSpace,
-                                                        armSkeleton,
-                                                        nullptr);
-        motion4->plan(robot->m_ada, robot->m_adaImg);
+        if (agent->ifSim()) {
+            Eigen::Vector3d delta_x(0., 0., 0.10);
+            auto motion4 =
+                    std::make_shared<LinearDeltaMotionNode>(robotHand->getEndEffectorBodyNode(),
+                                                            delta_x,
+                                                            dart::dynamics::Frame::World(),
+                                                            1,
+                                                            armSpace,
+                                                            armSkeleton,
+                                                            nullptr);
+            motion4->plan(robot->m_ada, robot->m_adaImg);
+        } else {
+            Eigen::Vector3d delta_x(0., 0., 0.10);
+            auto motion4 =
+                    std::make_shared<LinearDeltaMotionNode>(robotHand->getEndEffectorBodyNode(),
+                                                            delta_x,
+                                                            dart::dynamics::Frame::World(),
+                                                            1,
+                                                            armSpace,
+                                                            armSkeleton,
+                                                            nullptr);
+            motion4->plan(robot->m_ada, robot->m_adaImg);
+        }
 
         m_ifExecuted = true;
     }

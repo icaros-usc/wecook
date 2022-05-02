@@ -51,6 +51,10 @@ void ActionPlanner::plan(ActionNode *actionNode,
         planSqueeze(actionNode, agents, containingMap, objectMgr);
     } else if (actionNode->getAction().get_verb() == "feeding") {
         planFeeding(actionNode, agents, containingMap, objectMgr);
+    } else if (actionNode->getAction().get_verb() == "wrap") {
+        planWrap(actionNode, agents, containingMap, objectMgr);
+    } else if (actionNode->getAction().get_verb() == "dip") {
+        planDip(actionNode, agents, containingMap, objectMgr);
     }
 }
 
@@ -226,6 +230,9 @@ void ActionPlanner::planCut(ActionNode *actionNode,
                             std::map<std::string, std::shared_ptr<Agent>> &agents,
                             std::shared_ptr<ContainingMap> &containingMap,
                             std::shared_ptr<ObjectMgr> &objectMgr) {
+    // since every object will be placed back to the original position, we should save it.
+    auto table0_pose = objectMgr->getObjTransform("table0");
+
     // To do cutting, we have 4 steps: grab tool, move tool to start position,
     // do predefined cutting motion, place tool back
     // 1) create grab node
@@ -281,7 +288,8 @@ void ActionPlanner::planCut(ActionNode *actionNode,
     // get the original place of the tool
     auto translation = objectMgr->getObjTransform(toolName).translation();
     epsilon = 0.005;
-    placePose->mTw_e.translation() = translation - Eigen::Vector3d(0.5, 0.0, 0.);
+//    placePose->mTw_e.translation() = translation - Eigen::Vector3d(0.5, 0.0, 0.);
+    placePose->mTw_e.translation() = translation - Eigen::Vector3d(-0.2, -0.45, 0.0);
     placePose->mBw
             << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
     auto
@@ -987,16 +995,6 @@ void ActionPlanner::planHolding(wecook::ActionNode *actionNode,
                  0.8678, 0., 0.4969,
                     0., 1, 0.,
                     -0.4969, 0., 0.8678;
-//      Eigen::Matrix3d rot;
-//      rot <<
-//          1, 0, 0,
-//          0, -1, 0,
-//          0, 0, -1;
-//      Eigen::Matrix3d rot2;
-//      rot2 <<
-//          1., 0., 0.,
-//          0., 0.8678, 0.4969,
-//          0., -0.4969, 0.8678;
 
             grabPoseM->mTw_e.linear() = rot2 * rot;
             grabPoseM->mTw_e.translation() = Eigen::Vector3d(0.14, 0.0, 0.08);
@@ -1094,11 +1092,6 @@ void ActionPlanner::planHolding(wecook::ActionNode *actionNode,
             // If the holder is holding the coontainer which is the source of transfer
             // 1) create robotM grab node
             auto grabPoseM = std::make_shared<aikido::constraint::dart::TSR>();
-//            Eigen::Matrix3d rot1;
-//            rot1 <<
-//                 -0.4480736, 0.8939967, 0,
-//                    -0.8939967, -0.4480736, 0,
-//                    0, 0, 1;
             Eigen::Matrix3d rot2;
             rot2 <<
                  1, 0., 0.,
@@ -1318,5 +1311,19 @@ void ActionPlanner::planSqueeze(ActionNode *actionNode,
                                 std::map<std::string, std::shared_ptr<Agent>> &agents,
                                 std::shared_ptr<ContainingMap> &containingMap,
                                 std::shared_ptr<ObjectMgr> &objectMgr) {
+
+}
+
+void ActionPlanner::planWrap(ActionNode *actionNode,
+                             std::map<std::string, std::shared_ptr<Agent>> &agents,
+                             std::shared_ptr<ContainingMap> &containingMap,
+                             std::shared_ptr<ObjectMgr> &objectMgr) {
+
+}
+
+void ActionPlanner::planDip(ActionNode *actionNode,
+                            std::map<std::string, std::shared_ptr<Agent>> &agents,
+                            std::shared_ptr<ContainingMap> &containingMap,
+                            std::shared_ptr<ObjectMgr> &objectMgr) {
 
 }

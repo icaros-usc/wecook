@@ -4,9 +4,9 @@
 
 #include <ros/console.h>
 #include <boost/thread.hpp>
+#include <geometry_msgs/Transform.h>
 
 #include "wecook/ObjectMgr.h"
-#include "apriltags/AprilTagDetections.h"
 
 using namespace wecook;
 
@@ -54,7 +54,7 @@ dart::collision::CollisionGroupPtr ObjectMgr::createCollisionGroupExceptFoodAndT
   return envCollisionGroup;
 }
 
-void ObjectMgr::processTagMsg(const apriltags::AprilTagDetections::ConstPtr &msg) {
+void ObjectMgr::processTagMsg(const pyapriltags::AprilTagDetections::ConstPtr &msg) {
   if (m_tagMsgCounter == 0) {
       ROS_WARN_STREAM("processTagMsg is called first time");
   }

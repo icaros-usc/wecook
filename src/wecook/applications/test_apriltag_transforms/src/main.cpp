@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include <ros/ros.h>
-#include "apriltags/AprilTagDetections.h"
+#include "pyapriltags/AprilTagDetections.h"
 #include <Eigen/Dense>
 
 Eigen::Isometry3d vectorToIsometry(std::vector<double> &poseVector) {
@@ -19,7 +19,7 @@ Eigen::Isometry3d vectorToIsometry(std::vector<double> &poseVector) {
   return pose;
 }
 
-void processTagMsg(const apriltags::AprilTagDetections::ConstPtr &msg) {
+void processTagMsg(const pyapriltags::AprilTagDetections::ConstPtr &msg) {
   Eigen::Isometry3d T_basetag_cam;
   Eigen::Isometry3d T_testTag_cam;
   for (auto &detection: msg->detections) {
