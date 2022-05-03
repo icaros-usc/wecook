@@ -3,7 +3,7 @@
 # rissois_vegetarianos_6519
 
 import rospy
-from wecook.msg import ActionMsg, TaskMsg, SceneMsg, ObjectMsg, ContainingMsg, TagMsg
+from wecook.msg import ActionMsg, TaskMsg, SceneMsg, ObjectMsg, ContainingMsg, TagMsg, AgentMsg
 
 
 def talker():
@@ -25,13 +25,16 @@ def talker():
                           ObjectMsg('fork0',
                                     'package://wecook_assets/data/objects/fork.urdf',
                                     [0.3, -0.5, 0.78, 0., 0., 0., 1.])],
-                         # ObjectMsg('cooker0',
-                         #           'package://wecook_assets/data/objects/cooker.urdf',
-                         #           [-0.55, 0, 0.45, 0., 0., 0., 1])],
-                         [TagMsg(1,'None', [0.0, 0.0, 0.0, 0.0, 0.0, 0.0])],
+                         [TagMsg(1, 'None', [0.0, 0.0, 0.0, 0.0, 0.0, 0.0])],
                          [])
 
-    task_msg = TaskMsg(scene_msg, [ActionMsg(['p2'], 'heat', [], 'fork0', ['food_item0'])])
+    task_msg = TaskMsg(scene_msg, [ActionMsg(['p2'], 'heat', [], 'fork0', ['food_item0'])],
+                       [AgentMsg('p2', 'r', [-0.2, -0.20, 0.7, 0., 0., 0.7071068, 0.7071068], True)],
+                       "",
+                       "",
+                       "follow",
+                       "RRTConnect",
+                       True)
 
     # sleeping 10 seconds to publish
     rospy.sleep(1)

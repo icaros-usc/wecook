@@ -45,23 +45,27 @@ void ActionPlanner::plan(ActionNode *actionNode,
         planRoll(actionNode, agents, containingMap, objectMgr);
     } else if (actionNode->getAction().get_verb() == "heat") {
         planHeat(actionNode, agents, containingMap, objectMgr);
-    } else if (actionNode->getAction().get_verb() == "sprinkle") {
-        planSprinkle(actionNode, agents, containingMap, objectMgr);
-    } else if (actionNode->getAction().get_verb() == "squeeze") {
-        planSqueeze(actionNode, agents, containingMap, objectMgr);
-    } else if (actionNode->getAction().get_verb() == "feeding") {
+    }  else if (actionNode->getAction().get_verb() == "feeding") {
         planFeeding(actionNode, agents, containingMap, objectMgr);
-    } else if (actionNode->getAction().get_verb() == "wrap") {
-        planWrap(actionNode, agents, containingMap, objectMgr);
-    } else if (actionNode->getAction().get_verb() == "dip") {
-        planDip(actionNode, agents, containingMap, objectMgr);
     }
+//    } else if (actionNode->getAction().get_verb() == "wrap") {
+//        planWrap(actionNode, agents, containingMap, objectMgr);
+//    } else if (actionNode->getAction().get_verb() == "dip") {
+//        planDip(actionNode, agents, containingMap, objectMgr);
+//    } else if (actionNode->getAction().get_verb() == "sprinkle") {
+//        planSprinkle(actionNode, agents, containingMap, objectMgr);
+//    } else if (actionNode->getAction().get_verb() == "squeeze") {
+//        planSqueeze(actionNode, agents, containingMap, objectMgr);
+//    }
 }
 
 void ActionPlanner::planRoll(ActionNode *actionNode,
                              std::map<std::string, std::shared_ptr<Agent>> &agents,
                              std::shared_ptr<ContainingMap> &containingMap,
                              std::shared_ptr<ObjectMgr> &objectMgr) {
+    // since every object will be placed back to the original position, we should save it.
+    auto table0_pose = objectMgr->getObjTransform("table0");
+
     // To do rolling, we have 4 steps: grab tool, move tool to start position,
     // do predefined rolling motion, place tool back
     // 1) create grab node
@@ -83,6 +87,9 @@ void ActionPlanner::planRoll(ActionNode *actionNode,
     grabPose->mBw
             << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
     auto toolName = actionNode->getAction().get_tool();
+    auto tool_pose = objectMgr->getObjTransform(toolName);
+    auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
+    placePose->mTw_e = table0_pose.inverse() * tool_pose;
     auto pid = actionNode->getAction().get_pids()[0];
     auto agent = agents[pid];
 
@@ -110,9 +117,9 @@ void ActionPlanner::planRoll(ActionNode *actionNode,
                                                    false);
 
     // 4) create place back node
-    auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
-    auto translation = objectMgr->getObjTransform(toolName).translation();
-    placePose->mTw_e.translation() = translation - Eigen::Vector3d(0.5, 0.0, 0.);
+//    auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
+//    auto translation = objectMgr->getObjTransform(toolName).translation();
+//    placePose->mTw_e.translation() = translation - Eigen::Vector3d(0.5, 0.0, 0.);
     placePose->mBw
             << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
     auto
@@ -493,10 +500,6 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
                                          std::shared_ptr<Agent>> &agents,
                                  std::shared_ptr<ContainingMap> &containingMap,
                                  std::shared_ptr<ObjectMgr> &objectMgr) {
-//    auto agentS = agents["p2"];
-//    if (agentS->getType() == "h") {
-//        return;
-//    }
     if (actionNode->getAction().get_tool() == "hand") {
         // To do transfer object by hand, we have 2 steps: grab object, place object to new position
         // 1) create grab node
@@ -549,6 +552,8 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
 
         return;
     } else if (actionNode->getAction().get_tool() == actionNode->getAction().get_locations()[0]) {
+        auto table0_pose = objectMgr->getObjTransform("table0");
+
         // To do transfer object by old container, we have 2 steps: grab old container, move container to start position,
         // do predefined motion
         // 1) create grab node
@@ -569,6 +574,9 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
         grabPose->mBw << -0.01, 0.01, 0., 0., -0.01, 0.01, -M_PI / 8, M_PI / 8, -M_PI / 8, M_PI / 8, -0.02, 0.02;
         auto objectName = actionNode->getAction().get_locations()[0];
         auto pid = actionNode->getAction().get_pids()[0];
+        auto objectPose = objectMgr->getObjTransform(objectName);
+        auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
+        placePose->mTw_e = table0_pose.inverse() * objectPose;
         auto grabNode =
                 std::make_shared<PrimitiveGraspNode>(grabPose, objectName, objectName, pid, objectName, "", true,
                                                      false);
@@ -603,8 +611,8 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
                                                        false);
 
         // 4) create place back node
-        auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
-        placePose->mTw_e.translation() = Eigen::Vector3d(-0.1, -0.75, 0.73);
+//        auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
+//        placePose->mTw_e.translation() = Eigen::Vector3d(-0.1, -0.75, 0.73);
         placePose->mBw
                 << -0.02, 0.02, -0.02, 0.02, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
         auto placeNode =
@@ -1356,30 +1364,30 @@ void ActionPlanner::planHolding(wecook::ActionNode *actionNode,
     }
 }
 
-void ActionPlanner::planSprinkle(ActionNode *actionNode,
-                                 std::map<std::string, std::shared_ptr<Agent>> &agents,
-                                 std::shared_ptr<ContainingMap> &containingMap,
-                                 std::shared_ptr<ObjectMgr> &objectMgr) {
-
-}
-
-void ActionPlanner::planSqueeze(ActionNode *actionNode,
-                                std::map<std::string, std::shared_ptr<Agent>> &agents,
-                                std::shared_ptr<ContainingMap> &containingMap,
-                                std::shared_ptr<ObjectMgr> &objectMgr) {
-
-}
-
-void ActionPlanner::planWrap(ActionNode *actionNode,
-                             std::map<std::string, std::shared_ptr<Agent>> &agents,
-                             std::shared_ptr<ContainingMap> &containingMap,
-                             std::shared_ptr<ObjectMgr> &objectMgr) {
-
-}
-
-void ActionPlanner::planDip(ActionNode *actionNode,
-                            std::map<std::string, std::shared_ptr<Agent>> &agents,
-                            std::shared_ptr<ContainingMap> &containingMap,
-                            std::shared_ptr<ObjectMgr> &objectMgr) {
-
-}
+//void ActionPlanner::planSprinkle(ActionNode *actionNode,
+//                                 std::map<std::string, std::shared_ptr<Agent>> &agents,
+//                                 std::shared_ptr<ContainingMap> &containingMap,
+//                                 std::shared_ptr<ObjectMgr> &objectMgr) {
+//
+//}
+//
+//void ActionPlanner::planSqueeze(ActionNode *actionNode,
+//                                std::map<std::string, std::shared_ptr<Agent>> &agents,
+//                                std::shared_ptr<ContainingMap> &containingMap,
+//                                std::shared_ptr<ObjectMgr> &objectMgr) {
+//
+//}
+//
+//void ActionPlanner::planWrap(ActionNode *actionNode,
+//                             std::map<std::string, std::shared_ptr<Agent>> &agents,
+//                             std::shared_ptr<ContainingMap> &containingMap,
+//                             std::shared_ptr<ObjectMgr> &objectMgr) {
+//
+//}
+//
+//void ActionPlanner::planDip(ActionNode *actionNode,
+//                            std::map<std::string, std::shared_ptr<Agent>> &agents,
+//                            std::shared_ptr<ContainingMap> &containingMap,
+//                            std::shared_ptr<ObjectMgr> &objectMgr) {
+//
+//}

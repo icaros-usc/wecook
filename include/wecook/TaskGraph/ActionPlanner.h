@@ -77,25 +77,25 @@ namespace wecook {
                       std::shared_ptr<ContainingMap> &containingMap,
                       std::shared_ptr<ObjectMgr> &objectMgr);
 
-        void planSprinkle(ActionNode *actionNode,
-                          std::map<std::string, std::shared_ptr<Agent>> &agents,
-                          std::shared_ptr<ContainingMap> &containingMap,
-                          std::shared_ptr<ObjectMgr> &objectMgr);
-
-        void planSqueeze(ActionNode *actionNode,
-                         std::map<std::string, std::shared_ptr<Agent>> &agents,
-                         std::shared_ptr<ContainingMap> &containingMap,
-                         std::shared_ptr<ObjectMgr> &objectMgr);
-
-        void planWrap(ActionNode *actionNode,
-                      std::map<std::string, std::shared_ptr<Agent>> &agents,
-                      std::shared_ptr<ContainingMap> &containingMap,
-                      std::shared_ptr<ObjectMgr> &objectMgr);
-
-        void planDip(ActionNode *actionNode,
-                     std::map<std::string, std::shared_ptr<Agent>> &agents,
-                     std::shared_ptr<ContainingMap> &containingMap,
-                     std::shared_ptr<ObjectMgr> &objectMgr);
+//        void planSprinkle(ActionNode *actionNode,
+//                          std::map<std::string, std::shared_ptr<Agent>> &agents,
+//                          std::shared_ptr<ContainingMap> &containingMap,
+//                          std::shared_ptr<ObjectMgr> &objectMgr);
+//
+//        void planSqueeze(ActionNode *actionNode,
+//                         std::map<std::string, std::shared_ptr<Agent>> &agents,
+//                         std::shared_ptr<ContainingMap> &containingMap,
+//                         std::shared_ptr<ObjectMgr> &objectMgr);
+//
+//        void planWrap(ActionNode *actionNode,
+//                      std::map<std::string, std::shared_ptr<Agent>> &agents,
+//                      std::shared_ptr<ContainingMap> &containingMap,
+//                      std::shared_ptr<ObjectMgr> &objectMgr);
+//
+//        void planDip(ActionNode *actionNode,
+//                     std::map<std::string, std::shared_ptr<Agent>> &agents,
+//                     std::shared_ptr<ContainingMap> &containingMap,
+//                     std::shared_ptr<ObjectMgr> &objectMgr);
     };
 }
 

@@ -19,18 +19,17 @@ def talker():
                           ObjectMsg('roller0',
                                     'package://wecook_assets/data/objects/roller.urdf',
                                     [0.3, 0.5, 0.83, 0., 0., 0., 1.])],
-                         [TagMsg(1,'None', [0.0, 0.0, 0.0, 0.0, 0.0, 0.0])],
+                         [TagMsg(1, 'None', [0.0, 0.0, 0.0, 0.0, 0.0, 0.0])],
                          [])
 
     task_msg = TaskMsg(scene_msg,
                        [ActionMsg(['p1'], 'roll', [], 'roller0', ['food_item0'])],
-                       [AgentMsg('p1', 'r', [-0.2, 0.15, 0.7, 0., 0., 0.7071068, 0.7071068])],
+                       [AgentMsg('p1', 'r', [-0.2, 0.15, 0.7, 0., 0., 0.7071068, 0.7071068], True)],
                        "",
                        "",
                        "follow",
                        "RRTConnect",
-                       False)
-
+                       True)
 
     # sleeping 10 seconds to publish
     rospy.sleep(1)

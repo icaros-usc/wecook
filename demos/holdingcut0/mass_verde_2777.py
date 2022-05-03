@@ -3,7 +3,7 @@
 # mass_verde_2777
 
 import rospy
-from wecook.msg import ActionMsg, TaskMsg, SceneMsg, ObjectMsg, ContainingMsg, TagMsg
+from wecook.msg import ActionMsg, TaskMsg, SceneMsg, ObjectMsg, ContainingMsg, TagMsg, AgentMsg
 
 
 def talker():
@@ -61,14 +61,18 @@ def talker():
                           ObjectMsg('spoonHolder0',
                                     'package://wecook_assets/data/objects/holder.urdf',
                                     [0.25, 0.45, 0.73, 0., 0., 0., 1])],
-                         # ObjectMsg('cooker0',
-                         #           'package://wecook_assets/data/objects/cooker.urdf',
-                         #           [-0.55, 0, 0.45, 0., 0., 0., 1])],
-                         [TagMsg(1,'None', [0.0, 0.0, 0.0, 0.0, 0.0, 0.0])],
+                         [TagMsg(1, 'None', [0.0, 0.0, 0.0, 0.0, 0.0, 0.0])],
                          [ContainingMsg(['chopping_board0', 'food_item3'])])
 
     task_msg = TaskMsg(scene_msg, [ActionMsg(['p2', 'p1'], 'holding_chopping_board0_cut',
-                                             ['chopping_board0'], 'knife0', ['food_item3'])])
+                                             ['chopping_board0'], 'knife0', ['food_item3'])],
+                       [AgentMsg('p1', 'r', [-0.2, 0.15, 0.7, 0., 0., 0.7071068, 0.7071068], True),
+                        AgentMsg('p2', 'r', [-0.2, -0.20, 0.7, 0., 0., 0.7071068, 0.7071068], True)],
+                       "",
+                       "",
+                       "follow",
+                       "RRTConnect",
+                       True)
 
     # sleeping 10 seconds to publish
     rospy.sleep(1)
