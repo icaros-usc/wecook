@@ -28,8 +28,6 @@ void PrimitivePlaceNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
 
         if (robot->getHand()->isGrabbing(m_toPlace) == 0) {
             m_targetPose->mT0_w = objMgr->getObjTransform(m_refObject);
-            std::cout << m_targetPose->mT0_w.matrix() << std::endl;
-            std::cout << m_targetPose->mTw_e.matrix() << std::endl;
             auto placeBn = objMgr->getObjBodyNode(m_toPlace);
             auto collisionDetector = dart::collision::FCLCollisionDetector::create();
             std::shared_ptr<dart::collision::CollisionGroup>

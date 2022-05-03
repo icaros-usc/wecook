@@ -3,15 +3,18 @@
 import rospy
 from wecook.msg import ActionMsg, TaskMsg, SceneMsg, ObjectMsg, ContainingMsg, AgentMsg, TagMsg
 
+
 def validate_pose_dimension(objects, hint):
     for i, o in enumerate(objects):
         if len(o.pose) > 7:
             raise Exception(str.format("Wrong number of values for pose at index {0} in section {1}", i, hint))
 
+
 def validate_tag_pose_dimension(tags, hint):
     for i, t in enumerate(tags):
         if len(t.objectPose) > 7:
             raise Exception(str.format("Wrong number of values for pose at index {0} in section {1}", i, hint))
+
 
 def talker():
     pub = rospy.Publisher('WeCookDispatch', TaskMsg, queue_size=10)
@@ -25,10 +28,10 @@ def talker():
                                     [-0.75, -0.4, 0.17, 0, 0, -0.7071068, 0.7071068]),
                           ObjectMsg('plant0',
                                     'package://wecook_assets/data/objects/plant.urdf',
-                                    [-0.55, -0.85,  0.03, 0, 0, -0.7071068, 0.7071068]),
+                                    [-0.55, -0.85, 0.03, 0, 0, -0.7071068, 0.7071068]),
                           ObjectMsg('plate1',
                                     'package://wecook_assets/data/objects/plate.urdf',
-                                    [0.05, -0.4,  0.03, 0, 0, -0.7071068, 0.7071068]),
+                                    [0.05, -0.4, 0.03, 0, 0, -0.7071068, 0.7071068]),
                           ObjectMsg('plate0',
                                     'package://wecook_assets/data/objects/plate.urdf',
                                     [0.4, -0.4, 0.03, 0, 0, -0.7071068, 0.7071068]),
@@ -71,18 +74,20 @@ def talker():
                           ObjectMsg('spoonHolder0',
                                     'package://wecook_assets/data/objects/holder.urdf',
                                     [0.65, -0.45, 0.03, 0, 0, -0.7071068, 0.7071068])],
-                         [TagMsg(1,'None', [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0])],
+                         [TagMsg(1, 'None', [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0])],
                          [ContainingMsg(['plate1', 'food_item1']),
                           ContainingMsg(['plate0', 'food_item0'])])
 
     task_msg = TaskMsg(scene_msg,
-                       [ActionMsg(['p2'], 'cut', ['plate1'], 'knife1', ['food_item1']),
-                        ActionMsg(['p1', 'p2'], 'holding_plate0_transfer', ['plate0', 'bowl0'], 'spoon1',
-                                  ['food_item0']),
-                        ActionMsg(['p2'], 'stir', ['bowl0'], 'spoon1', ['food_item0']),
-                        ActionMsg(['p1', 'p2'], 'holding_plate1_transfer', ['plate1', 'bowl0'], 'spoon1',
-                                  ['food_item1']),
-                        ActionMsg(['p1'], 'stir', ['bowl0'], 'spoon0', ['food_item0', 'food_item1'])],
+                       [
+                           ActionMsg(['p2'], 'cut', ['plate1'], 'knife1', ['food_item1']),
+                           ActionMsg(['p1', 'p2'], 'holding_plate0_transfer', ['plate0', 'bowl0'], 'spoon1',
+                                     ['food_item0']),
+                           ActionMsg(['p2'], 'stir', ['bowl0'], 'spoon1', ['food_item0']),
+                           ActionMsg(['p1', 'p2'], 'holding_plate1_transfer', ['plate1', 'bowl0'], 'spoon1',
+                                     ['food_item1']),
+                           ActionMsg(['p1'], 'stir', ['bowl0'], 'spoon0', ['food_item0', 'food_item1'])
+                       ],
                        [AgentMsg('p1', 'r', [0.35, 0.0, 0.0, 0., 0., 0.0, 1.0], True),
                         AgentMsg('p2', 'r', [0.0, 0.0, 0.0, 0., 0., 0.0, 1.0], True)],
                        "",
@@ -90,7 +95,6 @@ def talker():
                        "follow",
                        "RRTConnect",
                        True)
-    
 
     # For debugging
     validate_pose_dimension(scene_msg.objects, 'ObjectMsg array')

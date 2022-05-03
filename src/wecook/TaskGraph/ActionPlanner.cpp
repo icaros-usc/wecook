@@ -232,7 +232,6 @@ void ActionPlanner::planCut(ActionNode *actionNode,
                             std::shared_ptr<ObjectMgr> &objectMgr) {
     // since every object will be placed back to the original position, we should save it.
     auto table0_pose = objectMgr->getObjTransform("table0");
-    std::cout << table0_pose.matrix() << std::endl;
 
     // To do cutting, we have 4 steps: grab tool, move tool to start position,
     // do predefined cutting motion, place tool back
@@ -253,28 +252,7 @@ void ActionPlanner::planCut(ActionNode *actionNode,
     auto toolName = actionNode->getAction().get_tool();
     auto tool_pose = objectMgr->getObjTransform(toolName);
     auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
-    placePose->mTw_e = tool_pose * table0_pose.inverse();
-    std::cout << placePose->mTw_e.matrix() << std::endl;
-    Eigen::Matrix4d place_correction_rot;
-//    place_correction_rot <<
-//                         Eigen::Vector3d(-0.32, -0.55, 0.78) * placePose->mTw_e.translation().inverse();
-    Eigen::Matrix4d c1;
-    c1 <<     1,     0,     0, -0.55,
-    0,     1,     0, 0.32,
-    0,     0,     1,  0.78,
-    0,     0,     0,     1;
-
-    Eigen::Matrix4d c2;
-    c2 <<     1,     0,     0, -0.32,
-            0,     1,     0, -0.55,
-            0,     0,     1,  0.78,
-            0,     0,     0,     1;
-
-    place_correction_rot << c2 * c1.inverse();
-    std::cout << place_correction_rot << std::endl;
-//    placePose->mTw_e.translation() = place_correction_rot * placePose->mTw_e.translation();
-    placePose->mTw_e.translation() = Eigen::Vector3d(-0.32, -0.55, 0.78);
-    std::cout << placePose->mTw_e.matrix() << std::endl;
+    placePose->mTw_e = table0_pose.inverse() * tool_pose;
 
     auto pid = actionNode->getAction().get_pids()[0];
     auto agent = agents[pid];
@@ -312,12 +290,7 @@ void ActionPlanner::planCut(ActionNode *actionNode,
                                                    false);
 
     // 4) create place back node
-//    auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
-    // get the original place of the tool
-//    auto translation = objectMgr->getObjTransform(toolName).translation();
     epsilon = 0.005;
-//    placePose->mTw_e.translation() = translation - Eigen::Vector3d(0.5, 0.0, 0.);
-//    placePose->mTw_e.translation() = translation - Eigen::Vector3d(-0.2, -0.45, 0.0);
     placePose->mBw
             << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
     auto
@@ -353,42 +326,66 @@ void ActionPlanner::planStir(ActionNode *actionNode,
                              std::map<std::string, std::shared_ptr<Agent>> &agents,
                              std::shared_ptr<ContainingMap> &containingMap,
                              std::shared_ptr<ObjectMgr> &objectMgr) {
+    auto ifSim = false;
+    for (auto &agent : agents) {
+        if (agent.second->ifSim()) {
+            ifSim = true;
+            break;
+        }
+    }
+    auto table0_pose = objectMgr->getObjTransform("table0");
     // To do stiring, we have 4 steps: grab tool, move tool to start position,
     // do predefined stiring motion, place tool back
     // 1) create grab node
     // create grab pose
     auto grabPose = std::make_shared<aikido::constraint::dart::TSR>();
-    grabPose->mTw_e.translation() = Eigen::Vector3d(0.0, 0.15, 0.03);
-    Eigen::Matrix3d rot;
-    rot <<
-        1., 0., 0.,
-            0., -1., 0.,
-            0., 0., -1;
-    Eigen::Matrix3d rot2;
-    rot2 <<
-         1, 0., 0.,
-            0., 0, 1.,
-            -0., -1., 0;
-    Eigen::Matrix3d rot4;
-    rot4 <<
-         0, 1., 0.,
-            -1., 0., 0.,
-            0., 0., 1;
-    Eigen::Matrix3d rot5;
-    rot5 <<
-         1, 0., 0.,
-            0., 0, 1.,
-            -0., -1., 0;
-    Eigen::Matrix3d rot6;
-    rot6 <<
-         0, -1., 0.,
-            1., 0, 0.,
-            0., 0., 1.;
-    grabPose->mTw_e.linear() = rot6 * rot5 * rot4 * rot2 * rot;
+
+    if (ifSim) {
+        grabPose->mTw_e.translation() = Eigen::Vector3d(0.0, 0., 0.12);
+        Eigen::Matrix3d rot;
+        rot <<
+            1., 0., 0.,
+                0., -1., 0.,
+                0., 0., -1;
+        grabPose->mTw_e.linear() = rot;
+    } else {
+        grabPose->mTw_e.translation() = Eigen::Vector3d(0.0, 0.15, 0.03);
+        Eigen::Matrix3d rot;
+        rot <<
+            1., 0., 0.,
+                0., -1., 0.,
+                0., 0., -1;
+        Eigen::Matrix3d rot2;
+        rot2 <<
+             1, 0., 0.,
+                0., 0, 1.,
+                -0., -1., 0;
+        Eigen::Matrix3d rot4;
+        rot4 <<
+             0, 1., 0.,
+                -1., 0., 0.,
+                0., 0., 1;
+        Eigen::Matrix3d rot5;
+        rot5 <<
+             1, 0., 0.,
+                0., 0, 1.,
+                -0., -1., 0;
+        Eigen::Matrix3d rot6;
+        rot6 <<
+             0, -1., 0.,
+                1., 0, 0.,
+                0., 0., 1.;
+        grabPose->mTw_e.linear() = rot6 * rot5 * rot4 * rot2 * rot;
+    }
+
     auto epsilon = 0.01;
     grabPose->mBw
             << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
     auto toolName = actionNode->getAction().get_tool();
+    auto tool_pose = objectMgr->getObjTransform(toolName);
+    auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
+    placePose->mTw_e = table0_pose.inverse() * tool_pose;
+
     auto pid = actionNode->getAction().get_pids()[0];
     auto grabNode =
             std::make_shared<PrimitiveGraspNode>(grabPose, toolName, toolName, pid, toolName, "", true, false);
@@ -396,13 +393,18 @@ void ActionPlanner::planStir(ActionNode *actionNode,
     // 2) create move to node
     // create start pose
     auto targetPose = std::make_shared<aikido::constraint::dart::TSR>();
-    Eigen::Matrix3d rot0;
-    rot0 <<
-         1., 0., 0.,
-            0., 0, -1.,
-            0., 1., 0.;
-    targetPose->mTw_e.translation() = Eigen::Vector3d(0., 0., 0.15);
-    targetPose->mTw_e.linear() = rot0;
+    if (ifSim) {
+        targetPose->mTw_e.translation() = Eigen::Vector3d(0., 0., 0.06);
+    } else {
+        Eigen::Matrix3d rot0;
+        rot0 <<
+             1., 0., 0.,
+                0., 0, -1.,
+                0., 1., 0.;
+        targetPose->mTw_e.translation() = Eigen::Vector3d(0., 0., 0.15);
+        targetPose->mTw_e.linear() = rot0;
+    }
+
     targetPose->mBw
             << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -M_PI, M_PI;
     auto toStirName = actionNode->getAction().get_locations()[0];
@@ -416,25 +418,25 @@ void ActionPlanner::planStir(ActionNode *actionNode,
                                                   false,
                                                   false);
 
-    auto targetPose2 = std::make_shared<aikido::constraint::dart::TSR>();
-    Eigen::Matrix3d rot1;
-    rot1 <<
-         1., 0., 0.,
-            0., 0, -1.,
-            0., 1., 0.;
-    targetPose2->mTw_e.translation() = Eigen::Vector3d(0., 0., 0.08);
-    targetPose2->mTw_e.linear() = rot1;
-    targetPose2->mBw
-            << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -M_PI, M_PI;
-    auto moveToNode2 =
-            std::make_shared<PrimitiveEngageNode>(targetPose2,
-                                                  toolName,
-                                                  toStirName,
-                                                  pid,
-                                                  toolName,
-                                                  "",
-                                                  false,
-                                                  false);
+//    auto targetPose2 = std::make_shared<aikido::constraint::dart::TSR>();
+//    Eigen::Matrix3d rot1;
+//    rot1 <<
+//         1., 0., 0.,
+//            0., 0, -1.,
+//            0., 1., 0.;
+//    targetPose2->mTw_e.translation() = Eigen::Vector3d(0., 0., 0.08);
+//    targetPose2->mTw_e.linear() = rot1;
+//    targetPose2->mBw
+//            << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -M_PI, M_PI;
+//    auto moveToNode2 =
+//            std::make_shared<PrimitiveEngageNode>(targetPose2,
+//                                                  toolName,
+//                                                  toStirName,
+//                                                  pid,
+//                                                  toolName,
+//                                                  "",
+//                                                  false,
+//                                                  false);
 
     // 3) create predefined stirring node
     auto predefinedNode =
@@ -448,17 +450,17 @@ void ActionPlanner::planStir(ActionNode *actionNode,
                                                    false);
 
     // 4) create place back node
-    auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
-    auto translation = objectMgr->getObjTransform(toolName).translation();
-    placePose->mTw_e.translation() = translation - Eigen::Vector3d(-0.2, -0.45, 0.0);
-    placePose->mTw_e.linear() = objectMgr->getObjTransform(toolName).linear();
+//    auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
+//    auto translation = objectMgr->getObjTransform(toolName).translation();
+//    placePose->mTw_e.translation() = translation - Eigen::Vector3d(-0.2, -0.45, 0.0);
+//    placePose->mTw_e.linear() = objectMgr->getObjTransform(toolName).linear();
     placePose->mBw
             << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
     auto
             placeNode =
             std::make_shared<PrimitivePlaceNode>(placePose,
                                                  toolName,
-                                                 "spoonHolder1",
+                                                 "table0",
                                                  pid,
                                                  "",
                                                  toolName,
@@ -467,11 +469,11 @@ void ActionPlanner::planStir(ActionNode *actionNode,
 
     // connect these nodes
     grabNode->addChild(moveToNode);
-    moveToNode->addChild(moveToNode2);
-    moveToNode2->addFather(moveToNode);
+//    moveToNode->addChild(moveToNode2);
+//    moveToNode2->addFather(moveToNode);
     moveToNode->addFather(grabNode);
-    moveToNode2->addChild(predefinedNode);
-    predefinedNode->addFather(moveToNode2);
+    moveToNode->addChild(predefinedNode);
+    predefinedNode->addFather(moveToNode);
     predefinedNode->addChild(placeNode);
     placeNode->addFather(predefinedNode);
 
@@ -479,7 +481,7 @@ void ActionPlanner::planStir(ActionNode *actionNode,
     PrimitiveTaskGraph ptg{};
     ptg.addNode(grabNode);
     ptg.addNode(moveToNode);
-    ptg.addNode(moveToNode2);
+//    ptg.addNode(moveToNode2);
     ptg.addNode(predefinedNode);
     ptg.addNode(placeNode);
 
@@ -634,6 +636,8 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
 
         return;
     } else {
+        auto table0_pose = objectMgr->getObjTransform("table0");
+
         // To do transfer object by tool, we have 6 steps: grab tool, move tool to start position,
         // do predefined motion, move tool to new location, do predefined motion, place back tool
         // 1) create grab node
@@ -650,6 +654,9 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
         grabPose->mBw
                 << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
         auto toolName = actionNode->getAction().get_tool();
+        auto toolPose = objectMgr->getObjTransform(toolName);
+        auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
+        placePose->mTw_e = table0_pose.inverse() * toolPose;
         auto pid = actionNode->getAction().get_pids()[0];
         auto
                 grabNode =
@@ -721,9 +728,6 @@ void ActionPlanner::planTransfer(ActionNode *actionNode,
                                                        false);
 
         // 6) create place back node
-        auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
-        auto translation = objectMgr->getObjTransform(toolName).translation();
-        placePose->mTw_e.translation() = translation - Eigen::Vector3d(0.5, 0.0, 0.);
         placePose->mBw
                 << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
         auto
@@ -1026,7 +1030,6 @@ void ActionPlanner::planHolding(wecook::ActionNode *actionNode,
 
             grabPoseM->mTw_e.linear() = rot2 * rot;
             grabPoseM->mTw_e.translation() = Eigen::Vector3d(0.14, 0.0, 0.08);
-//      grabPoseM->mTw_e.translation() = Eigen::Vector3d(0.0, 0.14, 0.08);
             grabPoseM->mBw << -0.01, 0.01, -0.01, 0.01, -0.01, 0.01, -0.01, 0.01, -0.01, 0.01, -0.01, 0.01;
             auto pidM = actionNode->getAction().get_pids()[0];
             auto agentM = agents[pidM];
@@ -1119,40 +1122,60 @@ void ActionPlanner::planHolding(wecook::ActionNode *actionNode,
         } else if (holdedObjectName == actionNode->getAction().get_locations()[0]) {
             // If the holder is holding the coontainer which is the source of transfer
             // 1) create robotM grab node
-            auto grabPoseM = std::make_shared<aikido::constraint::dart::TSR>();
-            Eigen::Matrix3d rot2;
-            rot2 <<
-                 1, 0., 0.,
-                    0., 0, 1.,
-                    -0., -1., 0;
-            Eigen::Matrix3d rot3;
-            rot3 <<
-                 0, 0., 1.,
-                    0., 1., 0.,
-                    -1., 0., 0;
-            Eigen::Matrix3d rot4;
-            rot4 <<
-                 0, 1., 0.,
-                    -1., 0., 0.,
-                    0., 0., 1;
-
-            Eigen::Matrix3d rot5;
-            rot5 <<
-                 0, 0., 1.,
-                    0., 1., 0.,
-                    -1., 0., 0;
-
-            Eigen::Matrix3d rot6;
-            rot6 <<
-                 0, -1., 0.,
-                    1., 0., 0.,
-                    0., 0., 1;
-
-            grabPoseM->mTw_e.linear() = rot6 * rot5 * rot4 * rot3 * rot2;
-            grabPoseM->mTw_e.translation() = Eigen::Vector3d(-0.08, 0.0, 0.07);
-            grabPoseM->mBw << -0.01, 0.01, -0.01, 0.01, -0.01, 0.01, -0.01, 0.01, -0.01, 0.01, -0.01, 0.01;
             auto pidM = actionNode->getAction().get_pids()[0];
             auto agentM = agents[pidM];
+
+            auto grabPoseM = std::make_shared<aikido::constraint::dart::TSR>();
+            if (agentM->ifSim()) {
+                Eigen::Matrix3d rot;
+                rot << 1, 0, 0, 0, -1, 0, 0, 0, -1;
+                Eigen::Matrix3d rot2;
+                rot2 <<
+                     1., 0., 0.,
+                        0., 0.8678, 0.4969,
+                        0., -0.4969, 0.86781;
+                grabPoseM->mTw_e.linear() = rot2 * rot;
+                grabPoseM->mTw_e.translation() = Eigen::Vector3d(0.0, 0.125, 0.08);
+            } else {
+                Eigen::Matrix3d rot2;
+                rot2 <<
+                     1, 0., 0.,
+                        0., 0, 1.,
+                        -0., -1., 0;
+                Eigen::Matrix3d rot3;
+                rot3 <<
+                     0, 0., 1.,
+                        0., 1., 0.,
+                        -1., 0., 0;
+                Eigen::Matrix3d rot4;
+                rot4 <<
+                     0, 1., 0.,
+                        -1., 0., 0.,
+                        0., 0., 1;
+
+                Eigen::Matrix3d rot5;
+                rot5 <<
+                     0, 0., 1.,
+                        0., 1., 0.,
+                        -1., 0., 0;
+
+                Eigen::Matrix3d rot6;
+                rot6 <<
+                     0, -1., 0.,
+                        1., 0., 0.,
+                        0., 0., 1;
+
+                grabPoseM->mTw_e.linear() = rot6 * rot5 * rot4 * rot3 * rot2;
+                grabPoseM->mTw_e.translation() = Eigen::Vector3d(-0.08, 0.0, 0.07);
+            }
+
+            grabPoseM->mBw << -0.01, 0.01, -0.01, 0.01, -0.01, 0.01, -0.01, 0.01, -0.01, 0.01, -0.01, 0.01;
+            // when we create grab pose we can also create a place pose since we will place the object back
+            auto holdedObjectPose = objectMgr->getObjTransform(holdedObjectName);
+            auto placePoseM = std::make_shared<aikido::constraint::dart::TSR>();
+            // since every object will be placed back to the original position, we should save it.
+            auto table0_pose = objectMgr->getObjTransform("table0");
+            placePoseM->mTw_e = table0_pose.inverse() * holdedObjectPose;
             auto grabNodeM = std::make_shared<PrimitiveGraspNode>(grabPoseM,
                                                                   holdedObjectName,
                                                                   holdedObjectName,
@@ -1168,8 +1191,14 @@ void ActionPlanner::planHolding(wecook::ActionNode *actionNode,
             auto agentS = agents[pidS];
             auto positionM = agentM->getPosition();
             auto positionS = agentS->getPosition();
-            targetPoseM->mTw_e.translation() =
-                    Eigen::Vector3d(-0.15, 0.15, 1.15);
+            if (agentM->ifSim()) {
+                targetPoseM->mTw_e.translation() =
+                        Eigen::Vector3d(-0.3, (positionM[1] + positionS[1]) / 2, 0.90);
+            } else {
+                targetPoseM->mTw_e.translation() =
+                        Eigen::Vector3d(-0.15, 0.15, 1.15);
+            }
+
             targetPoseM->mBw << -0.01, 0.01, -0.01, 0.01, -0.01, 0.01, -0.01, 0.01, -0.01, 0.01, -0.01, 0.01;
             auto moveToNodeM =
                     std::make_shared<PrimitiveEngageNode>(targetPoseM,
@@ -1182,12 +1211,11 @@ void ActionPlanner::planHolding(wecook::ActionNode *actionNode,
                                                           false);
 
             // 3) after holding action finished, we place back the holded object
-            auto placePoseM = std::make_shared<aikido::constraint::dart::TSR>();
             // TODO find feasible place automatically
             // now we will place it back to its original place
-            auto translation = objectMgr->getObjTransform(holdedObjectName).translation();
-//            placePoseM->mTw_e.translation() = translation - Eigen::Vector3d(-0.5,0.0,0.);
-            placePoseM->mTw_e.translation() = translation - Eigen::Vector3d(0.5075, -0.3, -1.015);
+//            auto translation = objectMgr->getObjTransform(holdedObjectName).translation();
+////            placePoseM->mTw_e.translation() = translation - Eigen::Vector3d(-0.5,0.0,0.);
+//            placePoseM->mTw_e.translation() = translation - Eigen::Vector3d(0.5075, -0.3, -1.015);
             auto epsilon = 0.005;
             placePoseM->mBw
                     << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
