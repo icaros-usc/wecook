@@ -45,7 +45,7 @@ void ActionPlanner::plan(ActionNode *actionNode,
         planRoll(actionNode, agents, containingMap, objectMgr);
     } else if (actionNode->getAction().get_verb() == "heat") {
         planHeat(actionNode, agents, containingMap, objectMgr);
-    }  else if (actionNode->getAction().get_verb() == "feeding") {
+    } else if (actionNode->getAction().get_verb() == "feeding") {
         planFeeding(actionNode, agents, containingMap, objectMgr);
     }
 //    } else if (actionNode->getAction().get_verb() == "wrap") {
@@ -347,43 +347,13 @@ void ActionPlanner::planStir(ActionNode *actionNode,
     // create grab pose
     auto grabPose = std::make_shared<aikido::constraint::dart::TSR>();
 
-    if (ifSim) {
-        grabPose->mTw_e.translation() = Eigen::Vector3d(0.0, 0., 0.12);
-        Eigen::Matrix3d rot;
-        rot <<
-            1., 0., 0.,
-                0., -1., 0.,
-                0., 0., -1;
-        grabPose->mTw_e.linear() = rot;
-    } else {
-        grabPose->mTw_e.translation() = Eigen::Vector3d(0.0, 0.15, 0.03);
-        Eigen::Matrix3d rot;
-        rot <<
-            1., 0., 0.,
-                0., -1., 0.,
-                0., 0., -1;
-        Eigen::Matrix3d rot2;
-        rot2 <<
-             1, 0., 0.,
-                0., 0, 1.,
-                -0., -1., 0;
-        Eigen::Matrix3d rot4;
-        rot4 <<
-             0, 1., 0.,
-                -1., 0., 0.,
-                0., 0., 1;
-        Eigen::Matrix3d rot5;
-        rot5 <<
-             1, 0., 0.,
-                0., 0, 1.,
-                -0., -1., 0;
-        Eigen::Matrix3d rot6;
-        rot6 <<
-             0, -1., 0.,
-                1., 0, 0.,
-                0., 0., 1.;
-        grabPose->mTw_e.linear() = rot6 * rot5 * rot4 * rot2 * rot;
-    }
+    grabPose->mTw_e.translation() = Eigen::Vector3d(0.0, 0., 0.12);
+    Eigen::Matrix3d rot;
+    rot <<
+        1., 0., 0.,
+            0., -1., 0.,
+            0., 0., -1;
+    grabPose->mTw_e.linear() = rot;
 
     auto epsilon = 0.01;
     grabPose->mBw
@@ -400,17 +370,7 @@ void ActionPlanner::planStir(ActionNode *actionNode,
     // 2) create move to node
     // create start pose
     auto targetPose = std::make_shared<aikido::constraint::dart::TSR>();
-    if (ifSim) {
-        targetPose->mTw_e.translation() = Eigen::Vector3d(0., 0., 0.06);
-    } else {
-        Eigen::Matrix3d rot0;
-        rot0 <<
-             1., 0., 0.,
-                0., 0, -1.,
-                0., 1., 0.;
-        targetPose->mTw_e.translation() = Eigen::Vector3d(0., 0., 0.15);
-        targetPose->mTw_e.linear() = rot0;
-    }
+    targetPose->mTw_e.translation() = Eigen::Vector3d(0., 0., 0.06);
 
     targetPose->mBw
             << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -M_PI, M_PI;
@@ -425,26 +385,6 @@ void ActionPlanner::planStir(ActionNode *actionNode,
                                                   false,
                                                   false);
 
-//    auto targetPose2 = std::make_shared<aikido::constraint::dart::TSR>();
-//    Eigen::Matrix3d rot1;
-//    rot1 <<
-//         1., 0., 0.,
-//            0., 0, -1.,
-//            0., 1., 0.;
-//    targetPose2->mTw_e.translation() = Eigen::Vector3d(0., 0., 0.08);
-//    targetPose2->mTw_e.linear() = rot1;
-//    targetPose2->mBw
-//            << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -M_PI, M_PI;
-//    auto moveToNode2 =
-//            std::make_shared<PrimitiveEngageNode>(targetPose2,
-//                                                  toolName,
-//                                                  toStirName,
-//                                                  pid,
-//                                                  toolName,
-//                                                  "",
-//                                                  false,
-//                                                  false);
-
     // 3) create predefined stirring node
     auto predefinedNode =
             std::make_shared<PrimitiveActuateNode>(pid,
@@ -457,10 +397,6 @@ void ActionPlanner::planStir(ActionNode *actionNode,
                                                    false);
 
     // 4) create place back node
-//    auto placePose = std::make_shared<aikido::constraint::dart::TSR>();
-//    auto translation = objectMgr->getObjTransform(toolName).translation();
-//    placePose->mTw_e.translation() = translation - Eigen::Vector3d(-0.2, -0.45, 0.0);
-//    placePose->mTw_e.linear() = objectMgr->getObjTransform(toolName).linear();
     placePose->mBw
             << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;
     auto
@@ -476,8 +412,6 @@ void ActionPlanner::planStir(ActionNode *actionNode,
 
     // connect these nodes
     grabNode->addChild(moveToNode);
-//    moveToNode->addChild(moveToNode2);
-//    moveToNode2->addFather(moveToNode);
     moveToNode->addFather(grabNode);
     moveToNode->addChild(predefinedNode);
     predefinedNode->addFather(moveToNode);
@@ -488,7 +422,6 @@ void ActionPlanner::planStir(ActionNode *actionNode,
     PrimitiveTaskGraph ptg{};
     ptg.addNode(grabNode);
     ptg.addNode(moveToNode);
-//    ptg.addNode(moveToNode2);
     ptg.addNode(predefinedNode);
     ptg.addNode(placeNode);
 
@@ -1134,49 +1067,15 @@ void ActionPlanner::planHolding(wecook::ActionNode *actionNode,
             auto agentM = agents[pidM];
 
             auto grabPoseM = std::make_shared<aikido::constraint::dart::TSR>();
-            if (agentM->ifSim()) {
-                Eigen::Matrix3d rot;
-                rot << 1, 0, 0, 0, -1, 0, 0, 0, -1;
-                Eigen::Matrix3d rot2;
-                rot2 <<
-                     1., 0., 0.,
-                        0., 0.8678, 0.4969,
-                        0., -0.4969, 0.86781;
-                grabPoseM->mTw_e.linear() = rot2 * rot;
-                grabPoseM->mTw_e.translation() = Eigen::Vector3d(0.0, 0.125, 0.08);
-            } else {
-                Eigen::Matrix3d rot2;
-                rot2 <<
-                     1, 0., 0.,
-                        0., 0, 1.,
-                        -0., -1., 0;
-                Eigen::Matrix3d rot3;
-                rot3 <<
-                     0, 0., 1.,
-                        0., 1., 0.,
-                        -1., 0., 0;
-                Eigen::Matrix3d rot4;
-                rot4 <<
-                     0, 1., 0.,
-                        -1., 0., 0.,
-                        0., 0., 1;
-
-                Eigen::Matrix3d rot5;
-                rot5 <<
-                     0, 0., 1.,
-                        0., 1., 0.,
-                        -1., 0., 0;
-
-                Eigen::Matrix3d rot6;
-                rot6 <<
-                     0, -1., 0.,
-                        1., 0., 0.,
-                        0., 0., 1;
-
-                grabPoseM->mTw_e.linear() = rot6 * rot5 * rot4 * rot3 * rot2;
-                grabPoseM->mTw_e.translation() = Eigen::Vector3d(-0.08, 0.0, 0.07);
-            }
-
+            Eigen::Matrix3d rot;
+            rot << 1, 0, 0, 0, -1, 0, 0, 0, -1;
+            Eigen::Matrix3d rot2;
+            rot2 <<
+                 1., 0., 0.,
+                    0., 0.8678, 0.4969,
+                    0., -0.4969, 0.86781;
+            grabPoseM->mTw_e.linear() = rot2 * rot;
+            grabPoseM->mTw_e.translation() = Eigen::Vector3d(0.0, 0.125, 0.08);
             grabPoseM->mBw << -0.01, 0.01, -0.01, 0.01, -0.01, 0.01, -0.01, 0.01, -0.01, 0.01, -0.01, 0.01;
             // when we create grab pose we can also create a place pose since we will place the object back
             auto holdedObjectPose = objectMgr->getObjTransform(holdedObjectName);
@@ -1203,8 +1102,10 @@ void ActionPlanner::planHolding(wecook::ActionNode *actionNode,
                 targetPoseM->mTw_e.translation() =
                         Eigen::Vector3d(-0.3, (positionM[1] + positionS[1]) / 2, 0.90);
             } else {
+                // hardcoded
                 targetPoseM->mTw_e.translation() =
-                        Eigen::Vector3d(-0.15, 0.15, 1.15);
+                        Eigen::Vector3d(-0.3, 0, 0.9);
+                std::cout << targetPoseM->mTw_e.matrix() << std::endl;
             }
 
             targetPoseM->mBw << -0.01, 0.01, -0.01, 0.01, -0.01, 0.01, -0.01, 0.01, -0.01, 0.01, -0.01, 0.01;
@@ -1221,9 +1122,6 @@ void ActionPlanner::planHolding(wecook::ActionNode *actionNode,
             // 3) after holding action finished, we place back the holded object
             // TODO find feasible place automatically
             // now we will place it back to its original place
-//            auto translation = objectMgr->getObjTransform(holdedObjectName).translation();
-////            placePoseM->mTw_e.translation() = translation - Eigen::Vector3d(-0.5,0.0,0.);
-//            placePoseM->mTw_e.translation() = translation - Eigen::Vector3d(0.5075, -0.3, -1.015);
             auto epsilon = 0.005;
             placePoseM->mBw
                     << -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon, -epsilon, epsilon;

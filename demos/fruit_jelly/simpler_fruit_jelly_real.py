@@ -38,7 +38,7 @@ def talker(ifSim):
                   [-0.2, -0.5, 0.08, -0.4999688, -0.4999688, -0.5000312, 0.5000312]),
         ObjectMsg('spoon0',
                   'package://wecook_assets/data/objects/spoon.urdf',
-                  [0.65, -0.5, 0.08, -0.4999688, -0.4999688, -0.5000312, 0.5000312]),
+                  [0.65, -0.5, 0.15, -0.4999688, -0.4999688, -0.5000312, 0.5000312]),
         ObjectMsg('food_item1',
                   'package://wecook_assets/data/food/food_item0.urdf',
                   [0.05, -0.4, 0.05, 0, 0, -0.7071068, 0.7071068]),
@@ -47,28 +47,20 @@ def talker(ifSim):
                   [0.4, -0.4, 0.05, 0, 0, -0.7071068, 0.7071068]),
     ],
         [TagMsg(0, 'None', [0.0, -0.045, 0.13, 0.7071068, 0, 0, 0.7071068]),
-         #   TagMsg(4,'bowl0', [0.0, -0.06, 0.04, 0.7071068, 0, 0, 0.7071068]),
-         #   TagMsg(6,'plate0', [0.0, -0.06, 0.04, 0.7071068, 0, 0, 0.7071068]),
-         #   TagMsg(7,'plate1', [0.0, -0.06, 0.037, 0.7071068, 0, 0, 0.7071068]),
          ],
         [ContainingMsg(['plate1', 'food_item1']),
          ContainingMsg(['plate0', 'food_item0'])])
 
     task_msg = TaskMsg(scene_msg,
                        [
-                           # ActionMsg(['p2'], 'cut', ['plate1'], 'knife1', ['food_item1']),
-                           ActionMsg(['p1', 'p2'], 'holding_plate0_transfer', ['plate0', 'bowl0'], 'spoon1',
-                                     ['food_item0']),
-                           # # ActionMsg(['p2'], 'stir', ['bowl0'], 'spoon1', ['food_item0']),
-                           ActionMsg(['p1', 'p2'], 'holding_plate1_transfer', ['plate1', 'bowl0'], 'spoon1',
-                                     ['food_item1']),
-                           # # ActionMsg(['p2'], 'stir', ['bowl0'], 'spoon1', ['food_item0', 'food_item1']),
+                           # ActionMsg(['p1', 'p2'], 'holding_plate0_transfer', ['plate0', 'bowl0'], 'spoon1',
+                           #           ['food_item0']),
+                           # ActionMsg(['p1', 'p2'], 'holding_plate1_transfer', ['plate1', 'bowl0'], 'spoon1',
+                           #           ['food_item1']),
                            ActionMsg(['p1'], 'stir', ['bowl0'], 'spoon0', ['food_item0', 'food_item1'])
                        ],
-                       #    [AgentMsg('p1', 'r', [-0.2, 0.15, 0.7, 0., 0., 0.7071068, 0.7071068], True),
-                       #     AgentMsg('p2', 'r', [-0.2, -0.2, 0.7, 0., 0., 0.7071068, 0.7071068], True)],
-                       [AgentMsg('p1', 'r', [0.35, 0.0, 0.0, 0., 0., 0.0, 1.0], False),
-                        AgentMsg('p2', 'h', [0.0, 0.0, 0.0, 0., 0., 0.0, 1.0], True)],
+                       [AgentMsg('p1', 'r', [0.35, 0.0, 0.0, 0., 0., 0.0, 1.0], True),
+                        AgentMsg('p2', 'h', [0., 0.0, 0.0, 0., 0., 0.0, 1.0], True)],
                        "",
                        "",
                        "follow",
@@ -78,10 +70,6 @@ def talker(ifSim):
     validate_pose_dimension(scene_msg.objects, 'ObjectMsg array')
     validate_tag_pose_dimension(scene_msg.tags, 'TagMsg array')
     validate_pose_dimension(task_msg.agents, 'AgentMsg array')
-
-    # ht_offset = 0.13
-    # for o in scene_msg.objects:
-    #     o.pose[2] -= ht_offset
 
     # sleeping 10 seconds to publish
     rospy.sleep(1)

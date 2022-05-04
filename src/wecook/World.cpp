@@ -40,7 +40,7 @@ void World::recording() {
     for (const auto &agent : m_agents) {
       // don't need so many states
       ros::Duration(waitingTime).sleep();
-      auto adaImg = std::dynamic_pointer_cast<Robot, Agent>(agent.second)->m_adaImg;
+      auto adaImg = std::dynamic_pointer_cast<Robot, Agent>(agent.second)->m_adaExec;
       // first get arm positions
 //      auto wholeJoints = adaImg->getMetaSkeleton()->getPositions();
       auto armJoints = adaImg->getArm()->getMetaSkeleton()->getPositions();

@@ -58,7 +58,7 @@ void PrimitivePlaceNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
                                                            armSkeleton,
                                                            m_ifDebug);
             MotionNode::Result motionNodeResult{};
-            motion1->plan(robot->m_ada, robot->m_adaImg, &motionNodeResult);
+            motion1->plan(robot->m_adaPlan, robot->m_adaExec, &motionNodeResult);
             if (motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_GOAL) {
                 if (result) {
                     result->setStatus(PrimitiveActionNode::Result::StatusType::INVALID_MOTION_GOAL);
@@ -74,16 +74,18 @@ void PrimitivePlaceNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
             } else if (result) {
                 result->setStatus(PrimitiveActionNode::Result::StatusType::SUCCEEDED);
             }
-
+            
             auto motion2 = std::make_shared<GrabMotionNode>(world->getSkeleton(m_toPlace), false, armSpace,
                                                             armSkeleton);
-            motion2->plan(robot->m_ada, robot->m_adaImg);
+            motion2->plan(robot->m_adaPlan, robot->m_adaExec);
         }
 
-        auto conf = Eigen::Vector2d();
-        conf << 0., 0.;
-        auto motion3 = std::make_shared<ConfMotionNode>(conf, handSpace, handSkeleton);
-        motion3->plan(robot->m_ada, robot->m_adaImg);
+        auto adaPlanConf = Eigen::Vector2d();
+        adaPlanConf << 0., 0.;
+        auto adaExecConf = Eigen::Vector2d();
+        adaExecConf << 0., 0.;
+        auto motion3 = std::make_shared<ConfMotionNode>(adaPlanConf, adaExecConf, handSpace, handSkeleton);
+        motion3->plan(robot->m_adaPlan, robot->m_adaExec);
 
         if (agent->ifSim()) {
             Eigen::Vector3d delta_x(0., 0., 0.005);
@@ -95,7 +97,7 @@ void PrimitivePlaceNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
                                                             armSpace,
                                                             armSkeleton,
                                                             nullptr);
-            motion4->plan(robot->m_ada, robot->m_adaImg);
+            motion4->plan(robot->m_adaPlan, robot->m_adaExec);
         } else {
             Eigen::Vector3d delta_x(0., 0., 0.10);
             auto motion4 =
@@ -106,7 +108,7 @@ void PrimitivePlaceNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
                                                             armSpace,
                                                             armSkeleton,
                                                             nullptr);
-            motion4->plan(robot->m_ada, robot->m_adaImg);
+            motion4->plan(robot->m_adaPlan, robot->m_adaExec);
         }
 
         m_ifExecuted = true;

@@ -30,7 +30,7 @@ class LinearDeltaMotionNode : public MotionNode {
 
   }
 
-  void plan(const std::shared_ptr<ada::Ada> &ada, const std::shared_ptr<ada::Ada> &adaImg, Result *result = nullptr);
+  void plan(const std::shared_ptr<ada::Ada> &adaPlan, const std::shared_ptr<ada::Ada> &adaExec, Result *result = nullptr);
 
  private:
   Eigen::VectorXd m_delta_x;
