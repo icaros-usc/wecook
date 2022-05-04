@@ -57,33 +57,77 @@ void PrimitiveGraspNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
         collisionFreeConstraint->addPairwiseCheck(armCollisionGroup, envCollisionGroup);
 
 
-        // If the robot is simulated we don't need to set an up pose
-        auto motion1 = std::make_shared<TSRMotionNode>(m_grabPose,
-                                                       robotHand->getEndEffectorBodyNode(),
-                                                       collisionFreeConstraint,
-                                                       armSpace,
-                                                       armSkeleton);
-        // TSRMotionNode
-        MotionNode::Result motionNodeResult{};
-        motion1->plan(robot->m_adaPlan, robot->m_adaExec, &motionNodeResult);
-        if (motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_GOAL) {
-            if (result) {
-                result->setStatus(PrimitiveActionNode::Result::StatusType::INVALID_MOTION_GOAL);
-                return;
+        if (agent->ifSim()) {
+            // If the robot is simulated we don't need to set an up pose
+            auto motion1 = std::make_shared<TSRMotionNode>(m_grabPose,
+                                                           robotHand->getEndEffectorBodyNode(),
+                                                           collisionFreeConstraint,
+                                                           armSpace,
+                                                           armSkeleton);
+            // TSRMotionNode
+            MotionNode::Result motionNodeResult{};
+            motion1->plan(robot->m_adaPlan, robot->m_adaExec, &motionNodeResult);
+            if (motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_GOAL) {
+                if (result) {
+                    result->setStatus(PrimitiveActionNode::Result::StatusType::INVALID_MOTION_GOAL);
+                    return;
+                }
+            } else if (motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_IK
+                       || motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_START
+                       || motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_START
+                       || motionNodeResult.getStatus() == MotionNode::Result::StatusType::FAILED) {
+                if (result) {
+                    result->setStatus(PrimitiveActionNode::Result::StatusType::INVALID_MOTION_FAIL);
+                }
+            } else if (result) {
+                result->setStatus(PrimitiveActionNode::Result::StatusType::SUCCEEDED);
             }
-        } else if (motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_IK
-                   || motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_START
-                   || motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_START
-                   || motionNodeResult.getStatus() == MotionNode::Result::StatusType::FAILED) {
-            if (result) {
-                result->setStatus(PrimitiveActionNode::Result::StatusType::INVALID_MOTION_FAIL);
+        } else {
+            if (m_toGrab.find('spoon') != std::string::npos) {
+                auto upPose = std::make_shared<aikido::constraint::dart::TSR>();
+                upPose->mT0_w = m_grabPose->mT0_w;
+                upPose->mBw = m_grabPose->mBw;
+                upPose->mTw_e = m_grabPose->mTw_e;
+                upPose->mTw_e.translation() = upPose->mTw_e.translation() + Eigen::Vector3d{0, 0, 0.15};
+                auto motion2 = std::make_shared<TSRMotionNode>(upPose,
+                                                               robotHand->getEndEffectorBodyNode(),
+                                                               collisionFreeConstraint,
+                                                               armSpace,
+                                                               armSkeleton);
+                // TSRMotionNode
+                MotionNode::Result motion2NodeResult{};
+                motion2->plan(robot->m_adaPlan, robot->m_adaExec, &motion2NodeResult);
             }
-        } else if (result) {
-            result->setStatus(PrimitiveActionNode::Result::StatusType::SUCCEEDED);
+
+            // If the robot is simulated we don't need to set an up pose
+            auto motion1 = std::make_shared<TSRMotionNode>(m_grabPose,
+                                                           robotHand->getEndEffectorBodyNode(),
+                                                           collisionFreeConstraint,
+                                                           armSpace,
+                                                           armSkeleton);
+            // TSRMotionNode
+            MotionNode::Result motionNodeResult{};
+            motion1->plan(robot->m_adaPlan, robot->m_adaExec, &motionNodeResult);
+            if (motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_GOAL) {
+                if (result) {
+                    result->setStatus(PrimitiveActionNode::Result::StatusType::INVALID_MOTION_GOAL);
+                    return;
+                }
+            } else if (motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_IK
+                       || motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_START
+                       || motionNodeResult.getStatus() == MotionNode::Result::StatusType::INVALID_START
+                       || motionNodeResult.getStatus() == MotionNode::Result::StatusType::FAILED) {
+                if (result) {
+                    result->setStatus(PrimitiveActionNode::Result::StatusType::INVALID_MOTION_FAIL);
+                }
+            } else if (result) {
+                result->setStatus(PrimitiveActionNode::Result::StatusType::SUCCEEDED);
+            }
         }
 
+
         auto adaPlanConf = Eigen::Vector2d();
-        adaPlanConf << 1., 1.;
+        adaPlanConf << 0.5, 0.5;
         auto adaExecConf = Eigen::Vector2d();
         adaExecConf << 1.6, 1.6;
         auto motion2 = std::make_shared<ConfMotionNode>(adaPlanConf, adaExecConf, handSpace, handSkeleton);

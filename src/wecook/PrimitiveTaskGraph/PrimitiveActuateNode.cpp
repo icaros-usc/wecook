@@ -247,7 +247,7 @@ void PrimitiveActuateNode::execute(std::map<std::string, std::shared_ptr<Agent>>
             robotHand->grab(toolNode);
         } else if (m_motionType == "close") {
             auto adaPlanConf = Eigen::Vector2d();
-            adaPlanConf << 1., 1.;
+            adaPlanConf << 0.5, 0.5;
             auto adaExecConf = Eigen::Vector2d();
             adaExecConf << 1.6, 1.6;
             auto motion = std::make_shared<ConfMotionNode>(adaPlanConf, adaExecConf, handSpace, handSkeleton);

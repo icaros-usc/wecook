@@ -74,7 +74,7 @@ void PrimitivePlaceNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
             } else if (result) {
                 result->setStatus(PrimitiveActionNode::Result::StatusType::SUCCEEDED);
             }
-            
+
             auto motion2 = std::make_shared<GrabMotionNode>(world->getSkeleton(m_toPlace), false, armSpace,
                                                             armSkeleton);
             motion2->plan(robot->m_adaPlan, robot->m_adaExec);
@@ -99,7 +99,7 @@ void PrimitivePlaceNode::execute(std::map<std::string, std::shared_ptr<Agent>> &
                                                             nullptr);
             motion4->plan(robot->m_adaPlan, robot->m_adaExec);
         } else {
-            Eigen::Vector3d delta_x(0., 0., 0.10);
+            Eigen::Vector3d delta_x(0., 0., 0.05);
             auto motion4 =
                     std::make_shared<LinearDeltaMotionNode>(robotHand->getEndEffectorBodyNode(),
                                                             delta_x,

@@ -1067,15 +1067,28 @@ void ActionPlanner::planHolding(wecook::ActionNode *actionNode,
             auto agentM = agents[pidM];
 
             auto grabPoseM = std::make_shared<aikido::constraint::dart::TSR>();
-            Eigen::Matrix3d rot;
-            rot << 1, 0, 0, 0, -1, 0, 0, 0, -1;
-            Eigen::Matrix3d rot2;
-            rot2 <<
-                 1., 0., 0.,
-                    0., 0.8678, 0.4969,
-                    0., -0.4969, 0.86781;
-            grabPoseM->mTw_e.linear() = rot2 * rot;
-            grabPoseM->mTw_e.translation() = Eigen::Vector3d(0.0, 0.125, 0.08);
+            if (agentM->ifSim()) {
+                Eigen::Matrix3d rot;
+                rot << 1, 0, 0, 0, -1, 0, 0, 0, -1;
+                Eigen::Matrix3d rot2;
+                rot2 <<
+                     1., 0., 0.,
+                        0., 0.8678, 0.4969,
+                        0., -0.4969, 0.86781;
+                grabPoseM->mTw_e.linear() = rot2 * rot;
+                grabPoseM->mTw_e.translation() = Eigen::Vector3d(0.0, 0.125, 0.08);
+            } else {
+                Eigen::Matrix3d rot;
+                rot << 1, 0, 0, 0, -1, 0, 0, 0, -1;
+//                Eigen::Matrix3d rot2;
+//                rot2 <<
+//                     1., 0., 0.,
+//                        0., 0.8678, 0.4969,
+//                        0., -0.4969, 0.86781;
+                grabPoseM->mTw_e.linear() = rot;
+                grabPoseM->mTw_e.translation() = Eigen::Vector3d(0.0, 0.125, 0.08);
+            }
+
             grabPoseM->mBw << -0.01, 0.01, -0.01, 0.01, -0.01, 0.01, -0.01, 0.01, -0.01, 0.01, -0.01, 0.01;
             // when we create grab pose we can also create a place pose since we will place the object back
             auto holdedObjectPose = objectMgr->getObjTransform(holdedObjectName);
@@ -1100,11 +1113,11 @@ void ActionPlanner::planHolding(wecook::ActionNode *actionNode,
             auto positionS = agentS->getPosition();
             if (agentM->ifSim()) {
                 targetPoseM->mTw_e.translation() =
-                        Eigen::Vector3d(-0.3, (positionM[1] + positionS[1]) / 2, 0.90);
+                        Eigen::Vector3d(-0.3, (positionM[1] + positionS[1]) / 2, 1.0);
             } else {
                 // hardcoded
                 targetPoseM->mTw_e.translation() =
-                        Eigen::Vector3d(-0.3, 0, 0.9);
+                        Eigen::Vector3d(-0.55, -0.1, 1.0);
                 std::cout << targetPoseM->mTw_e.matrix() << std::endl;
             }
 
