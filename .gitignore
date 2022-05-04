@@ -2,3 +2,5 @@
 cmake-*
 doxy
 venv
+.vscode
+build/

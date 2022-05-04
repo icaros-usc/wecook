@@ -24,7 +24,7 @@ class TSRMotionNode : public MotionNode {
 
   }
 
-  void plan(const std::shared_ptr<ada::Ada> &ada, const std::shared_ptr<ada::Ada> &adaImg, Result *result = nullptr);
+  void plan(const std::shared_ptr<ada::Ada> &adaPlan, const std::shared_ptr<ada::Ada> &adaExec, Result *result = nullptr);
 
   void setTimeStep(double timeStep) {
     m_retimeTimeStep = timeStep;
@@ -49,8 +49,8 @@ class TSRMotionNode : public MotionNode {
                                                      const std::shared_ptr<ada::Ada> &ada);
 
   void executeTrajectory(const aikido::trajectory::TrajectoryPtr &timedTrajectory,
-                         const std::shared_ptr<ada::Ada> &ada,
-                         const std::shared_ptr<ada::Ada> &adaImg,
+                         const std::shared_ptr<ada::Ada> &adaPlan,
+                         const std::shared_ptr<ada::Ada> &adaExec,
                          const aikido::statespace::dart::MetaSkeletonStateSpace::ScopedState &startState);
 
  private:
