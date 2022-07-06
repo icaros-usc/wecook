@@ -6,24 +6,18 @@
 
 using namespace wecook;
 
-void ConfMotionNode::plan(const std::shared_ptr<ada::Ada> &ada, const std::shared_ptr<ada::Ada> &adaImg, Result *result) {
-  auto goalState = m_stateSpace->createState();
-  m_stateSpace->convertPositionsToState(m_goalConf, goalState);
+void
+ConfMotionNode::plan(const std::shared_ptr<ada::Ada> &adaPlan, const std::shared_ptr<ada::Ada> &adaExec,
+                     Result *result) {
+    auto goalState = m_stateSpace->createState();
+    m_stateSpace->convertPositionsToState(m_adaPlanGoalConf, goalState);
 
-  auto trajectory = ada->planToConfiguration(m_stateSpace,
-                                             m_skeleton,
-                                             goalState,
-                                             nullptr,
-                                             1.0);
-  auto future = ada->executeTrajectory(trajectory);
-  future.wait();
+    adaPlan->getHand()->executePreshape(m_adaPlanGoalConf);
+    adaExec->getHand()->executePreshape(m_adaExecGoalConf);
 
-  if (adaImg) {
-    auto future2 = adaImg->executeTrajectory(trajectory);
-    future2.wait();
-  }
+    ros::Duration(3).sleep();
 
-  if (result) {
-    result->setStatus(Result::StatusType::SUCCEEDED);
-  }
+    if (result) {
+        result->setStatus(Result::StatusType::SUCCEEDED);
+    }
 }

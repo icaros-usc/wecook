@@ -28,6 +28,10 @@ void TaskManager::addNewTask(const TaskMsg::ConstPtr &msg) {
     Object object(objectMsg.name, objectMsg.url, objectMsg.pose);
     task.addObject(object);
   }
+  for (const auto &tagMsg : msg->scene.tags) {
+    Tag tag(tagMsg.tagId, tagMsg.objectName, tagMsg.objectPose);
+    task.addTag(tag);
+  }
   for (const auto &actionMsg : msg->actions) {
     Action action(actionMsg.pid, actionMsg.location, actionMsg.ingredients, actionMsg.verb, actionMsg.tool);
     task.addSubgoal(action);
@@ -38,7 +42,7 @@ void TaskManager::addNewTask(const TaskMsg::ConstPtr &msg) {
   task.addPDDLDomain(msg->PDDLDomain);
   task.addPDDLProblem(msg->PDDLProblem);
   for (const auto &agentMsg : msg->agents) {
-    task.addAgent(agentMsg.pid, agentMsg.type, agentMsg.pose);
+    task.addAgent(agentMsg.pid, agentMsg.type, agentMsg.pose, agentMsg.if_float);
   }
   task.addTaskType(msg->type);
   task.addMotionPlannerType(msg->motionPlannerType);

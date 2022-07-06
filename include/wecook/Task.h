@@ -10,6 +10,7 @@
 
 #include "Action.h"
 #include "Object.h"
+#include "Tag.h"
 
 namespace wecook {
 /*!
@@ -29,14 +30,16 @@ class Task {
   };
 
   struct Agent {
-    Agent(const std::string &pid, const std::string &agentType, const std::vector<double> &pose) {
+    Agent(const std::string &pid, const std::string &agentType, const std::vector<double> &pose, bool if_float) {
       m_pid = pid;
       m_type = agentType;
       m_pose = pose;
+      m_if_float = if_float;
     }
     std::string m_pid;
     std::string m_type;
     std::vector<double> m_pose;
+    bool m_if_float;
   };
 
   Task() = default;
@@ -47,6 +50,10 @@ class Task {
 
   void addObject(const Object &object) {
     m_objects.emplace_back(object);
+  }
+
+  void addTag(const Tag &tag) {
+    m_tags.emplace_back(tag);
   }
 
   void addContainingPair(const std::string &containerName, const std::string &objectName) {
@@ -69,8 +76,8 @@ class Task {
     m_type = taskType == "plan" ? Planning : Following;
   }
 
-  void addAgent(const std::string &pid, const std::string &agentType, const std::vector<double> &pose) {
-    m_agents.emplace_back(Agent(pid, agentType, pose));
+  void addAgent(const std::string &pid, const std::string &agentType, const std::vector<double> &pose, bool if_float) {
+    m_agents.emplace_back(Agent(pid, agentType, pose, if_float));
   }
 
   void addMotionPlannerType(const std::string &type) {
@@ -103,6 +110,10 @@ class Task {
     return m_objects;
   }
 
+  std::vector<Tag> getTags() const {
+    return m_tags;
+  }
+
   std::vector<std::pair<std::string, std::string>> getContainingPairs() const {
     return m_containingPairs;
   }
@@ -118,6 +129,7 @@ class Task {
  private:
   std::vector<Action> m_subgoals;
   std::vector<Object> m_objects;
+  std::vector<Tag> m_tags;
   std::vector<std::pair<std::string, std::string>> m_containingPairs;
   std::string m_PDDLDomain;
   std::string m_PDDLProblem;

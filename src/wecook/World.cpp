@@ -40,7 +40,7 @@ void World::recording() {
     for (const auto &agent : m_agents) {
       // don't need so many states
       ros::Duration(waitingTime).sleep();
-      auto adaImg = std::dynamic_pointer_cast<Robot, Agent>(agent.second)->m_adaImg;
+      auto adaImg = std::dynamic_pointer_cast<Robot, Agent>(agent.second)->m_adaExec;
       // first get arm positions
 //      auto wholeJoints = adaImg->getMetaSkeleton()->getPositions();
       auto armJoints = adaImg->getArm()->getMetaSkeleton()->getPositions();
@@ -88,10 +88,21 @@ void World::run() {
         // Do following mode
         ROS_INFO("Setting up the environment...");
         setupFollowingTask(task);
+        
+        // PK_TODO: Hack: apriltags notification is coming a little late and robots are asking
+        // for object position before tag notifications are coming. Sleeping a bit to adjust for that.
+        // Should figure out a better plan?
+        ros::Duration(1).sleep();
 
         // After setting up the environment, we want to start a skeleton state recording thread
         m_recordingEnd = false;
-        boost::thread recordingThread(&World::recording, this);
+        boost::thread *recordingThread;
+        // PK_TODO: There was an issue with running recording in real robot demo, this was done till the issue
+        // is fully figured out.
+        bool runRecording = false; //task.ifSim()
+        if (runRecording) {
+            recordingThread = new boost::thread(&World::recording, this);
+        }
 
         std::vector<Action> subgoals = task.getSubgoals();
         ROS_INFO("Building the task graph...");
@@ -123,7 +134,9 @@ void World::run() {
         }
         // After executing we want to stop recording and cache the trajectory
         m_recordingEnd = true;
-        recordingThread.join();
+        if (runRecording) {
+            recordingThread->join();
+        }
 
         cleanFollowingTask(task);
         m_tasks.pop_back();
@@ -143,7 +156,12 @@ void World::setupFollowingTask(const Task &task) {
     auto transform = vectorToIsometry(pose);
     if (agent.m_type == "r") {
       // This is a robot agent
-      auto pAgent = std::make_shared<Robot>(transform, agent.m_pid, task.ifSim());
+      auto pAgent = std::make_shared<Robot>(transform, agent.m_pid, task.ifSim(), agent.m_if_float);
+      m_agents.emplace(std::pair<std::string, std::shared_ptr<Agent>>(agent.m_pid, pAgent));
+    }
+    if (agent.m_type == "h") {
+      // This is a human agent
+      auto pAgent = std::make_shared<Human>(transform, agent.m_pid);
       m_agents.emplace(std::pair<std::string, std::shared_ptr<Agent>>(agent.m_pid, pAgent));
     } else if (agent.m_type == "h") {
       // This is a human agent
@@ -157,10 +175,11 @@ void World::setupFollowingTask(const Task &task) {
   }
 
   std::vector<Object> objects = task.getObjects();
+  auto tags = task.getTags();
 
-  m_objectMgr = std::make_shared<ObjectMgr>();
+  m_objectMgr = std::make_shared<ObjectMgr>(m_nh);
 
-  m_objectMgr->init(objects, task.ifSim(), m_env);
+  m_objectMgr->init(objects, tags, task.ifSim(), m_env);
 
   m_containingMap = std::make_shared<ContainingMap>(task, m_objectMgr, m_env);
 
@@ -170,13 +189,14 @@ void World::setupFollowingTask(const Task &task) {
 
 void World::cleanFollowingTask(const Task &task) {
   std::vector<Object> objects = task.getObjects();
+  auto tags = task.getTags();
 
   m_primitiveActionExecutor.reset();
 
   m_containingMap->unconnectAll();
   m_containingMap.reset();
 
-  m_objectMgr->clear(objects, m_env);
+  m_objectMgr->clear(objects, tags, m_env);
   m_objectMgr.reset();
 
   m_mapTaskExecutorThread.clear();
